@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Haulix.App/Haulix.App.csproj" />
+    <Project Path="src/Haulix.Core/Haulix.Core.csproj" />
+    <Project Path="src/Haulix.Installer/Haulix.Installer.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Haulix.Core.Tests/Haulix.Core.Tests.csproj" />
+  </Folder>
+</Solution>

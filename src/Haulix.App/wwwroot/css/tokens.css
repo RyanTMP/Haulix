@@ -1,0 +1,140 @@
+/* ==========================================================================
+   HAULIX design tokens
+   One accent (electric amber) for interaction; green/orange/red/grey carry state only.
+   ========================================================================== */
+
+@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url("../assets/fonts/inter-400.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url("../assets/fonts/inter-ext-400.woff2") format("woff2");
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url("../assets/fonts/inter-500.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url("../assets/fonts/inter-600.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 500; font-display: swap; src: url("../assets/fonts/barlow-condensed-500.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; font-display: swap; src: url("../assets/fonts/barlow-condensed-600.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-style: italic; font-display: swap; src: url("../assets/fonts/barlow-condensed-700i.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 400; font-display: swap; src: url("../assets/fonts/jetbrains-mono-400.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 500; font-display: swap; src: url("../assets/fonts/jetbrains-mono-500.woff2") format("woff2"); }
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces — near-black charcoal, stepped by ~3% lightness */
+  --bg: #0b0c0e;
+  --bg-raised: #0f1013;
+  --surface-1: #121418;
+  --surface-2: #171a1f;
+  --surface-3: #1d2027;
+  --surface-hover: #1b1e24;
+  --border: #23272e;
+  --border-strong: #2f343d;
+  --border-subtle: #1a1d22;
+
+  /* Ink */
+  --text: #ecedee;
+  --text-2: #9ba1aa;
+  --text-3: #5e656f;
+  --text-inverse: #0b0c0e;
+
+  /* Accent — electric amber. Interaction only. */
+  --accent: #ffb020;
+  --accent-hover: #ffc24d;
+  --accent-press: #e89c10;
+  --accent-tint: rgb(255 176 32 / 0.12);
+  --accent-tint-strong: rgb(255 176 32 / 0.2);
+  --accent-ink: #1a1204;
+
+  /* State */
+  --ok: #3dd68c;
+  --ok-tint: rgb(61 214 140 / 0.12);
+  --warn: #ff8a3d;
+  --warn-tint: rgb(255 138 61 / 0.12);
+  --crit: #f0474f;
+  --crit-tint: rgb(240 71 79 / 0.12);
+  --info: #6ca8ff;
+  --info-tint: rgb(108 168 255 / 0.12);
+  --idle: #5e656f;
+
+  /* Charts */
+  --chart-1: var(--accent);
+  --chart-2: #8b93a1;          /* comparison series: cool grey */
+  --chart-grid: #1f2329;
+  --chart-axis: #5e656f;
+
+  /* Map streets (extracted from the game files) */
+  --road-motorway: #4c525c;
+  --road-main: #363b43;
+  --road-local: #272b31;
+  /* Map overlays: each kind of information gets one colour (legend in the map panel) */
+  --map-explored: #38b6ff;     /* streets you have driven */
+  --map-city: #f4f5f7;         /* city names */
+  --map-country: #b98cff;      /* country names */
+  --map-area: #171a20;         /* built-up city areas */
+  --map-land-opacity: 0.055;   /* soft landmass under the roads */
+
+  /* Type */
+  --font-ui: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Bahnschrift", "Arial Narrow", sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+  --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-15: 15px; --fs-18: 18px;
+  --fs-24: 24px; --fs-32: 32px; --fs-44: 44px; --fs-64: 64px;
+  --tracking-label: 0.1em;
+
+  /* Space (4px grid) */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px;
+  --gutter: 24px;
+  --card-pad: 20px;
+
+  /* Shape */
+  --r-1: 4px;
+  --r-2: 6px;
+  --r-3: 10px;
+  --slant: -15deg;            /* the H-logo italic angle — HAULIX's signature */
+
+  /* Elevation */
+  --shadow-1: 0 1px 0 rgb(255 255 255 / 0.02) inset, 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / 0.45), 0 1px 0 rgb(255 255 255 / 0.03) inset;
+  --shadow-3: 0 24px 64px rgb(0 0 0 / 0.6);
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --t-fast: 120ms;
+  --t-med: 180ms;
+
+  --sidebar-w: 236px;
+  --sidebar-rail: 68px;
+  --topbar-h: 60px;
+}
+
+/* Accent variants (Settings → Appearance) — still one accent at a time */
+:root[data-accent="copper"] { --accent: #e07a3f; --accent-hover: #ec905a; --accent-press: #c9692f; --accent-tint: rgb(224 122 63 / 0.13); --accent-tint-strong: rgb(224 122 63 / 0.22); --accent-ink: #1a0c04; }
+:root[data-accent="ice"] { --accent: #7cc4ff; --accent-hover: #9cd3ff; --accent-press: #5eb0f0; --accent-tint: rgb(124 196 255 / 0.12); --accent-tint-strong: rgb(124 196 255 / 0.2); --accent-ink: #04121c; --info: #b49cff; --info-tint: rgb(180 156 255 / 0.12); --map-explored: #3dd6a8; }
+:root[data-accent="signal"] { --accent: #e8e9eb; --accent-hover: #ffffff; --accent-press: #c9cbcf; --accent-tint: rgb(232 233 235 / 0.1); --accent-tint-strong: rgb(232 233 235 / 0.18); --accent-ink: #0b0c0e; }
+
+/* Theme variants */
+:root[data-theme="midnight"] {
+  --bg: #050506; --bg-raised: #08090a; --surface-1: #0c0d10; --surface-2: #111317; --surface-3: #16181d; --surface-hover: #14161a;
+  --border: #1c1f25; --border-strong: #272b33; --border-subtle: #121418; --chart-grid: #181b20;
+  --road-motorway: #434852; --road-main: #2e323a; --road-local: #1f2227; --map-area: #101216;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #eceef1; --bg-raised: #f3f4f6; --surface-1: #ffffff; --surface-2: #f6f7f9; --surface-3: #eef0f3; --surface-hover: #f1f3f6;
+  --border: #dde0e5; --border-strong: #c9cdd4; --border-subtle: #e7e9ed;
+  --text: #121418; --text-2: #4d535c; --text-3: #8a9099; --text-inverse: #ffffff;
+  --accent: #d98a00; --accent-hover: #c07a00; --accent-press: #a86b00; --accent-tint: rgb(217 138 0 / 0.12); --accent-tint-strong: rgb(217 138 0 / 0.2); --accent-ink: #ffffff;
+  --ok: #14a660; --warn: #e0661a; --crit: #d6333a; --info: #2f7de0;
+  --chart-grid: #e6e8ec; --chart-axis: #8a9099; --chart-2: #9aa1ad;
+  --road-motorway: #b9bec7; --road-main: #cdd1d7; --road-local: #dfe2e6;
+  --map-explored: #1f8fe0; --map-city: #121418; --map-country: #8a4fd6; --map-area: #dde1e7; --map-land-opacity: 0.07;
+  --shadow-1: 0 1px 2px rgb(16 24 40 / 0.06); --shadow-2: 0 8px 24px rgb(16 24 40 / 0.12); --shadow-3: 0 24px 64px rgb(16 24 40 / 0.2);
+}
+:root[data-theme="light"][data-accent="ice"] { --accent: #1f7fd1; --accent-hover: #186fb8; --accent-ink: #fff; --map-explored: #12a37c; }
+:root[data-theme="light"][data-accent="copper"] { --accent: #c8612a; --accent-hover: #b05422; --accent-ink: #fff; }
+:root[data-theme="light"][data-accent="signal"] { --accent: #121418; --accent-hover: #2a2e35; --accent-ink: #fff; }
+
+:root[data-compact="true"] { --gutter: 16px; --card-pad: 14px; --topbar-h: 52px; }
+:root[data-animations="false"] *, :root[data-animations="false"] *::before, :root[data-animations="false"] *::after {
+  animation-duration: 0s !important; transition-duration: 0s !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
+}

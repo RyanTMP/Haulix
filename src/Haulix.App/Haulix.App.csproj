@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <AssemblyName>Haulix</AssemblyName>
+    <RootNamespace>Haulix.App</RootNamespace>
+    <Product>HAULIX ETS2 Logger</Product>
+    <Version>0.0.5-beta</Version>
+    <!-- WebView2 ships a WPF control we don't use; its WindowsBase version mismatch is harmless. -->
+    <MSBuildWarningsAsMessages>MSB3277</MSBuildWarningsAsMessages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Haulix.Core\Haulix.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
+    <PackageReference Include="System.Speech" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- The city catalogue lives in Haulix.Core; the UI reads the same file from wwwroot/data. -->
+  <Target Name="CopyCityCatalogue" BeforeTargets="BeforeBuild">
+    <Copy SourceFiles="..\Haulix.Core\Data\cities.json" DestinationFolder="wwwroot\data" SkipUnchangedFiles="true" />
+  </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Include="app.ico" />
+    <Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

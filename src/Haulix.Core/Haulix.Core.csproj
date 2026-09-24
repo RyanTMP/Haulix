@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Haulix.Core</RootNamespace>
+    <Version>0.0.5-beta</Version>
+    <!-- HAULIX only runs on Windows (ETS2 shared memory, Steam registry). -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\cities.json" LogicalName="Haulix.Core.Data.cities.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
+    <PackageReference Include="TruckLib" Version="0.5.1" />
+    <PackageReference Include="TruckLib.Sii" Version="0.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Haulix.Core.Tests" />
+  </ItemGroup>
+
+</Project>

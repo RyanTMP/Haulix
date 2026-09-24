@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    HAULIX Setup: a single-file installer in the HAULIX style.
+    Targets .NET Framework 4.8 (built into Windows 10/11) so the setup itself needs no runtime download.
+    The published app is embedded as payload.zip by tools/release/build-release.ps1 (-p:Payload=...).
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>..\Haulix.App\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>HAULIX-Setup</AssemblyName>
+    <RootNamespace>Haulix.Installer</RootNamespace>
+    <Product>HAULIX ETS2 Logger Setup</Product>
+    <Company>HAULIX</Company>
+    <Version>0.0.5-beta</Version>
+    <PlatformTarget>x64</PlatformTarget>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- WebView2 is embedded as resources (single exe); don't copy its DLLs next to the exe. -->
+    <WebView2PackageDir>$(NuGetPackageRoot)microsoft.web.webview2\1.0.4191.47\</WebView2PackageDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Installer UI + shared HAULIX design system -->
+    <EmbeddedResource Include="ui\**\*" LogicalName="ui/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\Haulix.App\wwwroot\css\tokens.css" LogicalName="ui/css/tokens.css" />
+    <EmbeddedResource Include="..\Haulix.App\wwwroot\css\base.css" LogicalName="ui/css/base.css" />
+    <EmbeddedResource Include="..\Haulix.App\wwwroot\css\components.css" LogicalName="ui/css/components.css" />
+    <EmbeddedResource Include="..\Haulix.App\wwwroot\assets\fonts\*.woff2" LogicalName="ui/assets/fonts/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\Haulix.App\wwwroot\assets\brand\*.png" LogicalName="ui/assets/brand/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\Haulix.App\wwwroot\assets\icons.svg" LogicalName="ui/assets/icons.svg" />
+    <EmbeddedResource Include="..\..\LICENSE" LogicalName="ui/LICENSE.txt" Condition="Exists('..\..\LICENSE')" />
+    <!-- WebView2 (managed + native loader) -->
+    <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)\lib\net462\Microsoft.Web.WebView2.Core.dll" LogicalName="lib/Microsoft.Web.WebView2.Core.dll" />
+    <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)\lib\net462\Microsoft.Web.WebView2.WinForms.dll" LogicalName="lib/Microsoft.Web.WebView2.WinForms.dll" />
+    <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)\runtimes\win-x64\native\WebView2Loader.dll" LogicalName="lib/WebView2Loader.dll" />
+    <!-- SCS telemetry plugin (RenCloud scs-sdk-plugin 1.12.1, MIT), installed into ETS2 -->
+    <EmbeddedResource Include="..\..\third_party\scs-sdk-plugin\scs-telemetry.dll" LogicalName="plugin/scs-telemetry.dll" />
+    <!-- The app itself (release builds) -->
+    <EmbeddedResource Include="$(Payload)" LogicalName="payload.zip" Condition="'$(Payload)' != '' And Exists('$(Payload)')" />
+  </ItemGroup>
+
+  <!-- Keep the WebView2 DLLs out of the output folder: they are loaded from the embedded copies. -->
+  <Target Name="RemoveWebView2Copies" AfterTargets="Build">
+    <Delete Files="$(OutDir)Microsoft.Web.WebView2.Core.dll;$(OutDir)Microsoft.Web.WebView2.WinForms.dll;$(OutDir)Microsoft.Web.WebView2.Wpf.dll;$(OutDir)WebView2Loader.dll" />
+    <RemoveDir Directories="$(OutDir)runtimes" />
+  </Target>
+
+</Project>

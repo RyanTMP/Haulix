@@ -1,0 +1,190 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Haulix.Core.Data;
+
+namespace Haulix.Core.Settings;
+
+public sealed class AppSettings
+{
+    public bool SetupComplete { get; set; }
+    public GeneralSettings General { get; set; } = new();
+    public Ets2Settings Ets2 { get; set; } = new();
+    public TelemetrySettings Telemetry { get; set; } = new();
+    public MapSettings Map { get; set; } = new();
+    public DataSettings Data { get; set; } = new();
+    public AppearanceSettings Appearance { get; set; } = new();
+    public NotificationSettings Notifications { get; set; } = new();
+    public TruckersMpSettings TruckersMp { get; set; } = new();
+    public HudSettings Hud { get; set; } = new();
+}
+
+public sealed class GeneralSettings
+{
+    /// <summary>"auto" (Windows display language), "en" or "de".</summary>
+    public string Language { get; set; } = "auto";
+    /// <summary>True once the user picked a language (settings or installer); otherwise Windows decides.</summary>
+    public bool LanguageChosen { get; set; }
+    public string Units { get; set; } = "metric";        // metric | imperial
+    public string Currency { get; set; } = "EUR";
+    public string Theme { get; set; } = "dark";           // dark | midnight | light
+    public string StartPage { get; set; } = "dashboard";  // dashboard | last
+    public bool StartMinimized { get; set; }
+    public bool LaunchWithWindows { get; set; }
+    public bool MinimizeToTray { get; set; }
+    /// <summary>Check the HAULIX releases on GitHub for new versions (on start and every 6 hours).</summary>
+    public bool UpdateCheck { get; set; } = true;
+    /// <summary>Optional custom update manifest URL (JSON: version, url, notes). Empty = GitHub releases.</summary>
+    public string UpdateFeedUrl { get; set; } = "";
+    /// <summary>Version whose changelog the user has seen (the "What's new" window opens after an update).</summary>
+    public string? LastSeenVersion { get; set; }
+    /// <summary>Discord Rich Presence: shows your current drive on your Discord profile.</summary>
+    public bool DiscordPresence { get; set; } = true;
+    /// <summary>Application ID of the Discord app used for Rich Presence (Discord Developer Portal).</summary>
+    public string DiscordAppId { get; set; } = "";
+    /// <summary>Small always-on-top HUD over the game: speed limit, real-time ETA, next milestone.</summary>
+    public bool Hud { get; set; }
+}
+
+public sealed class Ets2Settings
+{
+    public bool AutoDetect { get; set; } = true;
+    public string? GamePath { get; set; }
+    public string? DocumentsPath { get; set; }
+    public string? ProfilePath { get; set; }
+    public string SaveSelection { get; set; } = "latest";  // latest | autosave | <save folder name>
+    public bool WatchSaves { get; set; } = true;
+    public bool ImportSaveHistory { get; set; } = true;
+}
+
+public sealed class TelemetrySettings
+{
+    public int UpdateHz { get; set; } = 10;
+    public bool RecordRoutes { get; set; } = true;
+    public bool RecordFreeRoam { get; set; } = true;
+    public int RoutePointSpacingM { get; set; } = 150;
+    public Dictionary<string, bool> Fields { get; set; } = new()
+    {
+        ["vehicle"] = true, ["drivetrain"] = true, ["fluids"] = true, ["damage"] = true,
+        ["lights"] = true, ["navigation"] = true, ["job"] = true, ["trailer"] = true,
+    };
+}
+
+public sealed class MapSettings
+{
+    public int DefaultZoom { get; set; } = -5;
+    public bool FollowTruck { get; set; } = true;
+    public int RouteHistoryDays { get; set; } = 90;
+    public string? TileFolder { get; set; }
+    public bool ShowEstimatedCities { get; set; } = true;
+    /// <summary>Extract the road network from the game files automatically when missing or outdated.</summary>
+    public bool AutoBuildRoadMap { get; set; } = true;
+    public bool ShowStreets { get; set; } = true;
+    public bool AutoRouteToJob { get; set; } = true;
+    public Dictionary<string, bool> Layers { get; set; } = new()
+    {
+        ["truck"] = true, ["currentRoute"] = true, ["previousRoutes"] = true, ["garages"] = true,
+        ["cities"] = true, ["services"] = false, ["dealers"] = false, ["recruitment"] = false,
+        ["aiDrivers"] = true, ["fleet"] = true, ["events"] = false,
+    };
+}
+
+public sealed class DataSettings
+{
+    public bool AutoBackup { get; set; } = true;
+    public int BackupIntervalHours { get; set; } = 24;
+    public int BackupKeep { get; set; } = 10;
+    public string? BackupFolder { get; set; }
+}
+
+/// <summary>
+/// Anti-AFK message for TruckersMP. Off by default: automatically avoiding the server's inactivity kick is
+/// against the TruckersMP rules and can get the account banned; the user enables it at their own risk.
+/// </summary>
+/// <summary>The in-game HUD bar (shown over ETS2 in borderless/windowed mode). Enabled lives in General.Hud.</summary>
+public sealed class HudSettings
+{
+    /// <summary>topCenter | topLeft | topRight | bottomCenter | bottomLeft | bottomRight | custom</summary>
+    public string Position { get; set; } = "topCenter";
+    /// <summary>Custom position: centre of the HUD in percent of the screen (0–100).</summary>
+    public double X { get; set; } = 50;
+    public double Y { get; set; } = 5;
+    /// <summary>Visibility in percent (20–100).</summary>
+    public int Opacity { get; set; } = 90;
+    /// <summary>small | medium | large</summary>
+    public string Size { get; set; } = "medium";
+    /// <summary>Only while a job is active.</summary>
+    public bool OnlyOnJob { get; set; }
+    /// <summary>Shown fields in order: speedLimit, speed, remaining, etaReal, arrival, etaGame, deadline, fuelRange, rest, damage, gameTime.</summary>
+    public List<string> Fields { get; set; } = ["speedLimit", "remaining", "etaReal", "arrival"];
+}
+
+public sealed class TruckersMpSettings
+{
+    public bool AntiAfk { get; set; }
+    /// <summary>The chat message that is sent while the player is inactive.</summary>
+    public string Message { get; set; } = "AFK - back soon";
+    /// <summary>Minutes of inactivity between messages (the server kicks after 10 min when full).</summary>
+    public int IntervalMinutes { get; set; } = 8;
+    /// <summary>Key that opens the TruckersMP chat (default Y).</summary>
+    public string ChatKey { get; set; } = "Y";
+    /// <summary>Set once the user confirmed the rules warning.</summary>
+    public bool RiskAccepted { get; set; }
+}
+
+public sealed class NotificationSettings
+{
+    /// <summary>Notifications about the tracked job (accepted, delivered, cancelled, fines).</summary>
+    public bool Enabled { get; set; } = true;
+    /// <summary>Distance milestones and halfway.</summary>
+    public bool Progress { get; set; } = true;
+    /// <summary>Deadline, fuel, cargo damage and rest warnings.</summary>
+    public bool Warnings { get; set; } = true;
+    /// <summary>Show them in an always-on-top overlay over the game while HAULIX is in the background.</summary>
+    public bool Overlay { get; set; } = true;
+    /// <summary>Read notifications aloud (Windows speech) – works even in exclusive fullscreen.</summary>
+    public bool Voice { get; set; }
+    /// <summary>On TruckersMP: warn before the server's inactivity kick (10 min on full servers, 30 min otherwise).</summary>
+    public bool AfkWarning { get; set; } = true;
+    /// <summary>Screen corner for the overlay: topRight | topLeft | bottomRight | bottomLeft.</summary>
+    public string Position { get; set; } = "topRight";
+}
+
+public sealed class AppearanceSettings
+{
+    public string Accent { get; set; } = "amber";  // amber | copper | ice | signal
+    public bool Compact { get; set; }
+    public bool Animations { get; set; } = true;
+    public bool Transparency { get; set; } = true;
+    public bool SidebarCollapsed { get; set; }
+}
+
+/// <summary>Persists <see cref="AppSettings"/> as one JSON document in the local database.</summary>
+public sealed class SettingsStore(Database db)
+{
+    public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+        WriteIndented = false,
+    };
+
+    private AppSettings? _cached;
+
+    public AppSettings Load()
+    {
+        if (_cached is not null) return _cached;
+        using var c = db.Open();
+        var json = Database.Scalar<string>(c, "SELECT value FROM settings WHERE key = 'app'");
+        _cached = string.IsNullOrEmpty(json) ? new AppSettings() : JsonSerializer.Deserialize<AppSettings>(json, Json) ?? new AppSettings();
+        return _cached;
+    }
+
+    public void Save(AppSettings s)
+    {
+        _cached = s;
+        using var c = db.Open();
+        Database.Exec(c, "INSERT INTO settings(key, value) VALUES('app', $v) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            ("$v", JsonSerializer.Serialize(s, Json)));
+    }
+
+    public void Invalidate() => _cached = null;
+}

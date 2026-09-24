@@ -1,0 +1,14 @@
+bin/
+obj/
+publish/
+artifacts/
+dist/
+*.user
+.vs/
+TestResults/
+# generated at build time from src/Haulix.Core/Data/cities.json
+src/Haulix.App/wwwroot/data/
+# local tools / editor state
+.claude/
+*.suo
+*.log

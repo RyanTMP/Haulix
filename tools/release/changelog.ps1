@@ -51,7 +51,7 @@ if ($Version -and $NotesFile) {
   (Section $v "de") | ForEach-Object { [void]$n.AppendLine($_) }
   [void]$n.AppendLine("")
   [void]$n.AppendLine("---")
-  [void]$n.AppendLine("**Install:** download ``HAULIX-Setup-$Version.exe`` below and run it (per user, no admin rights). Existing installations update themselves from inside HAULIX.")
+  [void]$n.AppendLine("**Install:** download ``Haulix.exe`` below and run it (per user, no admin rights). Existing installations update themselves from inside HAULIX.")
   [void]$n.AppendLine("")
   [void]$n.AppendLine("Windows SmartScreen may warn because the setup is not code-signed: *More info → Run anyway*.")
   [IO.File]::WriteAllText($NotesFile, $n.ToString(), (New-Object Text.UTF8Encoding $false))

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -57,11 +58,18 @@ namespace Haulix.Installer
             }
         }
 
-        public static bool AppRunning() => Process.GetProcessesByName("Haulix").Length > 0;
+        // The setup itself is also named Haulix.exe (the release download), so never count or close our own process.
+        private static IEnumerable<Process> AppProcesses()
+        {
+            var self = Process.GetCurrentProcess().Id;
+            return Process.GetProcessesByName("Haulix").Where(p => p.Id != self);
+        }
+
+        public static bool AppRunning() => AppProcesses().Any();
 
         public static void CloseApp()
         {
-            foreach (var p in Process.GetProcessesByName("Haulix"))
+            foreach (var p in AppProcesses())
             {
                 try
                 {

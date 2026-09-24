@@ -1,5 +1,5 @@
 ﻿# Builds a shareable HAULIX release:
-#   dist\HAULIX-Setup-<version>.exe      single-file installer (app embedded, no .NET download needed)
+#   dist\Haulix.exe                      the installer (app embedded, no .NET download needed)
 #   dist\HAULIX-<version>-source.zip     complete source code (required by the GPL when you share the exe)
 #
 # Usage (from the repo root):
@@ -82,7 +82,9 @@ $setupOut = Join-Path $artifacts "setup"
 dotnet build src\Haulix.Installer -c Release -o $setupOut -p:Payload="$payload" -p:Version=$Version --nologo -v q
 if ($LASTEXITCODE -ne 0) { throw "Installer build failed" }
 Invoke-HaulixSign -Files @(Join-Path $setupOut "HAULIX-Setup.exe") -Required:$RequireSigning | Out-Null
-$setup = Join-Path $dist "HAULIX-Setup-$Version.exe"
+# The download is always called Haulix.exe (it installs or updates HAULIX); older versioned setups are removed.
+Get-ChildItem $dist -Filter "HAULIX-Setup-*.exe" -ErrorAction SilentlyContinue | ForEach-Object { [IO.File]::Delete($_.FullName) }
+$setup = Join-Path $dist "Haulix.exe"
 Copy-Item (Join-Path $setupOut "HAULIX-Setup.exe") $setup -Force
 
 Write-Host "4/4 Packaging source code"

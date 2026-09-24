@@ -27,7 +27,7 @@ Coming later: VTC features (find a VTC, company pages, events & convoys, job boa
 
 ## Install
 
-1. Download **`HAULIX-Setup-<version>.exe`** from the [latest release](../../releases/latest).
+1. Download **`Haulix.exe`** from the [latest release](../../releases/latest).
 2. Run it. HAULIX installs for your Windows user only (no admin rights) and installs the telemetry plugin into ETS2.
 3. Start ETS2, accept the *Advanced SDK features* prompt once, and HAULIX switches to **LIVE**.
 
@@ -89,7 +89,7 @@ HAULIX is an unofficial fan project and is not affiliated with or endorsed by SC
 
 **HAULIX** ist ein Telemetrie-, Fahrtenbuch- und Karten-Tool für Euro Truck Simulator 2 – lokal auf deinem PC, ohne Konto.
 
-**Installation:** Lade `HAULIX-Setup-<version>.exe` aus dem [neuesten Release](../../releases/latest) herunter und starte es. Das Setup installiert HAULIX nur für deinen Windows-Benutzer (ohne Adminrechte) und richtet das Telemetrie-Plugin in ETS2 ein. Warnt Windows SmartScreen, klicke auf *Weitere Informationen → Trotzdem ausführen*.
+**Installation:** Lade `Haulix.exe` aus dem [neuesten Release](../../releases/latest) herunter und starte es. Das Setup installiert HAULIX nur für deinen Windows-Benutzer (ohne Adminrechte) und richtet das Telemetrie-Plugin in ETS2 ein. Warnt Windows SmartScreen, klicke auf *Weitere Informationen → Trotzdem ausführen*.
 
 **Updates:** HAULIX prüft die Releases dieses Repositorys und aktualisiert sich auf Wunsch selbst – ganz ohne eigenen Server.
 

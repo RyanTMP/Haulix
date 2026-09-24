@@ -26,7 +26,7 @@ if (-not $SkipBuild) {
   powershell -NoProfile -ExecutionPolicy Bypass -File tools\release\build-release.ps1
   if ($LASTEXITCODE -ne 0) { throw "Build failed" }
 }
-$setup = "dist\HAULIX-Setup-$version.exe"
+$setup = "dist\Haulix.exe"
 $source = "dist\HAULIX-$version-source.zip"
 foreach ($f in $setup, $source) { if (-not (Test-Path $f)) { throw "$f is missing" } }
 
@@ -39,7 +39,8 @@ if ($LASTEXITCODE -ne 0) { git commit -m "Release $label" }
 git tag -a $tag -m "HAULIX $label"
 git push origin HEAD --follow-tags
 
-$ghArgs = @("release", "create", $tag, $setup, $source, "--title", "HAULIX $label", "--notes-file", $notes)
+# Only Haulix.exe is attached; GitHub adds the source code archives of the tag automatically (GPL source).
+$ghArgs = @("release", "create", $tag, $setup, "--title", "HAULIX $label", "--notes-file", $notes)
 if ($Draft) { $ghArgs += "--draft" }
 gh @ghArgs
 if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }

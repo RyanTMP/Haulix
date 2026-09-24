@@ -7,7 +7,9 @@
       ["file-text", "What's new window", "Opens once after every update with every change since 0.0.2. Open it again any time in Settings → About."],
       ["refresh-cw", "Updates from GitHub", "HAULIX checks the public HAULIX releases on GitHub for new versions – no own server needed – and can download and start the new setup for you."],
       ["clock", "Discord status: coming later", "The Discord Rich Presence setting is locked until it is ready; nothing is sent to Discord."],
-      ["check", "Fix: map controls over dialogs", "The map's + and − buttons no longer show through the What's new window and other dialogs."]
+      ["check", "Fix: map controls over dialogs", "The map's + and − buttons no longer show through the What's new window and other dialogs."],
+      ["package", "One program file", "HAULIX is now a single Haulix.exe – no extra .exe files in the install folder; Windows' Uninstall still works through Haulix.exe."],
+      ["shield-check", "Ready for code signing", "Releases are signed automatically as soon as a code signing certificate is available."]
     ],
     "de": [
       ["gauge", "HUD im Spiel, frei einstellbar", "Wähle, was angezeigt wird: Tempolimit, Geschwindigkeit (rot bei zu schnell), Restdistanz, Echtzeit-ETA, Ankunftszeit, Spiel-ETA, Fristpuffer, Reichweite, nächste Pause, Lkw-Verschleiß und Spielzeit."],
@@ -15,7 +17,9 @@
       ["file-text", "Neuigkeiten-Fenster", "Erscheint einmal nach jedem Update mit allen Änderungen seit 0.0.2. Unter Einstellungen → Über jederzeit wieder aufrufbar."],
       ["refresh-cw", "Updates über GitHub", "HAULIX prüft die öffentlichen HAULIX-Releases auf GitHub auf neue Versionen – ganz ohne eigenen Server – und kann das neue Setup für dich herunterladen und starten."],
       ["clock", "Discord-Status: kommt später", "Die Einstellung für Discord Rich Presence ist gesperrt, bis sie fertig ist; es wird nichts an Discord gesendet."],
-      ["check", "Behoben: Kartenknöpfe über Fenstern", "Die + und − Knöpfe der Karte scheinen nicht mehr durch das Neuigkeiten-Fenster und andere Dialoge."]
+      ["check", "Behoben: Kartenknöpfe über Fenstern", "Die + und − Knöpfe der Karte scheinen nicht mehr durch das Neuigkeiten-Fenster und andere Dialoge."],
+      ["package", "Eine Programmdatei", "HAULIX ist jetzt eine einzige Haulix.exe – keine weiteren .exe-Dateien im Installationsordner; die Windows-Deinstallation läuft weiter über Haulix.exe."],
+      ["shield-check", "Bereit für Code-Signierung", "Releases werden automatisch signiert, sobald ein Code-Signing-Zertifikat vorhanden ist."]
     ]
   },
   {

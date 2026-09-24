@@ -8,6 +8,23 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        // Windows "Uninstall" calls Haulix.exe --uninstall: the uninstaller is stored as uninstall.bin so Haulix.exe
+        // stays the only program in the folder; run it from a temp copy so the whole folder can be removed.
+        if (args.Contains("--uninstall"))
+        {
+            var dir = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+            var data = Path.Combine(dir, "uninstall.bin");
+            if (!File.Exists(data))
+            {
+                MessageBox.Show("The HAULIX uninstaller (uninstall.bin) is missing. Reinstall HAULIX, then uninstall it.", "HAULIX", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            var copy = Path.Combine(Path.GetTempPath(), $"HAULIX-Uninstall-{Guid.NewGuid():N}"[..24] + ".exe");
+            File.Copy(data, copy, true);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(copy, $"--uninstall-from \"{dir}\"") { UseShellExecute = false });
+            return;
+        }
+
         using var mutex = new Mutex(true, MutexName, out var first);
         if (!first)
         {

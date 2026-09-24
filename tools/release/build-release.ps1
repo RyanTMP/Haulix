@@ -1,16 +1,18 @@
-# Builds a shareable HAULIX release:
+﻿# Builds a shareable HAULIX release:
 #   dist\HAULIX-Setup-<version>.exe      single-file installer (app embedded, no .NET download needed)
 #   dist\HAULIX-<version>-source.zip     complete source code (required by the GPL when you share the exe)
 #
 # Usage (from the repo root):
 #   powershell -ExecutionPolicy Bypass -File tools\release\build-release.ps1
 #   powershell -ExecutionPolicy Bypass -File tools\release\build-release.ps1 -Version 0.0.5-beta
-param([string]$Version = "")
+#   add -RequireSigning to fail instead of building unsigned when no certificate is available
+param([string]$Version = "", [switch]$RequireSigning)
 
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path "$PSScriptRoot\..\..").Path
 Set-Location $root
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+. "$PSScriptRoot\sign.ps1"   # code signing (Certum via SimplySign); skipped with a warning when no certificate is present
 
 if (-not $Version) {
   [xml]$proj = Get-Content "src\Haulix.App\Haulix.App.csproj"
@@ -29,9 +31,17 @@ if ($LASTEXITCODE -ne 0) { throw "Tests failed" }
 
 Write-Host "2/4 Publishing the app (self-contained, win-x64)"
 $appOut = Join-Path $artifacts "app"
+# One program file: the .NET runtime, all libraries and native DLLs are bundled into Haulix.exe (native ones
+# are unpacked to %TEMP% on first start). Only the UI (wwwroot), the map bundle and licences stay as files.
 dotnet publish src\Haulix.App -c Release -r win-x64 --self-contained true -o $appOut `
-  -p:Version=$Version -p:DebugType=none -p:DebugSymbols=false --nologo -v q
+  -p:Version=$Version -p:DebugType=none -p:DebugSymbols=false `
+  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true --nologo -v q
 if ($LASTEXITCODE -ne 0) { throw "Publish failed" }
+# createdump.exe is the runtime's crash-dump helper; HAULIX does not need it.
+Get-ChildItem $appOut -Filter *.exe | Where-Object { $_.Name -ne "Haulix.exe" } | ForEach-Object { [IO.File]::Delete($_.FullName) }
+# IntelliSense docs of the WebView2 package are not needed at runtime.
+Get-ChildItem $appOut -Filter *.xml | ForEach-Object { [IO.File]::Delete($_.FullName) }
+Invoke-HaulixSign -Files @(Join-Path $appOut "Haulix.exe") -Required:$RequireSigning | Out-Null
 Copy-Item LICENSE (Join-Path $appOut "LICENSE.txt")
 Copy-Item third_party\scs-sdk-plugin\LICENSE (Join-Path $appOut "LICENSE-scs-sdk-plugin.txt")
 Set-Content -Path (Join-Path $appOut "SOURCE.txt") -Encoding UTF8 -Value @"
@@ -71,6 +81,7 @@ Write-Host "3/4 Building the installer"
 $setupOut = Join-Path $artifacts "setup"
 dotnet build src\Haulix.Installer -c Release -o $setupOut -p:Payload="$payload" -p:Version=$Version --nologo -v q
 if ($LASTEXITCODE -ne 0) { throw "Installer build failed" }
+Invoke-HaulixSign -Files @(Join-Path $setupOut "HAULIX-Setup.exe") -Required:$RequireSigning | Out-Null
 $setup = Join-Path $dist "HAULIX-Setup-$Version.exe"
 Copy-Item (Join-Path $setupOut "HAULIX-Setup.exe") $setup -Force
 

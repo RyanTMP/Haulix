@@ -13,7 +13,9 @@ namespace Haulix.Installer
     {
         public const string AppName = "HAULIX";
         public const string AppExe = "Haulix.exe";
-        public const string UninstallerExe = "Uninstall HAULIX.exe";
+        // The uninstaller is kept as a data file so Haulix.exe is the only program in the install folder;
+        // "Haulix.exe --uninstall" copies it to %TEMP% as an .exe and starts it.
+        public const string UninstallerData = "uninstall.bin";
         private const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\HAULIX";
         private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
 
@@ -125,7 +127,7 @@ namespace Haulix.Installer
             }
 
             progress(0.92, "Adding uninstaller");
-            File.Copy(Assembly.GetExecutingAssembly().Location, Path.Combine(dir, UninstallerExe), true);
+            File.Copy(Assembly.GetExecutingAssembly().Location, Path.Combine(dir, UninstallerData), true);
 
             progress(0.94, "Creating shortcuts");
             var exe = Path.Combine(dir, AppExe);
@@ -142,8 +144,8 @@ namespace Haulix.Installer
                 k.SetValue("Publisher", "HAULIX");
                 k.SetValue("DisplayIcon", exe + ",0");
                 k.SetValue("InstallLocation", dir);
-                k.SetValue("UninstallString", "\"" + Path.Combine(dir, UninstallerExe) + "\" --uninstall");
-                k.SetValue("QuietUninstallString", "\"" + Path.Combine(dir, UninstallerExe) + "\" --uninstall");
+                k.SetValue("UninstallString", "\"" + exe + "\" --uninstall");
+                k.SetValue("QuietUninstallString", "\"" + exe + "\" --uninstall");
                 k.SetValue("NoModify", 1, RegistryValueKind.DWord);
                 k.SetValue("NoRepair", 1, RegistryValueKind.DWord);
                 k.SetValue("EstimatedSize", (int)(DirSize(dir) / 1024), RegistryValueKind.DWord);

@@ -10,6 +10,8 @@ All notable changes to HAULIX. The same list appears in the app under *What's ne
 - **Updates from GitHub** – HAULIX checks the public HAULIX releases on GitHub for new versions – no own server needed – and can download and start the new setup for you.
 - **Discord status: coming later** – The Discord Rich Presence setting is locked until it is ready; nothing is sent to Discord.
 - **Fix: map controls over dialogs** – The map's + and − buttons no longer show through the What's new window and other dialogs.
+- **One program file** – HAULIX is now a single Haulix.exe – no extra .exe files in the install folder; Windows' Uninstall still works through Haulix.exe.
+- **Ready for code signing** – Releases are signed automatically as soon as a code signing certificate is available.
 
 <details><summary>Deutsch</summary>
 
@@ -19,6 +21,8 @@ All notable changes to HAULIX. The same list appears in the app under *What's ne
 - **Updates über GitHub** – HAULIX prüft die öffentlichen HAULIX-Releases auf GitHub auf neue Versionen – ganz ohne eigenen Server – und kann das neue Setup für dich herunterladen und starten.
 - **Discord-Status: kommt später** – Die Einstellung für Discord Rich Presence ist gesperrt, bis sie fertig ist; es wird nichts an Discord gesendet.
 - **Behoben: Kartenknöpfe über Fenstern** – Die + und − Knöpfe der Karte scheinen nicht mehr durch das Neuigkeiten-Fenster und andere Dialoge.
+- **Eine Programmdatei** – HAULIX ist jetzt eine einzige Haulix.exe – keine weiteren .exe-Dateien im Installationsordner; die Windows-Deinstallation läuft weiter über Haulix.exe.
+- **Bereit für Code-Signierung** – Releases werden automatisch signiert, sobald ein Code-Signing-Zertifikat vorhanden ist.
 
 </details>
 

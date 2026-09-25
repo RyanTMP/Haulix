@@ -11,7 +11,7 @@
     <AssemblyName>Haulix</AssemblyName>
     <RootNamespace>Haulix.App</RootNamespace>
     <Product>HAULIX ETS2 Logger</Product>
-    <Version>0.0.7-beta</Version>
+    <Version>0.0.8-beta</Version>
     <Copyright>Copyright © 2026 RyanTMP</Copyright>
     <Authors>RyanTMP</Authors>
     <!-- WebView2 ships a WPF control we don't use; its WindowsBase version mismatch is harmless. -->

@@ -11,14 +11,13 @@ import * as f from "../core/format.js";
 // Three categories: HAULIX itself, ETS2 and (later) ATS. Each lists its own sections in the side navigation.
 const CATEGORIES = [
   ["haulix", "HAULIX", "sliders-horizontal", "App, look, data and about"],
-  ["ets2", "Euro Truck Simulator 2", "truck", "Game, telemetry, HUD, notifications, map"],
+  ["ets2", "Euro Truck Simulator 2", "truck", "Game, telemetry, notifications, HUD, TruckersMP"],
   ["ats", "American Truck Simulator", "flag", "Coming later"],
 ];
 const SECTIONS = [
   ["general", "General", "sliders-horizontal", "haulix"], ["appearance", "Appearance", "palette", "haulix"], ["online", "Online", "globe", "haulix"],
   ["data", "Data", "database", "haulix"], ["about", "About", "info", "haulix"],
   ["ets2", "Game & profile", "truck", "ets2"], ["telemetry", "Telemetry", "activity", "ets2"], ["notifications", "Notifications & sounds", "bell", "ets2"],
-  ["hud", "In-game HUD", "gauge", "ets2"], ["truckersmp", "TruckersMP", "users", "ets2"], ["map", "Map", "map", "ets2"],
   ["ats", "American Truck Simulator", "flag", "ats"],
 ];
 const CAT_OF = Object.fromEntries(SECTIONS.map(([id, , , c]) => [id, c]));
@@ -85,7 +84,7 @@ export default {
         ${section("telemetry", "Telemetry", html`
           ${row("Status", html`${st?.pluginInstalled ? "scs-telemetry.dll installed" : "Plugin not installed"}${st?.pluginRevision ? ` · revision ${st.pluginRevision}` : ""}`, html`<span class="badge ${st?.telemetry === "live" ? "badge--ok" : ""}">${st?.telemetry || "—"}</span>`)}
           ${row("Update frequency", "How often HAULIX reads telemetry. The UI refreshes at up to 10 Hz.", segmented("telemetry.updateHz", [["5", "5 Hz"], ["10", "10 Hz"], ["20", "20 Hz"]], String(s.telemetry.updateHz)))}
-          ${row("Record routes", "Store GPS breadcrumbs for the map and delivery details.", toggle("telemetry.recordRoutes", s.telemetry.recordRoutes))}
+          ${row("Record routes", "Store GPS breadcrumbs for the speed profile in delivery details.", toggle("telemetry.recordRoutes", s.telemetry.recordRoutes))}
           ${row("Record free roam", "Also record routes driven without a job.", toggle("telemetry.recordFreeRoam", s.telemetry.recordFreeRoam))}
           ${row("Route point spacing", "Distance between stored points. Lower gives more detail but a larger database.", select("telemetry.routePointSpacingM", [[50, "50 m"], [100, "100 m"], [150, "150 m"], [300, "300 m"], [600, "600 m"]], s.telemetry.routePointSpacingM))}
           ${row("Telemetry panels", "Choose which panels the Telemetry page shows.", html`<div class="chips" style="justify-content:flex-end">${FIELDS.map(([k, l]) => html`<label class="pill" style="cursor:pointer"><input type="checkbox" name="telemetry.fields.${k}" ${raw(s.telemetry.fields[k] !== false ? "checked" : "")} style="accent-color:var(--accent)">${l}</label>`)}</div>`, "setting--stack")}
@@ -151,7 +150,7 @@ export default {
         `)}
 
         ${section("online", "Online", html`
-          <div class="callout" style="margin:14px 0 6px">${icon("globe")}<div><strong>The HAULIX online service is being prepared.</strong> Accounts, VTCs, job board, events, leaderboards, live map and cloud sync are built into HAULIX already, but there is no server yet – nothing is sent from this PC.</div></div>
+          <div class="callout" style="margin:14px 0 6px">${icon("globe")}<div><strong>The HAULIX online service is being prepared.</strong> Accounts, VTCs, job board, events, leaderboards and cloud sync are built into HAULIX already, but there is no server yet – nothing is sent from this PC.</div></div>
           ${row(html`Status`, "", html`<span class="badge badge--outline">${icon("clock", "icon icon-sm")}Not available yet</span>`)}
           ${row("Developer preview", "Shows the VTC and Online pages with local sample data (no network), to try the screens before the service starts.", toggle("online.sample", !!store.get("onlineSample")))}
         `)}
@@ -163,18 +162,6 @@ export default {
           ${row("Message", "Sent in the TruckersMP chat (max. 120 characters).", html`<div class="row" style="gap:8px"><input class="input" name="truckersMp.message" maxlength="120" style="width:260px" value="${s.truckersMp?.message || AFK_DEFAULT}"><button class="btn btn--sm btn--ghost" id="resetAfkMsg" data-tip="Back to the default message">${icon("rotate-ccw")}Reset</button></div>`)}
           ${row("Interval", "Minutes of inactivity between messages. On full servers TruckersMP kicks after 10 minutes.", select("truckersMp.intervalMinutes", [[4, "4 min"], [6, "6 min"], [8, "8 min"], [9, "9 min"], [15, "15 min"], [25, "25 min"]], s.truckersMp?.intervalMinutes || 8))}
           ${row("Chat key", "The key that opens the TruckersMP chat in your controls (default Y).", html`<input class="input" name="truckersMp.chatKey" maxlength="1" style="width:60px;text-align:center;text-transform:uppercase" value="${s.truckersMp?.chatKey || "Y"}">`)}
-        `)}
-
-        ${section("map", "Map", html`
-          ${row("Road map", html`<span id="roadMapStatus">—</span>`, html`<button class="btn btn--sm" id="buildRoadMap">${icon("refresh-cw")}Rebuild</button>`)}
-          ${row("Build road map automatically", "Read streets from your ETS2 files on first start and after game or DLC updates (about a minute, offline).", toggle("map.autoBuildRoadMap", s.map.autoBuildRoadMap !== false))}
-          ${row("Navigate to the current job", "Plan a route to the job's destination company automatically. You can still pick another destination on the map.", toggle("map.autoRouteToJob", s.map.autoRouteToJob !== false))}
-          ${row("Default zoom", "", select("map.defaultZoom", [[-7, "Region"], [-6, "Wide"], [-5, "Normal"], [-4, "Close"], [-3, "Street"]], s.map.defaultZoom))}
-          ${row("Follow truck", "Keep the map centred on your truck while driving.", toggle("map.followTruck", s.map.followTruck))}
-          ${row("Route history", "How far back the map shows completed routes.", select("map.routeHistoryDays", [[7, "7 days"], [30, "30 days"], [90, "90 days"], [365, "1 year"], [3650, "Everything"]], s.map.routeHistoryDays))}
-          ${row("Show estimated cities", "Cities HAULIX hasn't visited yet are placed from real-world coordinates.", toggle("map.showEstimatedCities", s.map.showEstimatedCities))}
-          ${row("Local tile folder", html`<span class="path-value">${s.map.tileFolder || "None: schematic map"}</span><br><span class="faint">Optional pre-rendered map tiles ({z}/{x}/{y}.png plus haulix-tiles.json). Takes effect after restarting HAULIX.</span>`,
-            html`<button class="btn btn--sm" data-pick="map.tileFolder">${icon("folder-open")}Browse</button>${s.map.tileFolder ? html`<button class="btn btn--sm btn--ghost" id="clearTiles">Clear</button>` : ""}`)}
         `)}
 
         ${section("data", "Data", html`
@@ -207,7 +194,7 @@ export default {
           </div>
           <div class="about-points">
             <div>${icon("book-open")}<span><strong>Logs every delivery</strong> with route, income, fuel and a driving score – automatically.</span></div>
-            <div>${icon("gauge")}<span><strong>Live dashboard</strong>, current job, real-time ETA and a map with the whole ETS2 world.</span></div>
+            <div>${icon("gauge")}<span><strong>Live dashboard</strong>, current job page, real-time ETA and your driving score.</span></div>
             <div>${icon("monitor")}<span><strong>In-game HUD and notifications</strong> over your game, optionally read out by a natural voice.</span></div>
             <div>${icon("shield-check")}<span><strong>Private:</strong> no account, no ads, no tracking. Your data stays on this PC.</span></div>
           </div>
@@ -219,13 +206,13 @@ export default {
             <a class="btn btn--sm" href="#" data-url="https://github.com/RyanTMP/Haulix/releases">${icon("download")}Downloads</a>
             <a class="btn btn--sm btn--ghost" href="#" data-url="https://github.com/RyanTMP/Haulix/issues">${icon("circle-alert")}Report a problem</a></div>`)}
           ${row("Keyboard", "", html`<span class="muted" style="font-size:12px"><span class="kbd">Ctrl K</span> search · <span class="kbd">Alt 1–9</span> pages · <span class="kbd">Ctrl ,</span> settings</span>`)}
-          ${row("Credits", "Live data comes from the free SCS telemetry plugin by RenCloud. Map with Leaflet, charts with uPlot, icons by Lucide, voices by Piper. HAULIX is free software (GPL v2).", "")}
+          ${row("Credits", "Live data comes from the free SCS telemetry plugin by RenCloud. Charts with uPlot, icons by Lucide, voices by Piper. HAULIX is free software (GPL v2).", "")}
           <p class="faint about-legal">© 2026 RyanTMP. HAULIX is licensed under the GNU GPL v2; the HAULIX name, logo and artwork are all rights reserved.</p>
           <p class="faint about-legal">HAULIX is an independent fan project, not affiliated with or endorsed by SCS Software, TruckersMP or any other company. Euro Truck Simulator 2 and American Truck Simulator are trademarks of SCS Software; all other names and trademarks belong to their owners.</p>
           <details class="about-dev"><summary>${icon("wrench")}For developers</summary>
             ${row("Custom update source", "URL of your own update manifest (JSON with version, url, notes). Leave empty to use GitHub.", html`<input class="input" name="general.updateFeedUrl" placeholder="https://…/haulix-update.json" style="width:260px" value="${s.general.updateFeedUrl || ""}">`)}
             ${row("Telemetry", "Reads the SCS SDK shared memory written by scs-telemetry.dll (RenCloud scs-sdk-plugin, revision 12).", "")}
-            ${row("Open-source components", "Leaflet (BSD-2), uPlot (MIT), Lucide icons (ISC), Piper (MIT), Inter / Barlow Condensed / JetBrains Mono (OFL).", "")}
+            ${row("Open-source components", "uPlot (MIT), Lucide icons (ISC), Piper (MIT), Inter / Barlow Condensed / JetBrains Mono (OFL).", "")}
             ${row("Design system", "Colours, type, components and markers used across HAULIX.", html`<a class="btn btn--sm" href="#/design">${icon("palette")}Open reference</a>`)}
           </details>
         `)}
@@ -236,10 +223,10 @@ export default {
             <span class="badge badge--outline">${icon("clock", "icon icon-sm")}Coming later</span>
             <h2 class="vtc-soon__title">American Truck Simulator</h2>
             <p class="vtc-soon__lead">This feature is not available in the current HAULIX version.</p>
-            <p class="muted vtc-soon__text">Later HAULIX will support American Truck Simulator too: the same logbook, live job page, HUD and notifications – with miles, dollars and the ATS map. HAULIX works fully with ETS2 today.</p>
+            <p class="muted vtc-soon__text">Later HAULIX will support American Truck Simulator too: the same logbook, live job page, HUD and notifications – with miles and dollars. HAULIX works fully with ETS2 today.</p>
             <div class="vtc-soon__points">
               <div>${icon("book-open")}<span>Logbook and statistics for your ATS company</span></div>
-              <div>${icon("map")}<span>ATS road map with navigation to your job</span></div>
+              <div>${icon("briefcase")}<span>Current job page with real-time ETA for ATS</span></div>
               <div>${icon("gauge")}<span>In-game HUD, notifications and sounds in ATS</span></div>
             </div>
           </div>
@@ -257,7 +244,7 @@ export default {
     }).then(() => toast({ kind: "success", title: "Saved", timeout: 1400 })).catch((e) => toast({ kind: "error", title: "Could not save", message: e.message }));
 
     const coerce = (name, v) => {
-      if (["notifications.voiceRate", "notifications.voiceVolume", "notifications.soundVolume", "hud.x", "hud.y", "hud.margin", "hud.scale", "hud.width", "hud.opacity", "truckersMp.intervalMinutes", "telemetry.updateHz", "telemetry.routePointSpacingM", "map.defaultZoom", "map.routeHistoryDays", "data.backupIntervalHours", "data.backupKeep"].includes(name)) return Number(v);
+      if (["notifications.voiceRate", "notifications.voiceVolume", "notifications.soundVolume", "hud.x", "hud.y", "hud.margin", "hud.scale", "hud.width", "hud.opacity", "truckersMp.intervalMinutes", "telemetry.updateHz", "telemetry.routePointSpacingM", "data.backupIntervalHours", "data.backupKeep"].includes(name)) return Number(v);
       if (name === "ets2.profilePath" && !v) return null;
       return v;
     };
@@ -494,24 +481,7 @@ export default {
       }
     });
 
-    const showRoadMap = (m) => {
-      const el = $("#roadMapStatus", root);
-      if (!el || !m) return;
-      el.textContent = {
-        ready: `Ready · ${f.num(m.segments)} road segments · ETS2 ${m.gameVersion || ""} · built ${f.dateTime(m.builtUtc)}`,
-        building: `Building… ${Math.round((m.progress || 0) * 100)}% · ${m.message}`,
-        missing: "Not built yet",
-        error: `Failed: ${m.message}`,
-        unavailable: "ETS2 installation not found",
-      }[m.state] || "—";
-      $("#buildRoadMap", root).disabled = m.state === "building" || m.state === "unavailable";
-    };
-    showRoadMap(store.get("mapStatus"));
-    const offMap = store.on("mapStatus", showRoadMap);
-    $("#buildRoadMap", root).onclick = async () => store.set("mapStatus", await call("map.build"));
-
     $("#redetect", root).onclick =async () => { store.set("detection", await call("ets2.detect")); toast({ kind: "success", title: "Detection complete" }); location.reload(); };
-    $("#clearTiles", root)?.addEventListener("click", () => setting("map.tileFolder", null).then(() => location.reload()));
     $("#demoToggle", root).onclick = async () => {
       const on = !store.get("status")?.demo;
       await call("demo.set", { on });
@@ -583,6 +553,6 @@ export default {
     root.querySelectorAll("[data-sec]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); $(`#sec-${a.dataset.sec}`, root).scrollIntoView({ behavior: "smooth" }); history.replaceState(null, "", `#/settings/${a.dataset.sec}`); }));
     page.addEventListener("scroll", mark);
     showCat(cat, params[0] && CAT_OF[params[0]] ? params[0] : null);
-    return () => { page.removeEventListener("scroll", mark); offMap(); offHud(); offVoice.forEach((o) => o?.()); };
+    return () => { page.removeEventListener("scroll", mark); offHud(); offVoice.forEach((o) => o?.()); };
   },
 };

@@ -2,6 +2,24 @@
 
 All notable changes to HAULIX. The same list appears in the app under *What's new* (Settings → About).
 
+## 0.0.8 BETA
+
+- **HAULIX is preparing to go online** – A notice at the top of HAULIX: updates now come more often and can contain features that are not available yet and are not the final version.
+- **Map removed** – The map page, the road map and the in-app navigation are gone – ETS2 has its own map and GPS. The logbook keeps the speed profile of each delivery, and the old map files are deleted automatically to free disk space.
+- **Live map removed** – The planned live map with friends is no longer part of the online plans.
+- **Dashboard: your progress** – Where the map used to be, the dashboard now shows your driver rank and the achievements you are closest to.
+- **Smaller and faster** – The setup no longer carries the map files, and HAULIX starts without building a road map.
+
+<details><summary>Deutsch</summary>
+
+- **HAULIX bereitet sich auf den Online-Start vor** – Ein Hinweis oben in HAULIX: Updates kommen jetzt häufiger und können Funktionen enthalten, die noch nicht verfügbar sind und nicht dem finalen Stand entsprechen.
+- **Karte entfernt** – Kartenseite, Straßenkarte und die Navigation in HAULIX sind entfernt – ETS2 hat eine eigene Karte und ein eigenes Navi. Das Fahrtenbuch behält das Geschwindigkeitsprofil jeder Lieferung, alte Kartendateien werden automatisch gelöscht.
+- **Live-Karte entfernt** – Die geplante Live-Karte mit Freunden ist nicht mehr Teil der Online-Pläne.
+- **Übersicht: dein Fortschritt** – Wo früher die Karte war, zeigt die Übersicht jetzt deinen Fahrerrang und die Erfolge, die du fast erreicht hast.
+- **Kleiner und schneller** – Das Setup enthält keine Kartendateien mehr, und HAULIX startet, ohne eine Straßenkarte zu erstellen.
+
+</details>
+
 ## 0.0.7 BETA
 
 - **New: Current job page** – Everything about the job you are driving, like VTC trackers: route and progress, real-time ETA, deadline buffer, income after tolls, ferries and fines, a live driving score with its penalties, a speed profile and a timeline of the trip.

@@ -27,6 +27,6 @@ public sealed class OnlineService
         available = Available,
         state = State.ToString(),
         sample = UseSample,
-        planned = new[] { "accounts", "vtc", "jobBoard", "events", "leaderboards", "liveMap", "cloudSync" },
+        planned = new[] { "accounts", "vtc", "jobBoard", "events", "leaderboards", "cloudSync" },
     };
 }

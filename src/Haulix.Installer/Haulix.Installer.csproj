@@ -17,7 +17,7 @@
     <RootNamespace>Haulix.Installer</RootNamespace>
     <Product>HAULIX ETS2 Logger Setup</Product>
     <Company>RyanTMP</Company>
-    <Version>0.0.7-beta</Version>
+    <Version>0.0.8-beta</Version>
     <Copyright>Copyright © 2026 RyanTMP</Copyright>
     <Authors>RyanTMP</Authors>
     <PlatformTarget>x64</PlatformTarget>

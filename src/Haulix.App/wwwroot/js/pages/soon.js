@@ -3,7 +3,7 @@ import { icon } from "../core/icons.js";
 import { store } from "../core/store.js";
 import * as f from "../core/format.js";
 
-// Areas that need an online HAULIX service (accounts, VTCs, live positions). This offline version shows
+// Areas that need an online HAULIX service (accounts, VTCs, cloud sync). This offline version shows
 // what is coming, and says plainly that the feature is not available yet.
 const PAGES = {
   vtc: {
@@ -19,7 +19,7 @@ const PAGES = {
   "vtc-events": {
     title: "Events & convoys", crumb: "Drive together", icon: "calendar",
     text: "Plan and join convoys: date and time, meeting point, route on the HAULIX map and the server to meet on – with reminders shortly before the start.",
-    points: [["calendar", "Event calendar for your VTC and public convoys"], ["route", "Meeting point and route on the map"], ["bell", "Reminders over the game before the start"]],
+    points: [["calendar", "Event calendar for your VTC and public convoys"], ["route", "Meeting point, route and server"], ["bell", "Reminders over the game before the start"]],
   },
   "vtc-jobs": {
     title: "Job board", crumb: "Jobs posted by your VTC", icon: "briefcase",
@@ -30,11 +30,6 @@ const PAGES = {
     title: "Leaderboards", crumb: "Rankings", icon: "award",
     text: "Rankings within your VTC and across all HAULIX drivers: kilometres, deliveries, income and driving score – weekly, monthly and all time.",
     points: [["award", "Weekly, monthly and all-time rankings"], ["gauge", "Driving score as a fair ranking"], ["users", "Your VTC against other companies"]],
-  },
-  "live-map": {
-    title: "Live map", crumb: "Friends and colleagues on the map", icon: "globe",
-    text: "See your friends and VTC colleagues live on the HAULIX map – where they drive, what they haul and when they arrive.",
-    points: [["globe", "Live positions of friends and your VTC"], ["package", "Their current job and arrival time"], ["navigation", "Navigate to a friend with one click"]],
   },
   "cloud-sync": {
     title: "Cloud sync", crumb: "Your logbook on every PC", icon: "cloud-off",
@@ -80,10 +75,6 @@ const PREVIEW = {
   "vtc-leaderboards": async (call) => {
     const rows = await call("online.leaderboard", { metric: "km", period: "week" });
     return table(["#Rank", "Driver", "VTC", "#This week"], rows.map((r) => html`<tr><td class="num">${r.rank}</td><td>${r.name}</td><td>${r.vtcTag || "—"}</td><td class="num">${f.dist(r.value)}</td></tr>`));
-  },
-  "live-map": async (call) => {
-    const pos = await call("online.live", { scope: "vtc" });
-    return table(["Driver", "Cargo", "Destination", "#Speed"], pos.map((p) => html`<tr><td>${p.name}</td><td>${p.cargo || "—"}</td><td>${p.destinationCity || "—"}</td><td class="num">${f.speed(p.speedKmh)}</td></tr>`));
   },
 };
 

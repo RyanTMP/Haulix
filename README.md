@@ -1,7 +1,7 @@
 <p align="center"><img src="branding/Haulix_ETS2_Logger.png" alt="HAULIX – ETS2 Logger" width="520"></p>
 
 <p align="center"><b>Your free logbook and co-driver for Euro Truck Simulator 2.</b><br>
-Every delivery logged automatically, live job data, a map of the whole game world and a HUD over your game – no account, no ads.</p>
+Every delivery logged automatically, live job data, achievements and a HUD over your game – no account, no ads.</p>
 
 <p align="center">
   <a href="../../releases/latest"><b>⬇ Download HAULIX</b></a> ·
@@ -16,14 +16,13 @@ Every delivery logged automatically, live job data, a map of the whole game worl
 
 - 📒 **Automatic logbook** – every job is saved with route, cargo, income, XP, fuel, damage and a **driving score** from 0 to 100. Export to CSV or share a picture of your best runs.
 - 🚚 **Current job page** – route and progress, real-time arrival time, deadline buffer, tolls, ferries and fines, a live driving score, a speed profile and a timeline of your trip.
-- 🗺️ **Map of the whole ETS2 world** (all map DLCs) – see the streets you have driven, your route to the next delivery and where your garages are.
 - 🎮 **In-game HUD** – a clean job card over your game like VTC trackers use. Choose what it shows, its style, size and colour, and **drag it anywhere on your screen**.
 - 🔔 **Notifications over the game** – milestones, deadline, fuel, damage and rest reminders, optionally **read out by a natural voice** (German and English, works offline).
 - 🏆 **Achievements** – more than 60 goals in bronze, silver, gold and platinum, with a driver rank that grows with your career.
 - 🏢 **Your company at a glance** – trucks, trailers, garages, drivers and money, read straight from your save game.
 - 🌍 **German and English**, and updates with one click.
 
-Coming later: find and join a VTC, events & convoys, job board, leaderboards, a live map with friends and cloud sync.
+Coming later: find and join a VTC, events & convoys, job board, leaderboards and cloud sync.
 
 ## Get started
 
@@ -52,20 +51,19 @@ Want to build HAULIX yourself or contribute? See [docs/DEVELOPING.md](docs/DEVEL
 
 ## Legal
 
-**HAULIX © 2026 RyanTMP.** The program is licensed under the **GNU GPL v2** (see [LICENSE](LICENSE)) – required because it builds on [TruckLib](https://github.com/sk-zk/TruckLib) (GPL-2.0). The copyright stays with RyanTMP. The **HAULIX name, logo and artwork are all rights reserved** and may not be used for other projects or modified versions – see [NOTICE.md](NOTICE.md).
+**HAULIX © 2026 RyanTMP.** The program is licensed under the **GNU GPL v2** (see [LICENSE](LICENSE)). The copyright stays with RyanTMP. The **HAULIX name, logo and artwork are all rights reserved** and may not be used for other projects or modified versions – see [NOTICE.md](NOTICE.md).
 
-HAULIX is an independent fan project and is not affiliated with or endorsed by SCS Software, TruckersMP or any other company. *Euro Truck Simulator 2* and *American Truck Simulator* are trademarks of SCS Software; the road map in the setup is derived from ETS2 game files © SCS Software. All other names and trademarks belong to their owners.
+HAULIX is an independent fan project and is not affiliated with or endorsed by SCS Software, TruckersMP or any other company. *Euro Truck Simulator 2* and *American Truck Simulator* are trademarks of SCS Software. All other names and trademarks belong to their owners.
 
-HAULIX uses great work by others – TruckLib, the SCS telemetry plugin by RenCloud, Leaflet, uPlot, Lucide, Piper, .NET, SQLite, WebView2 and the fonts Inter, Barlow and JetBrains Mono. Owners and licences: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+HAULIX uses great work by others – the SCS telemetry plugin by RenCloud, uPlot, Lucide, Piper, .NET, SQLite, WebView2 and the fonts Inter, Barlow and JetBrains Mono. Owners and licences: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## Deutsch
 
-**HAULIX** ist dein kostenloses Fahrtenbuch und Beifahrer für Euro Truck Simulator 2: Jede Lieferung wird automatisch gespeichert, du siehst Live-Daten zu deinem Auftrag, eine Karte der ganzen Spielwelt und ein HUD über dem Spiel – ohne Konto, ohne Werbung.
+**HAULIX** ist dein kostenloses Fahrtenbuch und Beifahrer für Euro Truck Simulator 2: Jede Lieferung wird automatisch gespeichert, du siehst Live-Daten zu deinem Auftrag, sammelst Erfolge und hast ein HUD über dem Spiel – ohne Konto, ohne Werbung.
 
 **Das kann HAULIX**
 - Automatisches **Fahrtenbuch** mit Route, Einnahmen, Kraftstoff, Schäden und **Fahrscore**.
 - **Aktueller Auftrag**: Fortschritt, Echtzeit-Ankunft, Frist, Maut, Fähren, Bußgelder, Live-Fahrscore, Geschwindigkeitsprofil und Verlauf.
-- **Karte** der kompletten ETS2-Welt mit allen Karten-DLCs.
 - **Ingame-HUD** als Auftragskarte – Inhalt, Stil, Größe und Farbe frei wählbar, **per Maus an jede Stelle ziehen**.
 - **Benachrichtigungen** über dem Spiel, auf Wunsch von einer **natürlichen Stimme** vorgelesen.
 - Über 60 **Erfolge** in Bronze, Silber, Gold und Platin mit Fahrerrang.

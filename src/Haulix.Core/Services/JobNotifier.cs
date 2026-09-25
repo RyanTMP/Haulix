@@ -163,10 +163,6 @@ public sealed class JobNotifier(Func<AppSettings> settings)
         }
     }
 
-    /// <summary>The player changed the route in the in-game navigation and HAULIX followed (or could not).</summary>
-    public void RouteAdjusted(double km, bool matched) =>
-        Raise(matched ? "info" : "warning", "progress", T(matched ? "routeTitle" : "routeDiffTitle"), T(matched ? "routeMsg" : "routeDiffMsg", Dist(km)));
-
     /// <summary>An achievement was reached.</summary>
     public void Achievement(AchievementInfo a) => Raise("success", "achievement", T("achTitle", a.Title), a.Description);
 
@@ -248,10 +244,6 @@ public sealed class JobNotifier(Func<AppSettings> settings)
         ["cancelledMsg"] = "Penalty {0}",
         ["fineTitle"] = "Fined",
         ["fineMsg"] = "{0} · {1}",
-        ["routeTitle"] = "Route changed",
-        ["routeMsg"] = "HAULIX follows your new in-game route · {0} to go",
-        ["routeDiffTitle"] = "Game GPS takes another way",
-        ["routeDiffMsg"] = "The in-game route ({0}) does not match any road-map route; the map shows the closest one.",
         ["afkTitle"] = "Inactive on TruckersMP",
         ["afkMsg10"] = "8 minutes without input. On full servers TruckersMP kicks after 10 minutes of inactivity.",
         ["afkMsg30"] = "27 minutes without input. TruckersMP kicks after 30 minutes of inactivity.",
@@ -289,10 +281,6 @@ public sealed class JobNotifier(Func<AppSettings> settings)
         ["cancelledMsg"] = "Strafe {0}",
         ["fineTitle"] = "Bußgeld",
         ["fineMsg"] = "{0} · {1}",
-        ["routeTitle"] = "Route geändert",
-        ["routeMsg"] = "HAULIX folgt deiner neuen Route im Spiel · noch {0}",
-        ["routeDiffTitle"] = "Spiel-Navi fährt anders",
-        ["routeDiffMsg"] = "Die Route im Spiel ({0}) passt zu keiner Route der Karte; angezeigt wird die ähnlichste.",
         ["afkTitle"] = "Inaktiv auf TruckersMP",
         ["afkMsg10"] = "Seit 8 Minuten keine Eingabe. Auf vollen Servern kickt TruckersMP nach 10 Minuten Inaktivität.",
         ["afkMsg30"] = "Seit 27 Minuten keine Eingabe. TruckersMP kickt nach 30 Minuten Inaktivität.",

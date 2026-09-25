@@ -20,10 +20,3 @@ export function icon(name, cls = "icon") {
   );
 }
 
-/** The HAULIX truck marker: slanted chevron echoing the H logo, rotated to heading. */
-export function truckMarkerSvg(heading = 0, size = 34) {
-  return `<svg width="${size}" height="${size}" viewBox="-20 -20 40 40" style="transform:rotate(${heading}deg);overflow:visible">
-    <circle r="17" fill="rgb(255 176 32 / 0.14)" stroke="rgb(255 176 32 / 0.35)" stroke-width="1"/>
-    <path d="M0 -12 L9 9 L0 4 L-9 9 Z" fill="var(--accent)" stroke="#0b0c0e" stroke-width="2" stroke-linejoin="round"/>
-  </svg>`;
-}

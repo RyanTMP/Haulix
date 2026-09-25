@@ -13,7 +13,7 @@ const CATEGORIES = [["all", "All", "layout-grid"], ["career", "Career", "briefca
 const TIER_LABEL = { bronze: "Bronze", silver: "Silver", gold: "Gold", platinum: "Platinum" };
 const RANKS = [[0, "Rookie"], [150, "Driver"], [400, "Professional"], [800, "Expert"], [1400, "Veteran"], [2200, "Master"], [3200, "Legend"]];
 
-const rankOf = (points) => {
+export const rankOf = (points) => {
   let i = 0;
   while (i + 1 < RANKS.length && points >= RANKS[i + 1][0]) i++;
   const next = RANKS[i + 1];
@@ -21,7 +21,7 @@ const rankOf = (points) => {
 };
 
 // Groups the flat level list into families (older backends without family info become one-level families).
-const families = (list) => {
+export const families = (list) => {
   const map = new Map();
   for (const a of list) {
     const key = a.family || a.id;

@@ -10,7 +10,6 @@ public sealed class AppSettings
     public GeneralSettings General { get; set; } = new();
     public Ets2Settings Ets2 { get; set; } = new();
     public TelemetrySettings Telemetry { get; set; } = new();
-    public MapSettings Map { get; set; } = new();
     public DataSettings Data { get; set; } = new();
     public AppearanceSettings Appearance { get; set; } = new();
     public NotificationSettings Notifications { get; set; } = new();
@@ -66,25 +65,6 @@ public sealed class TelemetrySettings
     {
         ["vehicle"] = true, ["drivetrain"] = true, ["fluids"] = true, ["damage"] = true,
         ["lights"] = true, ["navigation"] = true, ["job"] = true, ["trailer"] = true,
-    };
-}
-
-public sealed class MapSettings
-{
-    public int DefaultZoom { get; set; } = -5;
-    public bool FollowTruck { get; set; } = true;
-    public int RouteHistoryDays { get; set; } = 90;
-    public string? TileFolder { get; set; }
-    public bool ShowEstimatedCities { get; set; } = true;
-    /// <summary>Extract the road network from the game files automatically when missing or outdated.</summary>
-    public bool AutoBuildRoadMap { get; set; } = true;
-    public bool ShowStreets { get; set; } = true;
-    public bool AutoRouteToJob { get; set; } = true;
-    public Dictionary<string, bool> Layers { get; set; } = new()
-    {
-        ["truck"] = true, ["currentRoute"] = true, ["previousRoutes"] = true, ["garages"] = true,
-        ["cities"] = true, ["services"] = false, ["dealers"] = false, ["recruitment"] = false,
-        ["aiDrivers"] = true, ["fleet"] = true, ["events"] = false,
     };
 }
 

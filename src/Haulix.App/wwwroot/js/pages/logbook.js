@@ -3,9 +3,6 @@ import { icon } from "../core/icons.js";
 import { store } from "../core/store.js";
 import { card, empty, skeleton, select, drawer, kv, toast, contextMenu, progress, damageTone } from "../components/ui.js";
 import { chart } from "../components/charts.js";
-import { createMap, routeLine, cityMarker, labelMarker } from "../components/map.js";
-import { streetsLayer, countriesLayer, loadCountries, destinationMarker } from "../components/streets.js";
-import { loadMapData, mapReady } from "../core/mapdata.js";
 import * as f from "../core/format.js";
 import { deliveryCard, scoreColor } from "../components/sharecard.js";
 
@@ -221,8 +218,6 @@ async function openDelivery(id, call) {
         <div class="stat"><div class="stat__label">XP</div><div class="stat__value">${f.num(d.xp)}</div></div>
         <div class="stat"><div class="stat__label">${f.currencySymbol()} / ${f.distUnit()}</div><div class="stat__value">${d.distanceKm ? f.num(d.income / f.distValue(d.distanceKm), 1) : "—"}</div></div>
       </div>
-      ${pts.length > 1 || mapReady() ? html`<div><div class="row" style="margin-bottom:10px"><div class="label label--muted">Route</div><span class="spacer"></span><span class="faint" style="font-size:11px" id="routeNote">${pts.length > 1 ? "Recorded GPS trace" : ""}</span></div><div class="route-map" id="drawerMap"></div></div>`
-        : html`<div class="callout">${icon("route")}<div>No GPS trace for this delivery${d.source === "save" ? " — it was imported from the game's delivery log." : "."} Build the road map (Map page) to see the likely route.</div></div>`}
       ${pts.length > 5 ? html`<div><div class="label label--muted" style="margin-bottom:10px">Speed profile</div><div id="speedProfile"></div></div>` : ""}
       <div class="grid">
         <div class="span-6">${kv([
@@ -263,47 +258,6 @@ async function openDelivery(id, call) {
         try { await call("image.copy", { dataUrl: await card() }); toast({ kind: "success", title: "Image copied", message: "Paste it into Discord with Ctrl+V.", timeout: 3000 }); }
         catch (e) { toast({ kind: "error", title: "Could not copy image", message: e.message }); }
       });
-      const mapEl = body.querySelector("#drawerMap");
-      if (mapEl) {
-        const m = createMap(mapEl, { zoom: -5, grid: !mapReady() });
-        let removed = false;
-        cleanup.push(() => { removed = true; m.remove(); });
-        (async () => {
-          // Base map: streets + country borders from the extracted road map.
-          const md = await loadMapData().catch(() => null);
-          if (removed) return;
-          if (md) {
-            streetsLayer(md.streets).addTo(m);
-            const cj = await loadCountries(store.get("mapStatus")?.countriesUrl);
-            if (cj && !removed) countriesLayer(cj, (code) => code.toUpperCase(), { labels: false }).addTo(m);
-          }
-          // Route: recorded GPS trace, or reconstructed over the road network.
-          let flat = pts.length > 1 ? pts.flatMap((p) => (p.speed === -1 ? [null, null, p.x, p.z] : [p.x, p.z])) : null;
-          if (!flat && md && d.originCityId && d.destCityId) {
-            const r = await call("route.reconstruct", { from: d.originCityId, to: d.destCityId }).catch(() => null);
-            if (r?.length) {
-              flat = Array.from(r);
-              const note = document.getElementById("routeNote");
-              if (note) note.textContent = "Likely road route (no GPS trace recorded)";
-            }
-          }
-          if (removed) return;
-          const o = md?.pois.cities.get(d.originCityId);
-          const t = md?.pois.cities.get(d.destCityId);
-          let bounds = null;
-          if (flat) {
-            const line = routeLine(flat, { highlighted: true, dashed: pts.length < 2 }).addTo(m);
-            bounds = line.getBounds();
-          }
-          const from = o || (flat && { x: flat[0], z: flat[1] });
-          const to = t || (flat && { x: flat[flat.length - 2], z: flat[flat.length - 1] });
-          if (from) { cityMarker(from.x, from.z, { name: d.originCity, kind: "city" }).addTo(m); labelMarker(from.x, from.z, d.originCity).addTo(m); }
-          if (to) { destinationMarker(to.x, to.z, d.destCity).addTo(m); labelMarker(to.x, to.z, d.destCity).addTo(m); }
-          m.invalidateSize();
-          if (bounds?.isValid()) m.fitBounds(bounds, { padding: [30, 30], animate: false });
-          else if (from && to) m.fitBounds(window.L.latLngBounds([[-from.z, from.x], [-to.z, to.x]]), { padding: [40, 40], animate: false });
-        })();
-      }
       const sp = body.querySelector("#speedProfile");
       if (sp) {
         const xs = pts.map((_, i) => i);

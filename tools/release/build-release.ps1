@@ -32,7 +32,7 @@ if ($LASTEXITCODE -ne 0) { throw "Tests failed" }
 Write-Host "2/4 Publishing the app (self-contained, win-x64)"
 $appOut = Join-Path $artifacts "app"
 # One program file: the .NET runtime, all libraries and native DLLs are bundled into Haulix.exe (native ones
-# are unpacked to %TEMP% on first start). Only the UI (wwwroot), the map bundle and licences stay as files.
+# are unpacked to %TEMP% on first start). Only the UI (wwwroot) and licences stay as files.
 dotnet publish src\Haulix.App -c Release -r win-x64 --self-contained true -o $appOut `
   -p:Version=$Version -p:DebugType=none -p:DebugSymbols=false `
   -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true --nologo -v q
@@ -52,30 +52,6 @@ Copyright © 2026 RyanTMP. HAULIX is licensed under the GNU General Public Licen
 The HAULIX name, logo and artwork are © RyanTMP, all rights reserved (see NOTICE.txt).
 The complete source code is distributed alongside this program as HAULIX-$Version-source.zip.
 "@
-
-# Full map: ship the road map built on this PC so players with fewer map DLCs (or without the game
-# installed) still see every street. Build it first by starting HAULIX once (Settings -> Map).
-$mapDir = Join-Path $env:LOCALAPPDATA "Haulix\map"
-$meta = Get-ChildItem $mapDir -Filter "meta-*.json" -ErrorAction SilentlyContinue |
-  Where-Object { Test-Path (Join-Path $mapDir ("network-" + $_.BaseName.Substring(5) + ".bin")) } |
-  Sort-Object { ((Get-Content $_.FullName -Raw | ConvertFrom-Json).mapDlcs).Count }, LastWriteTime | Select-Object -Last 1
-if ($meta) {
-  $key = $meta.BaseName.Substring(5)
-  $bundle = Join-Path $appOut "map-bundle"
-  New-Item -ItemType Directory -Force $bundle | Out-Null
-  foreach ($f in @("network-$key.bin", "streets-$key.bin", "pois-$key.json", "vcountry-$key.bin")) {
-    $src = Join-Path $mapDir $f
-    if (-not (Test-Path $src)) { throw "Map bundle incomplete: $f missing (rebuild the road map in HAULIX)" }
-    Copy-Item $src $bundle
-  }
-  Get-ChildItem $mapDir -Filter "countries-$key-v*.json" | Copy-Item -Destination $bundle
-  Get-ChildItem $mapDir -Filter "land-$key-v*.png" | Copy-Item -Destination $bundle
-  Copy-Item $meta.FullName (Join-Path $bundle "bundle.json")
-  $dlcs = (Get-Content $meta.FullName -Raw | ConvertFrom-Json).mapDlcs
-  Write-Host ("    full map bundled: {0} map DLCs ({1})" -f $dlcs.Count, ($dlcs -join ", "))
-} else {
-  Write-Warning "No built road map found in $mapDir - the release will not include the full map."
-}
 
 $payload = Join-Path $artifacts "payload.zip"
 [IO.Compression.ZipFile]::CreateFromDirectory($appOut, $payload, [IO.Compression.CompressionLevel]::Optimal, $false)

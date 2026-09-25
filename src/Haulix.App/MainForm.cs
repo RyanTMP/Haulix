@@ -108,12 +108,6 @@ public sealed class MainForm : Form
         if (File.Exists(Path.Combine(source, "index.html"))) root = source;
 #endif
         core.SetVirtualHostNameToFolderMapping(HostName, root, CoreWebView2HostResourceAccessKind.DenyCors);
-        // Road map extracted from the local game files (streets geometry + POIs), served from disk.
-        core.SetVirtualHostNameToFolderMapping("map.haulix", _engine.Map.Folder, CoreWebView2HostResourceAccessKind.Allow);
-        // Optional user-supplied map tiles (Settings → Map → Local tile folder), also served from disk.
-        var tiles = settings.Map.TileFolder;
-        if (!string.IsNullOrEmpty(tiles) && Directory.Exists(tiles))
-            core.SetVirtualHostNameToFolderMapping("tiles.haulix", tiles, CoreWebView2HostResourceAccessKind.Allow);
         core.Settings.AreDefaultContextMenusEnabled = false;
         core.Settings.IsStatusBarEnabled = false;
         core.Settings.IsZoomControlEnabled = false;

@@ -1,6 +1,8 @@
 // Converts a telemetry snapshot into display strings for data-bind targets (shared by Dashboard & Telemetry).
 import * as f from "./format.js";
-import { project } from "../components/map.js";
+// Rough projection of real-world lat/lon to ETS2 world coordinates (≈ 1:19 around 10°E / 51°N), used to
+// estimate positions of cities HAULIX has not driven through yet (for the "near …" location label).
+const project = (lat, lon) => ({ x: 3700 * lon - 37000, z: -5850 * lat + 298350 });
 
 export function gearLabel(s) {
   if (!s) return "—";
@@ -100,19 +102,10 @@ export function jobProgress(s) {
   return Math.max(0, Math.min(1, 1 - left / s.plannedDistanceKm));
 }
 
-/** City positions for the map: learned (exact) + catalogue (estimated). */
-export function cityPositions(learned, catalogue, exact = null) {
+/** City positions: learned while driving (exact) + catalogue (estimated). */
+export function cityPositions(learned, catalogue) {
   const out = new Map();
-  // Exact positions from the game's own map (road map built) take precedence.
-  if (exact) {
-    const byId = new Map((catalogue || []).map((c) => [c.id, c]));
-    for (const c of exact.values()) {
-      const cat = byId.get(c.id);
-      out.set(c.id, { id: c.id, name: cat?.name || c.id.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase()), country: cat?.country, x: c.x, z: c.z, estimated: false, fromMap: true });
-    }
-  }
-  for (const c of learned || []) if (!out.has(c.id)) out.set(c.id, { ...c, estimated: false });
-  if (exact) return out; // the game map is authoritative: no estimated positions needed
+  for (const c of learned || []) out.set(c.id, { ...c, estimated: false });
   for (const c of catalogue || []) {
     if (out.has(c.id)) continue;
     const p = project(c.lat, c.lon);

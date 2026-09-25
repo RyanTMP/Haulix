@@ -16,8 +16,7 @@ In Debug builds the UI is served straight from `src/Haulix.App/wwwroot`, so UI c
 
 1. Raise `<Version>` in `src/Haulix.App`, `src/Haulix.Core` and `src/Haulix.Installer` (e.g. `0.0.7-beta`).
 2. Add the version to `src/Haulix.App/wwwroot/changelog.json` (English + German). `CHANGELOG.md`, the release notes and the in-app *What's new* window are generated from it.
-3. Start HAULIX once so the road map for the current game version is built (it is bundled into the setup).
-4. Run:
+3. Run:
 
 ```bash
 powershell -ExecutionPolicy Bypass -File tools\release\publish-github.ps1
@@ -29,7 +28,7 @@ This builds the setup (`dist\Haulix.exe`) and the source zip, commits, tags `v<v
 
 | Path | What |
 |---|---|
-| `src/Haulix.Core` | Backend: SII save decoding, telemetry, SQLite logbook, road map builder (TruckLib), router, ETA, notifications, achievements, online groundwork |
+| `src/Haulix.Core` | Backend: SII save decoding, telemetry, SQLite logbook, ETA, notifications, achievements, online groundwork |
 | `src/Haulix.App` | WinForms + WebView2 host, overlay/HUD windows, voices, the UI in `wwwroot/` (HTML/CSS/JS, no build step) |
 | `src/Haulix.Installer` | The custom setup (.NET Framework 4.8, part of Windows 10/11) |
 | `tests/Haulix.Core.Tests` | xUnit tests |

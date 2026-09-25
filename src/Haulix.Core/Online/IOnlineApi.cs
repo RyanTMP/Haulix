@@ -23,10 +23,6 @@ public interface IOnlineApi
     Task<IReadOnlyList<VtcEvent>> GetEventsAsync(string? vtcId, CancellationToken ct = default);
     Task<IReadOnlyList<LeaderboardEntry>> GetLeaderboardAsync(string metric, string period, string? vtcId, CancellationToken ct = default);
 
-    // Live map
-    Task SendPositionAsync(LivePosition position, CancellationToken ct = default);
-    Task<IReadOnlyList<LivePosition>> GetLivePositionsAsync(string scope, CancellationToken ct = default);
-
     // Cloud sync (deliveries are identified by their dedupe key, so re-uploads are harmless)
     Task<int> UploadDeliveriesAsync(IReadOnlyList<Dictionary<string, object?>> deliveries, CancellationToken ct = default);
 }
@@ -44,8 +40,6 @@ public sealed class NoOnlineApi : IOnlineApi
     public Task<IReadOnlyList<VtcJob>> GetJobsAsync(string vtcId, CancellationToken ct = default) => throw Na();
     public Task<IReadOnlyList<VtcEvent>> GetEventsAsync(string? vtcId, CancellationToken ct = default) => throw Na();
     public Task<IReadOnlyList<LeaderboardEntry>> GetLeaderboardAsync(string m, string p, string? v, CancellationToken ct = default) => throw Na();
-    public Task SendPositionAsync(LivePosition position, CancellationToken ct = default) => Task.CompletedTask; // never leaves the PC
-    public Task<IReadOnlyList<LivePosition>> GetLivePositionsAsync(string scope, CancellationToken ct = default) => throw Na();
     public Task<int> UploadDeliveriesAsync(IReadOnlyList<Dictionary<string, object?>> d, CancellationToken ct = default) => throw Na();
 }
 
@@ -107,15 +101,6 @@ public sealed class SampleOnlineApi : IOnlineApi
         {
             new LeaderboardEntry(1, "acc-1", "Jonas", "NLL", 8_420), new LeaderboardEntry(2, "acc-2", "Sofia", "NLL", 7_910),
             new LeaderboardEntry(3, "acc-demo", "Demo Driver", "NLL", 5_130), new LeaderboardEntry(4, "acc-4", "Marek", "NLL", 1_020),
-        });
-
-    public Task SendPositionAsync(LivePosition position, CancellationToken ct = default) => Task.CompletedTask;
-
-    public Task<IReadOnlyList<LivePosition>> GetLivePositionsAsync(string scope, CancellationToken ct = default) =>
-        Task.FromResult<IReadOnlyList<LivePosition>>(new[]
-        {
-            new LivePosition("acc-1", "Jonas", -2_400, -15_800, 90, 84, "Logs", "Bremen", Now),
-            new LivePosition("acc-2", "Sofia", 9_800, -1_200, 180, 78, "Frozen food", "Munich", Now),
         });
 
     public Task<int> UploadDeliveriesAsync(IReadOnlyList<Dictionary<string, object?>> deliveries, CancellationToken ct = default) =>

@@ -195,106 +195,13 @@ public static class Queries
             """, ("$p", profileId));
     }
 
-    /// <summary>Map payload: learned city positions, recent routes (decimated), events.</summary>
-    public static MapPayload Map(Database db, int historyDays, bool includeDemo, long? currentRouteId)
+    /// <summary>City positions HAULIX learned while driving (world coordinates), used to name the truck's location.</summary>
+    public static List<Dictionary<string, object?>> LearnedCities(Database db)
     {
         using var c = db.Open();
-        var since = DateTime.UtcNow.AddDays(-Math.Max(1, historyDays)).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        var cities = Database.Rows(c, "SELECT id, name, country, x, z, samples FROM cities WHERE x IS NOT NULL");
-        var routes = Database.Rows(c, """
-            SELECT r.id, r.kind, r.started_utc AS startedUtc, r.ended_utc AS endedUtc, r.distance_km AS distanceKm, r.delivery_id AS deliveryId,
-                   COALESCE(d.origin_city, r.origin_city) AS originCity, COALESCE(d.dest_city, r.dest_city) AS destCity, d.cargo, d.income
-            FROM routes r LEFT JOIN deliveries d ON d.id = r.delivery_id
-            WHERE r.started_utc >= $since AND r.demo <= $demo
-            ORDER BY r.started_utc
-            """, ("$since", since), ("$demo", includeDemo ? 1 : 0));
-
-        var result = new List<object>();
-        foreach (var r in routes)
-        {
-            var id = (long)r["id"]!;
-            var pts = Database.Rows(c, "SELECT x, z, speed FROM route_points WHERE route_id = $r ORDER BY seq", ("$r", id));
-            if (pts.Count < 2 && id != currentRouteId) continue;
-            // Encode compactly: flat [x, z, x, z, …] with null separating gaps.
-            var flat = new List<double?>(pts.Count * 2);
-            var step = pts.Count > 800 ? pts.Count / 800 + 1 : 1;
-            for (var i = 0; i < pts.Count; i++)
-            {
-                var speed = Convert.ToDouble(pts[i]["speed"], CultureInfo.InvariantCulture);
-                if (IsGap(speed)) { flat.Add(null); flat.Add(null); }
-                if (i % step != 0 && i != pts.Count - 1 && !IsGap(speed)) continue;
-                flat.Add(Math.Round(Convert.ToDouble(pts[i]["x"], CultureInfo.InvariantCulture), 1));
-                flat.Add(Math.Round(Convert.ToDouble(pts[i]["z"], CultureInfo.InvariantCulture), 1));
-            }
-            r["points"] = flat;
-            r["current"] = id == currentRouteId;
-            result.Add(r);
-        }
-
-        var events = Database.Rows(c, "SELECT type, amount, detail, x, z, at_utc AS at FROM events WHERE at_utc >= $since AND demo <= $demo AND x IS NOT NULL",
-            ("$since", since), ("$demo", includeDemo ? 1 : 0));
-        return new MapPayload(cities, result, events);
+        return Database.Rows(c, "SELECT id, name, country, x, z, samples FROM cities WHERE x IS NOT NULL");
     }
 
-    /// <summary>
-    /// Every recorded driving position (all time), flat [x, z, …] with null pairs separating routes and gaps.
-    /// Points closer than 15 m to the previous one are skipped. Used to colour the streets already driven.
-    /// </summary>
-    public static List<double?> DrivenPoints(Database db, bool includeDemo)
-    {
-        using var c = db.Open();
-        using var cmd = c.CreateCommand();
-        cmd.CommandText = """
-            SELECT p.route_id, p.x, p.z, p.speed FROM route_points p JOIN routes r ON r.id = p.route_id
-            WHERE r.demo <= $demo ORDER BY p.route_id, p.seq
-            """;
-        cmd.Parameters.AddWithValue("$demo", includeDemo ? 1 : 0);
-        var flat = new List<double?>();
-        long route = -1;
-        double lx = double.NaN, lz = double.NaN;
-        using var r = cmd.ExecuteReader();
-        while (r.Read())
-        {
-            var id = r.GetInt64(0);
-            double x = r.GetDouble(1), z = r.GetDouble(2), speed = r.IsDBNull(3) ? 0 : r.GetDouble(3);
-            if (id != route || IsGap(speed))
-            {
-                route = id;
-                if (flat.Count > 0 && flat[^1] is not null) { flat.Add(null); flat.Add(null); }
-                lx = lz = double.NaN;
-            }
-            if ((x - lx) * (x - lx) + (z - lz) * (z - lz) < 225) continue;
-            flat.Add(Math.Round(x, 1));
-            flat.Add(Math.Round(z, 1));
-            lx = x; lz = z;
-        }
-        return flat;
-    }
-
-    /// <summary>The trip recorder stores speed -1 to mark a ferry/train/teleport gap (reversing is only slightly negative).</summary>
-    private static bool IsGap(double speed) => Math.Abs(speed + 1) < 1e-6;
-
-    public sealed record MapPayload(List<Dictionary<string, object?>> Cities, List<object> Routes, List<Dictionary<string, object?>> Events);
-
-    /// <summary>
-    /// Deliveries in the history window without a recorded GPS trace (imported from the save, or recorded
-    /// while route recording was off). Imported entries have no real date and are always included.
-    /// </summary>
-    public static List<Dictionary<string, object?>> DeliveriesWithoutRoutes(Database db, int historyDays, bool includeDemo, int limit = 150)
-    {
-        using var c = db.Open();
-        var since = DateTime.UtcNow.AddDays(-Math.Max(1, historyDays)).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        return Database.Rows(c, """
-            SELECT d.id, d.origin_city AS originCity, d.origin_city_id AS originCityId, d.dest_city AS destCity, d.dest_city_id AS destCityId,
-                   d.cargo, d.income, d.distance_km AS distanceKm, d.finished_utc AS finishedUtc, d.game_end_min AS gameEndMin, d.source
-            FROM deliveries d
-            WHERE d.demo <= $demo AND d.status = 'delivered' AND d.origin_city_id IS NOT NULL AND d.dest_city_id IS NOT NULL
-              AND (d.finished_utc IS NULL OR d.finished_utc >= $since)
-              AND NOT EXISTS (SELECT 1 FROM routes r WHERE r.delivery_id = d.id)
-            ORDER BY COALESCE(d.finished_utc, '0000') DESC, d.game_end_min DESC
-            LIMIT $limit
-            """, ("$demo", includeDemo ? 1 : 0), ("$since", since), ("$limit", limit));
-    }
 
     public static string LogbookCsv(Database db, bool includeDemo)
     {

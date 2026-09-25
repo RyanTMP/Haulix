@@ -473,17 +473,3 @@
 .swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; padding: 3px; background-clip: content-box; cursor: pointer; }
 .swatch.is-active { border-color: var(--text); }
 
-/* Leaflet overrides */
-/* isolation: Leaflet's controls use z-index 1000; keep them inside the map so dialogs, drawers and menus stay on top. */
-.leaflet-container { background: var(--bg) !important; font-family: var(--font-ui) !important; isolation: isolate; }
-.leaflet-control-attribution { display: none; }
-.leaflet-bar { border: 1px solid var(--border-strong) !important; box-shadow: var(--shadow-2) !important; }
-.leaflet-bar a { background: var(--surface-2) !important; color: var(--text) !important; border-bottom-color: var(--border) !important; }
-.leaflet-bar a:hover { background: var(--surface-3) !important; }
-.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface-2) !important; color: var(--text) !important; border: 1px solid var(--border-strong); box-shadow: var(--shadow-3) !important; }
-.leaflet-popup-content-wrapper { border-radius: var(--r-2) !important; }
-.leaflet-popup-content { margin: 12px 14px !important; font-size: var(--fs-12) !important; line-height: 1.5 !important; }
-.leaflet-container a.leaflet-popup-close-button { color: var(--text-3) !important; }
-.leaflet-tooltip { background: var(--surface-3) !important; color: var(--text) !important; border: 1px solid var(--border-strong) !important; box-shadow: var(--shadow-2) !important; border-radius: 4px !important; font-size: 11px !important; padding: 3px 8px !important; }
-.leaflet-tooltip::before { display: none; }
-.leaflet-tooltip.city-label { background: transparent !important; border: 0 !important; box-shadow: none !important; color: var(--map-city) !important; font-family: var(--font-display); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px !important; padding: 0 !important; text-shadow: 0 1px 3px #000, 0 0 2px #000; }

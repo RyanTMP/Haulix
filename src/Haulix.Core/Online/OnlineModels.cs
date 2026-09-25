@@ -22,10 +22,6 @@ public sealed record VtcJob(string Id, string VtcId, string Cargo, string FromCi
 public sealed record VtcEvent(string Id, string VtcId, string Title, DateTime StartUtc, string Server, string MeetingPoint,
     string Route, int Attendees, bool Public);
 
-/// <summary>A live position shared with friends / the VTC (only when the player turns sharing on).</summary>
-public sealed record LivePosition(string AccountId, string Name, double X, double Z, double HeadingDeg, double SpeedKmh,
-    string? Cargo, string? DestinationCity, DateTime AtUtc);
-
 /// <summary>A leaderboard row.</summary>
 public sealed record LeaderboardEntry(int Rank, string AccountId, string Name, string? VtcTag, double Value);
 

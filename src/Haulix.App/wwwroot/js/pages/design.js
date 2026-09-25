@@ -1,5 +1,5 @@
 import { html, raw, $ } from "../core/html.js";
-import { icon, truckMarkerSvg } from "../core/icons.js";
+import { icon } from "../core/icons.js";
 import { card, kv, progress, slots, driverStatus, toggle, segmented, select, empty, skeleton, toast, modal, confirm, statTile } from "../components/ui.js";
 import { chart, sparkline, gauge, barList } from "../components/charts.js";
 
@@ -34,13 +34,6 @@ export default {
           <div class="row" style="gap:14px"><span class="chip chip--live"><span class="dot dot--ok dot--live"></span><strong>LIVE</strong>telemetry</span><span class="chip"><span class="dot"></span><strong>OFFLINE</strong>last seen 2h ago</span></div>` })}
         ${card({ cls: "span-4 md-6 sm-12", title: "Meters", body: html`
           <div class="col" style="gap:14px">${progress(0.62)}${progress(0.18, { tone: "warn" })}${progress(0.04, { tone: "ok", thin: true })}${progress(0.4, { tone: "muted", thick: true })}${slots(5, 3)}${slots(5, 4, { muted: true })}</div>` })}
-        ${card({ cls: "span-4 md-12", title: "Map markers", body: html`
-          <div class="row" style="gap:28px;align-items:center;justify-content:center;padding:10px 0">
-            <div class="col" style="align-items:center">${raw(truckMarkerSvg(35, 40))}<span class="faint" style="font-size:11px">Current truck</span></div>
-            <div class="col" style="align-items:center"><div class="garage-marker is-hq"><span>HQ</span></div><span class="faint" style="font-size:11px">Headquarters</span></div>
-            <div class="col" style="align-items:center"><div class="garage-marker"><span>G</span></div><span class="faint" style="font-size:11px">Garage</span></div>
-            <div class="col" style="align-items:center"><div class="driver-marker"></div><span class="faint" style="font-size:11px">AI driver</span></div>
-          </div>` })}
         ${card({ cls: "span-8 md-12", title: "Chart", meta: "single accent series · crosshair tooltip", body: html`<div id="dsChart"></div>` })}
         ${card({ cls: "span-4 md-12", title: "Gauge & sparkline", body: html`<div id="dsGauge" style="max-width:220px;margin:0 auto"></div><div style="margin-top:12px">${raw(sparkline([4, 6, 5, 8, 7, 9, 12, 10, 14], { h: 36 }))}</div>` })}
         ${card({ cls: "span-6 md-12", title: "Data table", bodyCls: "card__body--flush", body: html`<table class="table"><thead><tr><th>Route</th><th>Cargo</th><th class="num">Distance</th><th class="num">Income</th></tr></thead>

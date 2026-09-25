@@ -138,7 +138,6 @@ export default {
         <div class="job-hero__cargo">
           <span>${icon("package")}<b>${s.cargo}</b></span><span>${icon("weight")}${v.cargoMass}</span>
           <span>${icon("truck")}${v.truck}</span><span>${icon("container")}${v.trailer}</span>
-          <a class="btn btn--sm btn--ghost" href="#/map" style="margin-left:auto">${icon("map")}${t("Show on map")}</a>
         </div>
         <div class="job-progress" data-job="progress"></div>
         <div class="job-kpis job-kpis--eta" data-job="eta"></div>

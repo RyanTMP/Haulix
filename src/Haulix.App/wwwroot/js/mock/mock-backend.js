@@ -499,7 +499,7 @@ function handle(method, p) {
       let money = 820_000;
       return Array.from({ length: 30 }, (_, i) => ({ t: new Date(Date.now() - (29 - i) * 86400e3).toISOString(), money: (money += int(-8000, 30000)), xp: 300_000 + i * 3800, distanceKm: 120_000 + i * 900, trucks: 7, trailers: 11, garages: 4, drivers: 8, aiRevenue: i * 9000, aiProfit: i * 5200 }));
     }
-    case "map.get": return mapPayload();
+    case "cities.learned": return mapPayload().cities;
     case "map.driven": return mapPayload().routes.flatMap((r) => [...r.points, null, null]);
     case "data.counts": return { deliveries: deliveries.length, recorded: 48, imported: 16, routes: 46, routePoints: 18_220, sessions: 88, events: 214, learnedCities: 8, snapshots: 31 };
     case "data.backups": return [

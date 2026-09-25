@@ -11,7 +11,6 @@ const PAGES = {
   dashboard: () => import("./pages/dashboard.js"),
   telemetry: () => import("./pages/telemetry.js"),
   job: () => import("./pages/job.js"),
-  map: () => import("./pages/map.js"),
   logbook: () => import("./pages/logbook.js"),
   trucks: () => import("./pages/trucks.js"),
   trailers: () => import("./pages/trailers.js"),
@@ -25,7 +24,6 @@ const PAGES = {
   "vtc-events": () => import("./pages/soon.js"),
   "vtc-jobs": () => import("./pages/soon.js"),
   "vtc-leaderboards": () => import("./pages/soon.js"),
-  "live-map": () => import("./pages/soon.js"),
   "cloud-sync": () => import("./pages/soon.js"),
   settings: () => import("./pages/settings.js"),
   setup: () => import("./pages/setup.js"),
@@ -36,8 +34,7 @@ const NAV = [
   { section: "Operate" },
   { id: "dashboard", label: "Dashboard", icon: "layout-dashboard", key: "1" },
   { id: "telemetry", label: "Telemetry", icon: "gauge", key: "2" },
-  { id: "job", label: "Current job", icon: "briefcase", dot: () => !!store.get("telemetry")?.snapshot?.onJob },
-  { id: "map", label: "Map", icon: "map", key: "3" },
+  { id: "job", label: "Current job", icon: "briefcase", key: "3", dot: () => !!store.get("telemetry")?.snapshot?.onJob },
   { id: "logbook", label: "Logbook", icon: "book-open", key: "4", badge: () => store.get("counts")?.deliveries },
   { section: "Fleet" },
   { id: "trucks", label: "Trucks", icon: "truck", key: "5", badge: () => store.get("profile")?.trucks?.length },
@@ -55,7 +52,6 @@ const NAV = [
   { id: "vtc-jobs", label: "Job board", icon: "briefcase", soon: true },
   { id: "vtc-leaderboards", label: "Leaderboards", icon: "award", soon: true },
   { section: "Online" },
-  { id: "live-map", label: "Live map", icon: "globe", soon: true },
   { id: "cloud-sync", label: "Cloud sync", icon: "cloud-off", soon: true },
   { section: "App" },
   { id: "settings", label: "Settings", icon: "settings" },
@@ -90,13 +86,6 @@ async function boot() {
   on("antiAfkSent", (a) => toast({ kind: "info", title: "Anti-AFK message sent", message: a.message, timeout: 4000 }));
   on("dataChanged", (d) => { refreshCounts(); store.set("dataChanged", d); });
   on("delivery", (d) => store.set("dataChanged", { scope: "logbook", id: d.id }));
-  on("route", (r) => store.set("route", r));
-  on("mapStatus", (m) => {
-    const prev = store.get("mapStatus");
-    store.set("mapStatus", m);
-    if (prev?.state === "building" && m.state === "ready") toast({ kind: "success", title: "Road map ready", message: `${fmt.num(m.segments)} road segments extracted from your ETS2 files. Streets and navigation are now available.`, timeout: 8000 });
-    if (prev?.state === "building" && m.state === "error") toast({ kind: "error", title: "Road map build failed", message: m.message, timeout: 10000 });
-  });
 
   let init;
   try {
@@ -119,8 +108,6 @@ async function boot() {
   store.set("dataFolder", init.dataFolder);
   store.set("backupFolder", init.backupFolder);
   if (init.telemetry) store.set("telemetry", init.telemetry);
-  store.set("mapStatus", init.mapStatus || { state: "unavailable" });
-  store.set("route", init.route || null);
   applySettings(init.settings);
 
   renderShell();

@@ -8,11 +8,11 @@ contract and the app only needs a real `IOnlineApi` implementation plus `OnlineS
 | Data types | `src/Haulix.Core/Online/OnlineModels.cs` |
 | Client interface | `src/Haulix.Core/Online/IOnlineApi.cs` (`NoOnlineApi` = today, `SampleOnlineApi` = developer preview) |
 | Service / state | `src/Haulix.Core/Online/OnlineService.cs` |
-| UI | `wwwroot/js/pages/soon.js` (VTC + Online pages), Settings → Online |
+| UI | `wwwroot/js/pages/soon.js` (VTC and cloud sync pages), Settings → Online |
 
 ## Principles
 
-- **Offline first.** Everything works without an account; online is opt-in per feature (live position sharing, cloud sync).
+- **Offline first.** Everything works without an account; online is opt-in per feature (for example cloud sync).
 - **No passwords in HAULIX.** Sign-in through Discord or Steam (OAuth 2.0 with PKCE, loopback redirect to `http://127.0.0.1:<port>/callback`); HAULIX stores only the refresh token, protected with Windows DPAPI.
 - **Idempotent uploads.** Deliveries are identified by their `dedupe_key`, so re-sending is harmless.
 - **Small payloads.** Live positions at most every 5 s, only while sharing is on.
@@ -29,8 +29,6 @@ contract and the app only needs a real `IOnlineApi` implementation plus `OnlineS
 | `GET` | `/v1/vtcs/{id}/jobs` | `GetJobsAsync` | Job board |
 | `GET` | `/v1/events?vtcId=` | `GetEventsAsync` | Public events when `vtcId` is empty |
 | `GET` | `/v1/leaderboards/{metric}?period=week\|month\|all&vtcId=` | `GetLeaderboardAsync` | metric: `km`, `deliveries`, `income`, `score` |
-| `PUT` | `/v1/live/me` | `SendPositionAsync` | `LivePosition`; 204 |
-| `GET` | `/v1/live?scope=friends\|vtc` | `GetLivePositionsAsync` | Positions younger than 60 s |
 | `POST` | `/v1/sync/deliveries` | `UploadDeliveriesAsync` | Array of logbook rows; returns the number stored |
 
 ## Turning it on later

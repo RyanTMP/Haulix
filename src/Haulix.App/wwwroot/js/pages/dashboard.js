@@ -3,12 +3,11 @@ import { icon } from "../core/icons.js";
 import { store, isLive } from "../core/store.js";
 import { card, empty, progress, skeleton, damageTone } from "../components/ui.js";
 import { gauge, sparkline } from "../components/charts.js";
-import { createMap, truckMarker, routeLine, cityMarker, toLatLng, fitProjection } from "../components/map.js";
 import { teleValues, jobProgress, cityPositions, nearestCity, locationLabel } from "../core/teleview.js";
 import { loadCities } from "../core/cities.js";
-import { loadMapData } from "../core/mapdata.js";
-import { streetsLayer, routeLayer, destinationMarker, progressIndex, remainingLatLngs, loadCountries, landLayer } from "../components/streets.js";
 import * as f from "../core/format.js";
+import { rankOf, families } from "./achievements.js";
+import { t } from "../core/i18n.js";
 
 export default {
   title: "Dashboard",
@@ -35,9 +34,9 @@ export default {
       })}
 
       ${card({
-        title: "Current route", cls: "dash__route", bodyCls: "card__body--flush",
-        meta: html`<a class="link-muted" href="#/map">Open map ${icon("arrow-right")}</a>`,
-        body: html`<div class="mini-map" id="miniMap"><div class="map-overlay-chip" id="mapChip"></div></div>`,
+        title: "Your progress", cls: "dash__route", id: "progressCard",
+        meta: html`<a class="link-muted" href="#/achievements">Achievements ${icon("arrow-right")}</a>`,
+        body: skeleton(3),
       })}
 
       ${card({ title: "Finances", cls: "dash__finance", id: "financeCard", meta: html`<span>Last 7 days</span>`, body: skeleton(2) })}
@@ -63,73 +62,21 @@ export default {
     const gSpeed = gauge($("#gSpeed", root), { max: f.imperial() ? 90 : 140, unit: f.speedUnit(), ticks: 7, fmt: (v) => Math.round(f.speedValue(v)) });
     const gRpm = gauge($("#gRpm", root), { max: 2500, unit: "rpm", ticks: 5, redline: 2100, fmt: (v) => Math.round(v) });
 
-    // Map
-    const mapEl = $("#miniMap", root);
-    const settings = store.get("settings");
-    const map = createMap(mapEl, { zoom: -4.5, interactive: true, grid: store.get("mapStatus")?.state !== "ready" });
-    // Live trail: extends the recorded route between refreshes so the line always reaches the truck.
-    const trail = window.L.polyline([], { color: getComputedStyle(document.documentElement).getPropertyValue("--text-2").trim(), weight: 2.5, opacity: 0.8, dashArray: "2 6", interactive: false }).addTo(map);
-    let truck = null, routeGroup = null, cityLayer = window.L.layerGroup().addTo(map);
-    // Streets from the extracted road map + HAULIX navigation route.
-    let streetsOn = false;
-    const addStreets = () => loadMapData().then(async (d) => {
-      if (!d || streetsOn) return;
-      streetsOn = true;
-      streetsLayer(d.streets).addTo(map);
-      const cj = await loadCountries(store.get("mapStatus")?.countriesUrl);
-      landLayer(map, cj, store.get("mapStatus")?.countriesUrl)?.addTo(map);
-    }).catch(() => {});
-    addStreets();
-    const nav = routeLayer().addTo(map);
-    let routeHint = 0;
-    let destMarker = null;
-    const drawNav = () => {
-      const r = store.get("route");
-      const s = store.get("telemetry")?.snapshot;
-      destMarker?.remove(); destMarker = null;
-      if (!r?.points?.length) { nav.update([]); return; }
-      if (s) routeHint = progressIndex(r.points, s.x, s.z, routeHint);
-      nav.update(remainingLatLngs(r.points, routeHint, s && (s.x || s.z) ? { x: s.x, z: s.z } : null));
-      destMarker = destinationMarker(r.destination.x, r.destination.z, r.destination.name).addTo(map);
-    };
-    drawNav();
-    cleanups.push(store.on("route", () => { routeHint = 0; drawNav(); }));
-    cleanups.push(store.on("mapStatus", (m) => { if (m.state === "ready") addStreets(); }));
+    // Where the truck is: cities learned while driving + estimated positions from the city catalogue.
     let cityPos = new Map();
-    let follow = true;
-    map.on("dragstart", () => (follow = false));
-
-    const loadMap = async () => {
-      try {
-        const data = await call("map.get");
-        const learned = (data.cities || []).map((c) => ({ ...c, ...cities.byId.get(c.id) && { lat: cities.byId.get(c.id).lat, lon: cities.byId.get(c.id).lon } }));
-        fitProjection(learned.filter((c) => c.lat !== undefined).map((c) => ({ lat: c.lat, lon: c.lon, x: c.x, z: c.z })));
-        const md = await loadMapData().catch(() => null);
-        cityPos = cityPositions(data.cities, cities.list, md?.pois.cities);
-        cityLayer.clearLayers();
-        const p = store.get("profile");
-        const garageCities = new Set((p?.garages || []).map((g) => g.cityId));
-        for (const c of cityPos.values()) {
-          if (garageCities.has(c.id)) continue;
-          if (c.estimated && !settings.map.showEstimatedCities) continue;
-          cityMarker(c.x, c.z, { name: `${c.name}${c.estimated ? " (estimated position)" : ""}`, estimated: c.estimated }).addTo(cityLayer);
-        }
-        for (const g of p?.garages || []) {
-          const c = cityPos.get(g.cityId);
-          if (c) cityMarker(c.x, c.z, { name: `${g.city} garage · ${g.trucksAssigned}/${g.slots} trucks`, kind: g.isHq ? "hq" : "garage", estimated: c.estimated }).addTo(cityLayer);
-        }
-        routeGroup?.remove();
-        routeGroup = window.L.featureGroup().addTo(map);
-        const cur = data.routes.find((r) => r.current) || data.routes[data.routes.length - 1];
-        // Driven path (muted); the accent line is reserved for the planned navigation route.
-        if (cur?.points?.length) routeLine(cur.points, {}).addTo(routeGroup);
-        trail.setLatLngs([]);
-        if (!store.get("telemetry") && cur?.points?.length) map.fitBounds(routeGroup.getBounds(), { padding: [40, 40], maxZoom: -2, animate: false });
-      } catch (e) {
-        console.warn("map.get failed", e);
-      }
+    const loadCityPositions = async () => {
+      const learned = await call("cities.learned").catch(() => []);
+      cityPos = cityPositions(learned, cities.list);
     };
-    loadMap();
+    loadCityPositions();
+
+    // Your progress: driver rank and the achievements closest to being unlocked.
+    const loadProgress = async () => {
+      const list = await call("achievements.get").catch(() => null);
+      renderProgress($("#progressCard .card__body", root), list);
+    };
+    loadProgress();
+    cleanups.push(store.on("achievements", (l) => renderProgress($("#progressCard .card__body", root), l)));
 
     // Static sections
     const loadRecent = async () => {
@@ -148,7 +95,7 @@ export default {
     };
     loadRecent(); loadFeed(); loadFinance();
     renderFleet($("#fleetCard .card__body", root));
-    cleanups.push(store.on("profile", () => { renderFleet($("#fleetCard .card__body", root)); loadFinance(); loadMap(); }));
+    cleanups.push(store.on("profile", () => { renderFleet($("#fleetCard .card__body", root)); loadFinance(); loadCityPositions(); loadProgress(); }));
     cleanups.push(store.on("dataChanged", () => { loadRecent(); loadFeed(); }));
 
     // Live updates
@@ -186,36 +133,13 @@ export default {
       if (pf) pf.style.width = `${(jobProgress(s) * 100).toFixed(1)}%`;
       const lim = driveCard.querySelector(".limit-sign");
       if (lim) lim.style.visibility = s.speedLimitKmh > 1 ? "visible" : "hidden";
-
-      // Map
-      if (s.x || s.z) {
-        if (!truck) truck = truckMarker(s.x, s.z, s.headingDeg).addTo(map);
-        const ll = toLatLng(s.x, s.z);
-        const pts = trail.getLatLngs();
-        const lastPt = pts[pts.length - 1];
-        if (s.onJob && (!lastPt || Math.hypot(lastPt.lat - ll[0], lastPt.lng - ll[1]) > 80)) trail.addLatLng(ll);
-        truck.setLatLng(ll);
-        truck.setHeading(s.headingDeg);
-        if (follow && live) map.panTo(toLatLng(s.x, s.z), { animate: false });
-        const rt = store.get("route");
-        if (rt?.points?.length) {
-          routeHint = progressIndex(rt.points, s.x, s.z, routeHint);
-          nav.update(remainingLatLngs(rt.points, routeHint, { x: s.x, z: s.z }));
-        }
-      }
-      $("#mapChip", root).innerHTML = html`<span class="chip"><span class="${cx("dot", live ? "dot--ok dot--live" : "")}"></span>${v.location}</span>`.toString();
     };
     update();
     cleanups.push(store.on("telemetry", update));
     cleanups.push(store.on("status", update));
 
-    // Re-draw route line periodically while driving
-    const routeTimer = setInterval(() => { if (isLive()) loadMap(); }, 30000);
-
     return () => {
       cleanups.forEach((c) => c());
-      clearInterval(routeTimer);
-      map.remove();
     };
   },
 };
@@ -353,4 +277,24 @@ function renderFeed(el, events, rows) {
       <span class="feed__time">${f.time(i.at)}</span><span class="${cx("dot", `dot--${i.tone}`)}"></span>
       <span class="ellipsis">${i.text}</span>
       <span class="${cx("feed__amt", i.amount > 0 ? "ok" : "muted")}">${i.amount ? f.money(i.amount, { sign: true }) : ""}</span></div>`)}</div>`.toString();
+}
+
+function renderProgress(el, list) {
+  if (!el) return;
+  if (!list?.length) {
+    el.innerHTML = empty({ iconName: "award", title: "No achievements yet", text: "Deliver your first job to start your driver rank.", compact: true }).toString();
+    return;
+  }
+  const points = list.filter((a) => a.unlocked).reduce((s, a) => s + (a.points || 0), 0);
+  const rank = rankOf(points);
+  const near = families(list).filter((x) => x.next).sort((a, b) => b.share - a.share).slice(0, 4);
+  el.innerHTML = html`<div class="dash-rank">
+      <div class="dash-rank__badge">${icon("trophy")}<b>${rank.level}</b></div>
+      <div class="grow"><div class="eyebrow">${t("Driver rank")}</div><div class="dash-rank__name">${t(rank.name)}</div>
+        ${progress(rank.to ? (points - rank.from) / (rank.to - rank.from) : 1, { thin: true })}
+        <div class="faint" style="font-size:12px;margin-top:4px">${f.num(points)} ${t("Points")}${rank.next ? ` · ${f.num(rank.to - points)} ${t("points to")} ${t(rank.next)}` : ""}</div></div>
+    </div>
+    <div class="eyebrow" style="margin:16px 0 8px">${t("Almost there")}</div>
+    <div class="dash-near">${near.map((x) => html`<div class="dash-near__row tier-${x.next.tier}">${icon(x.icon)}<div class="grow" style="min-width:0">
+      <div class="dash-near__title">${x.next.title}</div>${progress(x.share, { thin: true })}</div><b class="num">${Math.floor(x.share * 100)} %</b></div>`)}</div>`.toString();
 }

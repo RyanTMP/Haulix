@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Text.Json;
 using Haulix.Core.Data;
 using Haulix.Core.Ets2;
-using Haulix.Core.Map;
 using Haulix.Core.Services;
 using Haulix.Core.Settings;
 using Haulix.Core.Telemetry;
@@ -39,20 +38,18 @@ public sealed class HaulixEngine : IDisposable
             return (t.RecordRoutes, t.RecordFreeRoam, Math.Clamp(t.RoutePointSpacingM, 25, 2000));
         });
 
-        Map = new MapService(dataFolder, () => _detection?.GamePath)
-        {
-            // Full map (all map DLCs) shipped next to the app; see tools/release/build-release.ps1.
-            BundleFolder = Path.Combine(AppContext.BaseDirectory, "map-bundle"),
-        };
         Notifier = new JobNotifier(() => Settings.Load()) { IsTruckersMp = TruckersMp.Active };
         Notifier.Raised += n => Push?.Invoke("notify", n);
-        Map.GameRouteAdjusted += (km, matched) => Notifier.RouteAdjusted(km, matched);
         Achievements = new Achievements(Db, () => Profiles.Current, () => Notifier.German);
-        Map.StatusChanged += () => Push?.Invoke("mapStatus", Map.StatusPayload());
-        Map.RouteChanged += r => Push?.Invoke("route", r);
-        Map.AutoRouteToJob = () => Settings.Load().Map.AutoRouteToJob;
 
         Queries.PurgeDemo(Db);
+
+        // HAULIX 0.0.8 removed the road map: free the space of the old map cache and the bundled map.
+        _ = Task.Run(() =>
+        {
+            foreach (var old in new[] { Path.Combine(dataFolder, "map"), Path.Combine(AppContext.BaseDirectory, "map-bundle") })
+                try { if (Directory.Exists(old)) Directory.Delete(old, recursive: true); } catch (Exception) { }
+        });
 
         Telemetry.Sample += OnSample;
         Telemetry.StatusChanged += s =>
@@ -65,7 +62,6 @@ public sealed class HaulixEngine : IDisposable
             Recorder.OnGameEvent(e);
             Notifier.OnGameEvent(e);
             if (e.Type is GameEventType.JobCancelled or GameEventType.JobDelivered) _eta.Reset();
-            if (e.Type is GameEventType.JobCancelled or GameEventType.JobDelivered) Map.OnJobEnded(e.Snapshot);
             if (e.Type == GameEventType.JobStarted)
                 Push?.Invoke("job", new { type = "started", cargo = e.Snapshot.Cargo, from = e.Snapshot.SourceCity, to = e.Snapshot.DestinationCity, income = e.Snapshot.JobIncome });
         };
@@ -97,7 +93,6 @@ public sealed class HaulixEngine : IDisposable
     public ProfileService Profiles { get; }
     public TelemetryService Telemetry { get; }
     public TripRecorder Recorder { get; }
-    public MapService Map { get; }
     /// <summary>Job notifications (the desktop host also shows them as an overlay over the game).</summary>
     public JobNotifier Notifier { get; }
     private readonly EtaEstimator _eta = new();
@@ -142,7 +137,6 @@ public sealed class HaulixEngine : IDisposable
                 Settings.Save(settings);
             }
             Profiles.Start();
-            Map.Initialize(Settings.Load().Map.AutoBuildRoadMap);
             PushStatus();
         });
         Telemetry.Start();
@@ -183,9 +177,7 @@ public sealed class HaulixEngine : IDisposable
     {
         LastSnapshot = s;
         Recorder.OnSample(s);
-        try { Map.OnSample(s); }
-        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Routing failed: {ex}"); }
-        s.Eta = _eta.Update(s, Map.RemainingRouteKm(s), preferRoute: Map.Route?.Mode == "manual");
+        s.Eta = _eta.Update(s, null, preferRoute: false);
         try { Notifier.OnSample(s); }
         catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Notifications failed: {ex}"); }
         lock (_pushGate)
@@ -260,8 +252,6 @@ public sealed class HaulixEngine : IDisposable
                     profile = ProfilePayload(),
                     telemetry = Telemetry.Last is { } last ? new { snapshot = last, job = Recorder.CurrentJobInfo, routeId = Recorder.CurrentRouteId } : null,
                     counts = Queries.Counts(Db),
-                    mapStatus = Map.StatusPayload(),
-                    route = Map.Route,
                     dataFolder = DataFolder,
                     systemLanguage = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName,
                     backupFolder = Backups.BackupFolder,
@@ -323,24 +313,7 @@ public sealed class HaulixEngine : IDisposable
                     Str(args, "to") ?? DateTime.UtcNow.ToString("yyyy-MM-dd"), Telemetry.DemoActive);
             case "stats.snapshots": return Profiles.ProfileId is { } pid ? Queries.Snapshots(Db, pid) : Array.Empty<object>();
 
-            case "map.get":
-            {
-                var days = Settings.Load().Map.RouteHistoryDays;
-                var payload = Queries.Map(Db, days, Telemetry.DemoActive, Recorder.CurrentRouteId);
-                // Deliveries without a GPS trace get a route reconstructed over the road map.
-                foreach (var d in Queries.DeliveriesWithoutRoutes(Db, days, Telemetry.DemoActive))
-                {
-                    var pts = Map.ReconstructRoute(d["originCityId"] as string, d["destCityId"] as string);
-                    if (pts is null) continue;
-                    payload.Routes.Add(new
-                    {
-                        id = -(long)d["id"]!, kind = "reconstructed", startedUtc = d["finishedUtc"], endedUtc = d["finishedUtc"],
-                        distanceKm = d["distanceKm"], deliveryId = d["id"], originCity = d["originCity"], destCity = d["destCity"],
-                        cargo = d["cargo"], income = d["income"], points = pts, current = false, source = d["source"], gameEndMin = d["gameEndMin"],
-                    });
-                }
-                return new { cities = payload.Cities, routes = payload.Routes, events = payload.Events, historyDays = days };
-            }
+            case "cities.learned": return Queries.LearnedCities(Db);
             case "notify.test": Notifier.Test(); return true;
             case "online.status": return Online.StatusPayload();
             case "online.sample":
@@ -352,10 +325,9 @@ public sealed class HaulixEngine : IDisposable
             case "online.jobs": return Online.Api.GetJobsAsync(Str(args, "vtcId") ?? "").GetAwaiter().GetResult();
             case "online.events": return Online.Api.GetEventsAsync(Str(args, "vtcId")).GetAwaiter().GetResult();
             case "online.leaderboard": return Online.Api.GetLeaderboardAsync(Str(args, "metric") ?? "km", Str(args, "period") ?? "week", Str(args, "vtcId")).GetAwaiter().GetResult();
-            case "online.live": return Online.Api.GetLivePositionsAsync(Str(args, "scope") ?? "vtc").GetAwaiter().GetResult();
             case "job.current":
                 // Job page: live stats, costs, timeline and speed profile of the job in progress.
-                return new { detail = Recorder.CurrentJobDetail(), snapshot = LastSnapshot, route = Map.Route };
+                return new { detail = Recorder.CurrentJobDetail(), snapshot = LastSnapshot };
             case "achievements.get":
             {
                 var list = Achievements.Evaluate(out _);
@@ -374,24 +346,6 @@ public sealed class HaulixEngine : IDisposable
                 var err = Ets2Display.SetBorderless(_detection?.DocumentsPath);
                 return new { ok = err is null, error = err, display = Ets2Display.Read(_detection?.DocumentsPath) };
             }
-            case "map.driven": return Queries.DrivenPoints(Db, Telemetry.DemoActive);
-            case "route.reconstruct":
-                return Map.ReconstructRoute(Str(args, "from"), Str(args, "to"));
-
-            case "map.status": return Map.StatusPayload();
-            case "map.build": Map.Build(); return Map.StatusPayload();
-            case "map.cancelBuild": Map.CancelBuild(); return true;
-            case "route.get": return Map.Route;
-            case "route.clear": return Map.ClearManual();
-            case "route.reroute": return Map.Reroute();
-            case "route.setPoint":
-                return Map.SetManual(new RouteDestination("point", Str(args, "name") ?? "Map point", null, null,
-                    (float)args.GetProperty("x").GetDouble(), (float)args.GetProperty("z").GetDouble()));
-            case "route.setCity":
-                return Map.SetManualCity(Str(args, "cityId") ?? "", Str(args, "name") ?? Str(args, "cityId") ?? "");
-            case "route.setCompany":
-                return Map.SetManual(new RouteDestination("company", Str(args, "name") ?? "Company", Str(args, "companyId"), Str(args, "cityId"),
-                    (float)args.GetProperty("x").GetDouble(), (float)args.GetProperty("z").GetDouble()));
 
             case "data.counts": return Queries.Counts(Db);
             case "data.backups": return Backups.List();
@@ -469,7 +423,6 @@ public sealed class HaulixEngine : IDisposable
         _heartbeat.Dispose();
         _backupTimer.Dispose();
         Recorder.OnDisconnected();
-        Map.Dispose();
         Telemetry.Dispose();
         Profiles.Dispose();
     }

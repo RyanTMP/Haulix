@@ -4,6 +4,7 @@ All notable changes to HAULIX. The same list appears in the app under *What's ne
 
 ## 0.0.9 BETA
 
+- **Brand, company and cargo logos** – Trucks and trailers show their brand logo (DAF, Iveco, MAN, Mercedes-Benz, Renault, Scania, Volvo, Krone, Kögel, Schmitz Cargobull, Feldbinder, Wielton, Tirsan, Schwarzmüller). Jobs show the logos of the 200+ ETS2 companies, and every cargo gets a category icon – on the dashboard, the Current job page, the logbook and the fleet pages.
 - **All-new installer** – The setup is redesigned in the new glass look: a clear step list, a welcome page with everything HAULIX does, a progress ring while installing and a finish page with the next steps.
 - **Express or Custom install** – Express installs with the recommended settings. Custom lets you choose the install folder, shortcuts and plugin, start with Windows, tray, updates and backups, the in-game HUD, notifications, sounds and voice, the AFK warning, GPS traces, borderless fullscreen, theme, accent colour, units and currency.
 - **Your setup choices are applied** – Everything you pick in a custom install is applied when HAULIX starts for the first time – no need to set it again.
@@ -12,6 +13,7 @@ All notable changes to HAULIX. The same list appears in the app under *What's ne
 
 <details><summary>Deutsch</summary>
 
+- **Logos für Marken, Firmen und Fracht** – Lkw und Anhänger zeigen ihr Markenlogo (DAF, Iveco, MAN, Mercedes-Benz, Renault, Scania, Volvo, Krone, Kögel, Schmitz Cargobull, Feldbinder, Wielton, Tirsan, Schwarzmüller). Aufträge zeigen die Logos der über 200 ETS2-Firmen, und jede Fracht bekommt ein Kategorie-Symbol – auf der Übersicht, der Seite Aktueller Auftrag, im Fahrtenbuch und bei der Flotte.
 - **Ganz neuer Installer** – Das Setup ist im neuen Glas-Look gestaltet: klare Schrittliste, eine Willkommensseite mit allem, was HAULIX kann, ein Fortschrittsring beim Installieren und eine Abschlussseite mit den nächsten Schritten.
 - **Express- oder benutzerdefinierte Installation** – Express installiert mit den empfohlenen Einstellungen. Benutzerdefiniert lässt dich Installationsordner, Verknüpfungen und Plugin, Autostart, Infobereich, Updates und Sicherungen, Ingame-HUD, Benachrichtigungen, Töne und Stimme, AFK-Warnung, GPS-Verlauf, randloses Vollbild, Design, Akzentfarbe, Einheiten und Währung wählen.
 - **Deine Setup-Auswahl wird übernommen** – Alles, was du bei der benutzerdefinierten Installation wählst, übernimmt HAULIX beim ersten Start – du musst nichts erneut einstellen.

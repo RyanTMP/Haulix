@@ -1,3 +1,4 @@
+import { loadLogos } from "./core/logos.js";
 import { html, raw, render, $, cx, esc, debounce } from "./core/html.js";
 import { icon, loadIcons } from "./core/icons.js";
 import { connect, call, on, isNative } from "./core/bridge.js";
@@ -63,7 +64,7 @@ let current = { id: null, cleanup: null, token: 0 };
 
 async function boot() {
   initTooltips();
-  await Promise.all([loadIcons(), connect(), loadCities()]);
+  await Promise.all([loadIcons(), connect(), loadCities(), loadLogos()]);
 
   on("status", (s) => store.set("status", s));
   let onJob = null;

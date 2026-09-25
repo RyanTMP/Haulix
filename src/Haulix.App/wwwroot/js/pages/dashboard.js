@@ -7,6 +7,7 @@ import { teleValues, jobProgress, cityPositions, nearestCity, locationLabel } fr
 import { loadCities } from "../core/cities.js";
 import * as f from "../core/format.js";
 import { rankOf, families } from "./achievements.js";
+import { truckLogo, companyLogo, cargoIcon, logoChip } from "../core/logos.js";
 import { t } from "../core/i18n.js";
 
 export default {
@@ -113,7 +114,8 @@ export default {
       const s = t?.snapshot;
       const live = isLive();
       root.querySelector("#dash").classList.toggle("disconnected", !live);
-      const mode = !s ? "none" : s.onJob ? "job" : "free";
+      // A new job (other cargo or destination) redraws the card so its logos match.
+      const mode = !s ? "none" : s.onJob ? `job:${s.sourceCompanyId}:${s.destinationCompanyId}:${s.cargoId}:${s.truckBrandId}` : `free:${s.truckBrandId}`;
       if (mode !== driveMode) {
         driveMode = mode;
         renderDrive(driveCard, mode);
@@ -166,19 +168,19 @@ function renderDrive(el, mode) {
       })}`.toString();
     return;
   }
-  const job = mode === "job";
+  const job = mode.startsWith("job");
   el.innerHTML = html`
     <header class="card__head">
       <h2 class="label">${job ? "Current drive" : "Free roam"}</h2>
-      <div class="card__meta"><span class="drive__truck">${icon("truck", "icon icon-sm")}<span data-bind="truck">—</span><span class="plate" data-bind="plateShort">${s?.licensePlate || ""}</span></span></div>
+      <div class="card__meta"><span class="drive__truck">${logoChip(truckLogo(s?.truckBrandId || s?.truckBrand), s?.truckBrand || "", "sm") || icon("truck", "icon icon-sm")}<span data-bind="truck">—</span><span class="plate" data-bind="plateShort">${s?.licensePlate || ""}</span></span></div>
     </header>
     <div class="card__body">
       <div class="drive">
         <div style="min-width:0">
           ${job ? html`<div class="drive__route">
-              <div class="drive__city"><span data-bind="from">—</span><small data-bind="fromCo"></small></div>
+              <div class="drive__city">${logoChip(companyLogo(s?.sourceCompanyId, s?.sourceCompany), s?.sourceCompany || "", "md")}<span data-bind="from">—</span><small data-bind="fromCo"></small></div>
               <div class="drive__arrow"><i></i>${icon("chevron-right")}</div>
-              <div class="drive__city"><span data-bind="to">—</span><small data-bind="toCo"></small></div>
+              <div class="drive__city">${logoChip(companyLogo(s?.destinationCompanyId, s?.destinationCompany), s?.destinationCompany || "", "md")}<span data-bind="to">—</span><small data-bind="toCo"></small></div>
             </div>
             <div class="drive__progress">${progress(jobProgress(s), { thick: true })}</div>
             <div class="drive__progress-meta"><span><span data-bind="progressPct">0%</span> complete</span><span><span data-bind="remaining">—</span> remaining</span></div>`
@@ -196,7 +198,7 @@ function renderDrive(el, mode) {
     </div>
     <div class="drive__facts">
       ${job ? [
-        ["Cargo", html`<span data-bind="cargo">—</span> <span class="faint" data-bind="cargoMass"></span>`, "package"],
+        ["Cargo", html`${cargoIcon(s?.cargoId, s?.cargo, "xs")}<span data-bind="cargo">—</span> <span class="faint" data-bind="cargoMass"></span>`, "package"],
         ["Arrival (real time)", html`<span class="num eta-real" data-bind="etaReal">—</span> <span class="faint" data-bind="arrivalClock"></span>`, "timer", "etaSource"],
         ["Game ETA", html`<span data-bind="eta">—</span> <span class="faint" data-bind="onTime"></span>`, "clock"],
         ["Income", html`<span class="num" data-bind="income">—</span>`, "coins"],

@@ -31,6 +31,9 @@ companies below; all names, logos and trademarks belong to their respective owne
 - **Euro Truck Simulator 2**, **American Truck Simulator** and **SCS Software** are trademarks of SCS Software s.r.o.
   Game files are © SCS Software.
 - **TruckersMP** is a trademark of TruckersMP. HAULIX is not a TruckersMP product.
+- **DAF**, **Iveco**, **MAN**, **Mercedes-Benz**, **Renault Trucks**, **Scania**, **Volvo**, **Krone**, **Kögel**, **Wielton**, **Feldbinder**,
+  **Schmitz Cargobull**, **Tirsan** and **Schwarzmüller** and their logos are trademarks of their respective owners; the logos are
+  shown only to identify the brands (see [branding/LOGOS.md](branding/LOGOS.md)).
 - **SpedV**, **Discord**, **Steam**, **GitHub**, **Microsoft**, **Windows** and **Microsoft Edge** are trademarks of their respective owners.
 
 Third-party software included in HAULIX, and its licences, are listed in

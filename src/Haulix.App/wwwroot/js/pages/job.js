@@ -7,6 +7,7 @@ import { scoreColor } from "../components/sharecard.js";
 import { teleValues, jobProgress } from "../core/teleview.js";
 import { t } from "../core/i18n.js";
 import * as f from "../core/format.js";
+import { truckLogo, trailerLogo, companyLogo, cargoIcon, cargoCategory, logoChip } from "../core/logos.js";
 
 // Current job, like the tour page of VTC trackers: route and progress, real-time ETA, live driving score,
 // costs (tolls, ferries, fines), a speed profile and a timeline of everything that happened on this job.
@@ -131,13 +132,13 @@ export default {
             <div class="job-hero__kicker"><i></i>${t("CURRENT JOB")}${s.specialJob ? html`<span class="badge badge--accent">${icon("star", "icon icon-sm")}${t("Special transport")}</span>` : ""}
               ${v.market !== "—" ? html`<span class="badge badge--outline">${t(v.market)}</span>` : ""}</div>
             <h2 class="job-hero__route">${s.sourceCity} <span>→</span> ${s.destinationCity}</h2>
-            <div class="job-hero__companies">${s.sourceCompany || "—"} ${icon("arrow-right", "icon icon-sm")} ${s.destinationCompany || "—"}</div>
+            <div class="job-hero__companies">${logoChip(companyLogo(s.sourceCompanyId, s.sourceCompany), s.sourceCompany || "", "md")}${s.sourceCompany || "—"} ${icon("arrow-right", "icon icon-sm")} ${logoChip(companyLogo(s.destinationCompanyId, s.destinationCompany), s.destinationCompany || "", "md")}${s.destinationCompany || "—"}</div>
           </div>
           <div class="job-hero__income"><div class="label label--muted">${t("Income")}</div><div class="job-hero__money">${f.money(s.jobIncome)}</div></div>
         </div>
         <div class="job-hero__cargo">
-          <span>${icon("package")}<b>${s.cargo}</b></span><span>${icon("weight")}${v.cargoMass}</span>
-          <span>${icon("truck")}${v.truck}</span><span>${icon("container")}${v.trailer}</span>
+          <span>${cargoIcon(s.cargoId, s.cargo, "sm")}<b>${s.cargo}</b><span class="faint">${cargoCategory(s.cargoId, s.cargo).label}</span></span><span>${icon("weight")}${v.cargoMass}</span>
+          <span>${logoChip(truckLogo(s.truckBrandId || s.truckBrand), s.truckBrand || "", "sm") || icon("truck")}${v.truck}</span><span>${logoChip(trailerLogo(s.trailerBrand) || trailerLogo(s.trailerName), s.trailerBrand || "", "sm") || icon("container")}${v.trailer}</span>
         </div>
         <div class="job-progress" data-job="progress"></div>
         <div class="job-kpis job-kpis--eta" data-job="eta"></div>

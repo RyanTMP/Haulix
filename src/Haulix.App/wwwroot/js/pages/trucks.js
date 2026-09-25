@@ -4,8 +4,16 @@ import { store } from "../core/store.js";
 import { card, empty, progress, kv, drawer, segmented, damageTone, contextMenu } from "../components/ui.js";
 import { chart } from "../components/charts.js";
 import * as f from "../core/format.js";
+import { truckLogo } from "../core/logos.js";
 
 export const brandMark = (brand = "") => brand.replace("Mercedes-Benz", "MB").replace("Renault", "RT").slice(0, 3).toUpperCase();
+/** Brand badge: the manufacturer logo when HAULIX has one, otherwise the short brand mark. */
+export const brandBadge = (brand = "", large = false) => {
+  const src = truckLogo(brand);
+  return src
+    ? html`<div class="brand-badge brand-badge--logo ${large ? "brand-badge--lg" : ""}" title="${brand}"><img src="${src}" alt="${brand}"></div>`
+    : html`<div class="brand-badge ${large ? "brand-badge--lg" : ""}">${brandMark(brand)}</div>`;
+};
 
 export function noProfile() {
   return empty({ brand: true, title: "No ETS2 profile loaded", text: "HAULIX reads trucks, trailers, garages and drivers from your save game. Choose a profile to get started.", action: html`<a class="btn btn--primary" href="#/setup">Run setup</a>` });
@@ -87,7 +95,7 @@ export default {
             <section class="card card--hover truck-card" data-id="${t.id}">
               <div class="card__body">
                 <div class="truck-card__head">
-                  <div class="brand-badge">${brandMark(t.brand)}</div>
+                  ${brandBadge(t.brand)}
                   <div class="grow"><div class="truck-card__name ellipsis">${t.name}</div><div class="truck-card__sub">${t.engine || "Engine unknown"}${t.horsePower ? ` · ${t.horsePower} hp` : ""}</div></div>
                   ${statusBadge(t)}
                 </div>
@@ -141,7 +149,7 @@ export function openTruck(t) {
   if (!t) return;
   drawer({
     wide: true,
-    head: html`<div class="brand-badge" style="width:54px;height:54px;font-size:18px">${brandMark(t.brand)}</div>`,
+    head: brandBadge(t.brand, true),
     title: t.name,
     sub: html`${statusBadge(t)}${t.licensePlate ? html`<span class="plate">${t.licensePlate}</span>` : ""}<span>${t.plateCountry || ""}</span>`,
     body: html`

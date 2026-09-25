@@ -4,6 +4,7 @@ import { store } from "../core/store.js";
 import { empty, progress, kv, drawer, damageTone } from "../components/ui.js";
 import { noProfile, wearRows } from "./trucks.js";
 import * as f from "../core/format.js";
+import { trailerLogo, logoChip } from "../core/logos.js";
 
 export default {
   title: "Trailers",
@@ -46,7 +47,7 @@ export default {
       $("#trTable", root).innerHTML = list.length ? html`<table class="table">
         <thead><tr><th>Trailer</th><th>Type</th><th>Cargo</th><th>Garage</th><th>Assigned to</th><th class="num">Axles</th><th class="num">Mileage</th><th class="num">Damage</th><th>Status</th></tr></thead>
         <tbody>${list.map((t) => html`<tr class="is-clickable" data-id="${t.id}">
-          <td><strong>${t.name}</strong><span class="sub">${t.licensePlate || ""}</span></td>
+          <td><div class="with-logo">${logoChip(trailerLogo(t.typeId) || trailerLogo(t.name), "", "sm")}<div><strong>${t.name}</strong><span class="sub">${t.licensePlate || ""}</span></div></div></td>
           <td>${t.bodyType || "—"}<span class="sub">${t.chainType || ""}</span></td>
           <td>${t.cargoMassKg > 0 ? f.mass(t.cargoMassKg) : html`<span class="faint">Empty</span>`}</td>
           <td>${t.garageCity || "—"}</td>

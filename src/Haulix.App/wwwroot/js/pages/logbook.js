@@ -4,6 +4,7 @@ import { store } from "../core/store.js";
 import { card, empty, skeleton, select, drawer, kv, toast, contextMenu, progress, damageTone } from "../components/ui.js";
 import { chart } from "../components/charts.js";
 import * as f from "../core/format.js";
+import { companyLogo, cargoIcon, logoChip } from "../core/logos.js";
 import { deliveryCard, scoreColor } from "../components/sharecard.js";
 
 const SORTS = [["recent", "Most recent"], ["oldest", "Oldest"], ["longest", "Longest"], ["income", "Highest income"], ["xp", "Highest XP"], ["efficiency", "Most fuel efficient"]];
@@ -98,7 +99,7 @@ export default {
         <tbody>${rows.map((r) => html`<tr class="is-clickable" data-id="${r.id}">
           <td><span class="num">${r.finishedUtc ? f.dateTime(r.finishedUtc) : f.gameDay(r.gameEndMin)}</span>${r.source === "save" ? html`<span class="source-tag" data-tip="Imported from the in-game delivery log">save</span>` : ""}</td>
           <td><span class="route">${r.originCity}${icon("arrow-right")}${r.destCity}</span><span class="sub">${r.originCompany} → ${r.destCompany}</span></td>
-          <td class="ellipsis" style="max-width:190px">${r.cargo}<span class="sub">${r.cargoMassKg ? f.mass(r.cargoMassKg) : ""}</span></td>
+          <td style="max-width:230px"><div class="with-logo">${cargoIcon(r.cargoId, r.cargo, "sm")}<div class="ellipsis">${r.cargo}<span class="sub">${r.cargoMassKg ? f.mass(r.cargoMassKg) : ""}</span></div></div></td>
           <td class="ellipsis muted" style="max-width:160px">${r.truck || "—"}</td>
           <td class="num">${f.dist(r.distanceKm)}</td>
           <td class="num ${r.status === "delivered" ? "ok" : ""}">${r.status === "delivered" ? f.money(r.income) : html`<span class="crit">−${f.money(r.penalty)}</span>`}</td>
@@ -221,9 +222,9 @@ async function openDelivery(id, call) {
       ${pts.length > 5 ? html`<div><div class="label label--muted" style="margin-bottom:10px">Speed profile</div><div id="speedProfile"></div></div>` : ""}
       <div class="grid">
         <div class="span-6">${kv([
-          ["Origin", html`${d.originCity} <span class="faint">· ${d.originCompany || ""}</span>`, { icon: "map-pin", text: true }],
-          ["Destination", html`${d.destCity} <span class="faint">· ${d.destCompany || ""}</span>`, { icon: "flag", text: true }],
-          ["Cargo", d.cargo, { icon: "package", text: true }],
+          ["Origin", html`<span class="with-logo with-logo--end">${logoChip(companyLogo(d.originCompany), d.originCompany || "", "sm")}<span>${d.originCity} <span class="faint">· ${d.originCompany || ""}</span></span></span>`, { icon: "map-pin", text: true }],
+          ["Destination", html`<span class="with-logo with-logo--end">${logoChip(companyLogo(d.destCompany), d.destCompany || "", "sm")}<span>${d.destCity} <span class="faint">· ${d.destCompany || ""}</span></span></span>`, { icon: "flag", text: true }],
+          ["Cargo", html`<span class="with-logo with-logo--end">${cargoIcon(d.cargoId, d.cargo, "xs")}<span>${d.cargo}</span></span>`, { icon: "package", text: true }],
           ["Cargo mass", d.cargoMassKg ? f.mass(d.cargoMassKg) : "—", { icon: "weight" }],
           ["Truck", d.truck || "—", { icon: "truck", text: true }],
           ["Trailer", d.trailer || "—", { icon: "container", text: true }],

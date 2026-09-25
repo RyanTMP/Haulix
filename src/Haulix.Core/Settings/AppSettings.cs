@@ -98,7 +98,7 @@ public sealed class HudSettings
     /// <summary>Card width in pixels at 100 % (220–420).</summary>
     public int Width { get; set; } = 290;
     /// <summary>dark | glass | light | contrast</summary>
-    public string Theme { get; set; } = "dark";
+    public string Theme { get; set; } = "glass";
     /// <summary>app (same as HAULIX) | amber | copper | green | blue | red | purple | white</summary>
     public string Accent { get; set; } = "app";
     /// <summary>compact | normal | roomy</summary>

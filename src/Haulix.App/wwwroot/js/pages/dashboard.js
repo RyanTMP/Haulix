@@ -10,7 +10,14 @@ import { rankOf, families } from "./achievements.js";
 import { t } from "../core/i18n.js";
 
 export default {
-  title: "Dashboard",
+  // Premium look: the dashboard greets the driver instead of repeating its name.
+  title: () => {
+    const h = new Date().getHours();
+    const part = h < 5 ? "evening" : h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+    const p = store.get("profile");
+    const name = p?.profileName || p?.companyName;
+    return name ? `Good ${part}, ${name}` : `Good ${part}`;
+  },
   crumb: () => {
     const p = store.get("profile");
     return p ? `${p.companyName || p.profileName} · ${p.hqCityName || ""} HQ` : "";

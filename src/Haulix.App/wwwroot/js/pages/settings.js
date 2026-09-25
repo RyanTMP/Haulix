@@ -18,6 +18,7 @@ const SECTIONS = [
   ["general", "General", "sliders-horizontal", "haulix"], ["appearance", "Appearance", "palette", "haulix"], ["online", "Online", "globe", "haulix"],
   ["data", "Data", "database", "haulix"], ["about", "About", "info", "haulix"],
   ["ets2", "Game & profile", "truck", "ets2"], ["telemetry", "Telemetry", "activity", "ets2"], ["notifications", "Notifications & sounds", "bell", "ets2"],
+  ["hud", "In-game HUD", "gauge", "ets2"], ["truckersmp", "TruckersMP", "users", "ets2"],
   ["ats", "American Truck Simulator", "flag", "ats"],
 ];
 const CAT_OF = Object.fromEntries(SECTIONS.map(([id, , , c]) => [id, c]));
@@ -131,7 +132,7 @@ export default {
             ${row("Distance from the edge", "", slider("hud.margin", 0, 120, 2, s.hud?.margin ?? 16, " px"))}
           </div>
           <div class="setting-group"><div class="setting-group__title">${icon("palette")}Look</div>
-            ${row("Style", "", segmented("hud.theme", [["dark", "Dark"], ["glass", "Glass"], ["light", "Light"], ["contrast", "High contrast"]], s.hud?.theme || "dark"))}
+            ${row("Style", "", segmented("hud.theme", [["glass", "Glass"], ["dark", "Dark"], ["light", "Light"], ["contrast", "High contrast"]], s.hud?.theme || "glass"))}
             ${row("Accent colour", "", html`<div class="hud-swatches" data-hud-accent>${HUD_ACCENTS.map(([k, c, l]) => html`<button type="button" data-value="${k}" style="--sw:${c}" data-tip="${l}" class="${(s.hud?.accent || "app") === k ? "is-active" : ""}"></button>`)}</div>`)}
             ${row("Size", "", slider("hud.scale", 60, 180, 5, hudScale(s.hud), " %"))}
             ${row("Width", "", slider("hud.width", 220, 420, 10, s.hud?.width ?? 290, " px"))}
@@ -387,13 +388,17 @@ export default {
       card.style.setProperty("--hc-accent", accent);
       card.style.setProperty("--hc-w", String(h.width ?? 290));
       card.style.setProperty("--hc-scale", String(hudScale(h) / 100));
-      card.dataset.theme = h.theme || "dark";
+      card.dataset.theme = h.theme || "glass";
       card.dataset.density = h.density || "normal";
       card.toggleAttribute("data-square", h.rounded === false);
-      card.innerHTML = html`${h.showHeader !== false ? html`<div class="hudp-card__kicker"><i></i>${t("CURRENT JOB")}<span>HAULIX</span></div>` : ""}
-        ${h.showCargo !== false ? html`<div class="hudp-card__cargo">Steel coils · 22.4 t</div>` : ""}
-        ${h.showRoute !== false ? html`<div class="hudp-card__route">Hamburg → Prague</div>` : ""}
-        ${h.showProgress !== false ? html`<div class="hudp-card__bar"><em><i style="width:67%"></i></em><span>67 %</span></div>` : ""}
+      const titles = h.showHeader !== false || h.showRoute !== false || h.showCargo !== false;
+      card.innerHTML = html`${h.showProgress !== false || titles ? html`<div class="hudp-card__head">
+          ${h.showProgress !== false ? html`<div class="hudp-ring" style="--p:67"><span>67%</span></div>` : ""}
+          ${titles ? html`<div class="hudp-card__titles">
+            ${h.showHeader !== false ? html`<div class="hudp-card__kicker">${t("CURRENT JOB")}<span>HAULIX</span></div>` : ""}
+            ${h.showRoute !== false ? html`<div class="hudp-card__route">Hamburg → Prague</div>` : ""}
+            ${h.showCargo !== false ? html`<div class="hudp-card__cargo">Steel coils · 22.4 t</div>` : ""}</div>` : ""}
+        </div>` : ""}
         ${fields.map((k) => HUD_FIELDS.find(([x]) => x === k)).filter(Boolean).map(([, , l, v, tone]) => html`<div class="hudp-card__row ${tone || ""}"><span>${t(l)}</span><b>${v}</b></div>`)}`.toString();
       card.dataset.pos = HUD_POS_OK(h.position) || "topRight";
       card.style.left = card.dataset.pos === "custom" ? `${h.x ?? 85}%` : "";

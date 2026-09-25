@@ -4,6 +4,9 @@ All notable changes to HAULIX. The same list appears in the app under *What's ne
 
 ## 0.0.8 BETA
 
+- **All-new look: premium dark glass** – HAULIX is redesigned: a deep dark background with soft colour glows, translucent glass panels, a floating sidebar, larger rounded cards, calmer typography with clear numbers, glowing progress bars and a personal greeting on the dashboard.
+- **New in-game HUD** – The job card is now a modern glass card: a progress ring for the trip next to the route and cargo, clear rows below, rounder corners and a soft accent glow. Glass is the new default style; all options and dragging stay.
+- **Installer: scrolling fixed** – The license agreement and the setup pages can be scrolled again.
 - **HAULIX is preparing to go online** – A notice at the top of HAULIX: updates now come more often and can contain features that are not available yet and are not the final version.
 - **Map removed** – The map page, the road map and the in-app navigation are gone – ETS2 has its own map and GPS. The logbook keeps the speed profile of each delivery, and the old map files are deleted automatically to free disk space.
 - **Live map removed** – The planned live map with friends is no longer part of the online plans.
@@ -14,6 +17,9 @@ All notable changes to HAULIX. The same list appears in the app under *What's ne
 
 <details><summary>Deutsch</summary>
 
+- **Ganz neuer Look: Premium Dark Glass** – HAULIX ist neu gestaltet: tiefdunkler Hintergrund mit sanften Farbverläufen, durchscheinende Glas-Flächen, eine schwebende Seitenleiste, größere abgerundete Karten, ruhigere Schrift mit klaren Zahlen, leuchtende Fortschrittsbalken und eine persönliche Begrüßung auf der Übersicht.
+- **Neues Ingame-HUD** – Die Auftragskarte ist jetzt eine moderne Glas-Karte: ein Fortschrittsring neben Route und Fracht, klare Zeilen darunter, rundere Ecken und ein sanftes Leuchten in der Akzentfarbe. Glas ist der neue Standardstil; alle Optionen und das Verschieben bleiben.
+- **Installer: Scrollen behoben** – Lizenzvertrag und Setup-Seiten lassen sich wieder scrollen.
 - **HAULIX bereitet sich auf den Online-Start vor** – Ein Hinweis oben in HAULIX: Updates kommen jetzt häufiger und können Funktionen enthalten, die noch nicht verfügbar sind und nicht dem finalen Stand entsprechen.
 - **Karte entfernt** – Kartenseite, Straßenkarte und die Navigation in HAULIX sind entfernt – ETS2 hat eine eigene Karte und ein eigenes Navi. Das Fahrtenbuch behält das Geschwindigkeitsprofil jeder Lieferung, alte Kartendateien werden automatisch gelöscht.
 - **Live-Karte entfernt** – Die geplante Live-Karte mit Freunden ist nicht mehr Teil der Online-Pläne.

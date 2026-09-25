@@ -549,3 +549,19 @@
 
 /* Legal documents (license agreement, privacy policy) inside HAULIX */
 .legal-text { margin: 0; max-height: 62vh; overflow: auto; white-space: pre-wrap; font-family: var(--font-ui); font-size: 13px; line-height: 1.55; color: var(--text-2); }
+
+/* HUD preview: modern glass card (0.0.8) – matches the in-game drawing in HudOverlay.cs */
+.hudp-card { --hc-bg: #161a21; --hc-bg2: #0a0c10; background: linear-gradient(180deg, var(--hc-bg), var(--hc-bg2)); border-radius: 12px; padding: 10px 11px 6px;
+  border-color: color-mix(in srgb, var(--hc-accent) 28%, var(--hc-border)); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 10px 30px -12px rgb(0 0 0 / 0.7); overflow: hidden; }
+.hudp-card::before { content: ""; position: absolute; left: -30px; top: -40px; width: 110px; height: 80px; border-radius: 50%; background: var(--hc-accent); opacity: 0.1; pointer-events: none; }
+.hudp-card[data-theme="glass"] { --hc-bg: #262d3a; --hc-bg2: #141820; }
+.hudp-card[data-theme="light"] { --hc-bg: #f6f7f9; --hc-bg2: #ecf0f5; }
+.hudp-card[data-theme="contrast"] { --hc-bg: #000; --hc-bg2: #000; }
+.hudp-card__head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; position: relative; }
+.hudp-card__titles { flex: 1; min-width: 0; }
+.hudp-card__kicker i { display: none; }
+.hudp-card__route { margin: 1px 0 1px; font-size: 11.5px; }
+.hudp-card__cargo { margin-top: 0; }
+.hudp-ring { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
+  background: radial-gradient(closest-side, var(--hc-bg) 72%, transparent 74%), conic-gradient(var(--hc-accent) calc(var(--p) * 1%), var(--hc-track) 0); }
+.hudp-ring span { font-size: 7.5px; font-weight: 600; color: var(--hc-ink); }

@@ -103,14 +103,14 @@ internal sealed class HudOverlay : IDisposable
 
     /* ================================================================ look */
 
-    private sealed record Palette(Color Bg, Color Border, Color Ink, Color Muted, Color Track, Color Sep);
+    private sealed record Palette(Color Bg, Color Border, Color Ink, Color Muted, Color Track, Color Sep, Color Bg2);
 
     private static Palette Theme(string theme) => theme switch
     {
-        "light" => new(Color.FromArgb(246, 247, 249), Color.FromArgb(214, 218, 224), Color.FromArgb(22, 25, 30), Color.FromArgb(98, 106, 117), Color.FromArgb(222, 226, 231), Color.FromArgb(230, 233, 237)),
-        "glass" => new(Color.FromArgb(28, 33, 41), Color.FromArgb(70, 80, 95), Color.FromArgb(244, 246, 248), Color.FromArgb(160, 170, 184), Color.FromArgb(52, 60, 72), Color.FromArgb(44, 51, 62)),
-        "contrast" => new(Color.Black, Color.FromArgb(120, 120, 120), Color.White, Color.FromArgb(200, 200, 200), Color.FromArgb(60, 60, 60), Color.FromArgb(50, 50, 50)),
-        _ => new(Color.FromArgb(15, 17, 21), Color.FromArgb(48, 54, 64), Color.FromArgb(236, 237, 238), Color.FromArgb(128, 136, 147), Color.FromArgb(38, 43, 51), Color.FromArgb(32, 36, 43)),
+        "light" => new(Color.FromArgb(246, 247, 249), Color.FromArgb(214, 218, 224), Color.FromArgb(22, 25, 30), Color.FromArgb(98, 106, 117), Color.FromArgb(222, 226, 231), Color.FromArgb(230, 233, 237), Color.FromArgb(236, 240, 245)),
+        "glass" => new(Color.FromArgb(38, 45, 58), Color.FromArgb(70, 80, 95), Color.FromArgb(244, 246, 248), Color.FromArgb(160, 170, 184), Color.FromArgb(52, 60, 72), Color.FromArgb(52, 60, 74), Color.FromArgb(20, 24, 32)),
+        "contrast" => new(Color.Black, Color.FromArgb(120, 120, 120), Color.White, Color.FromArgb(200, 200, 200), Color.FromArgb(60, 60, 60), Color.FromArgb(50, 50, 50), Color.Black),
+        _ => new(Color.FromArgb(22, 26, 33), Color.FromArgb(48, 54, 64), Color.FromArgb(236, 237, 238), Color.FromArgb(128, 136, 147), Color.FromArgb(38, 43, 51), Color.FromArgb(34, 38, 46), Color.FromArgb(10, 12, 16)),
     };
 
     private static Color AccentColor(string hudAccent, string appAccent) => (hudAccent is "" or "app" ? appAccent : hudAccent) switch
@@ -262,7 +262,7 @@ internal sealed class HudOverlay : IDisposable
             _ui = screen.Scale() * scale;
             _pal = Theme(hud.Theme);
             _accent = AccentColor(hud.Accent, appAccent);
-            _radius = hud.Rounded ? (int)(10 * _ui) : 0;
+            _radius = hud.Rounded ? (int)(16 * _ui) : 0;
             _rowH = hud.Density switch { "compact" => 18, "roomy" => 27, _ => 22 };
             _showHeader = hud.ShowHeader;
             _showCargo = hud.ShowCargo;
@@ -341,8 +341,8 @@ internal sealed class HudOverlay : IDisposable
             _rows = rows;
 
             var w = (int)(Math.Clamp(hud.Width, 220, 420) * _ui);
-            var head = (_showHeader ? 30 : 10) + (_showCargo ? 16 : 0) + (_showRoute ? 26 : 0);
-            var h = (int)((head + (_progress >= 0 ? 22 : 0) + _rows.Count * _rowH + 10) * _ui);
+            var head = HeaderHeight();
+            var h = (int)((head + _rows.Count * _rowH + 12) * _ui);
             Place(screen, new Size(w, Math.Max(h, (int)(40 * _ui))), hud, opacity);
         }
 
@@ -409,9 +409,25 @@ internal sealed class HudOverlay : IDisposable
             _fontFactor = f;
             _kickerFont = new Font("Segoe UI Semibold", 7f * f);
             _cargoFont = new Font("Segoe UI", 8.5f * f);
-            _routeFont = new Font("Segoe UI Semibold", 12.5f * f);
+            _routeFont = new Font("Segoe UI Semibold", 12f * f);
             _labelFont = new Font("Segoe UI", 8.5f * f);
             _valueFont = new Font("Segoe UI Semibold", 9f * f);
+        }
+
+        // Glass card layout (unscaled px): a progress ring on the left of the header, kicker / route / cargo beside it,
+        // then the rows. Everything is multiplied by _ui when drawn.
+        private const float Pad = 16, Ring = 48, RingGap = 12;
+
+        private bool HasRing => _progress >= 0;
+        private bool HasHeaderText => _showHeader || _showRoute || _showCargo;
+
+        private float HeaderTextHeight() => (_showHeader ? 16 : 0) + (_showRoute ? 22 : 0) + (_showCargo ? 17 : 0);
+
+        /// <summary>Height of everything above the rows, including the top padding and the gap before the rows.</summary>
+        private float HeaderHeight()
+        {
+            if (!HasRing && !HasHeaderText) return 8;
+            return 14 + Math.Max(HasRing ? Ring : 0, HeaderTextHeight()) + 12;
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -420,55 +436,73 @@ internal sealed class HudOverlay : IDisposable
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
             int P(float v) => (int)(v * _ui);
+            var rect = new Rectangle(0, 0, Width - 1, Height - 1);
 
-            // Frame (dashed accent while placing)
-            using (var pen = new Pen(_moving ? _accent : _pal.Border, _moving ? 2 : 1) { DashStyle = _moving ? DashStyle.Dash : DashStyle.Solid })
+            // Glass body: soft vertical gradient, an accent glow in the corner and a thin highlight at the top.
+            using (var body = new LinearGradientBrush(new Rectangle(0, 0, Width, Height + 1), _pal.Bg, _pal.Bg2, LinearGradientMode.Vertical))
+                g.FillRectangle(body, 0, 0, Width, Height);
+            using (var glow = new SolidBrush(Color.FromArgb(_pal.Bg.GetBrightness() > 0.6f ? 18 : 26, _accent)))
+                g.FillEllipse(glow, -P(50), -P(60), P(170), P(130));
+            using (var hi = new Pen(Color.FromArgb(_pal.Bg.GetBrightness() > 0.6f ? 120 : 22, 255, 255, 255)))
+                g.DrawLine(hi, Math.Max(_radius, P(8)), 1, Width - Math.Max(_radius, P(8)), 1);
+
+            // Frame: border tinted with the accent (dashed while placing)
+            var border = _moving ? _accent : Blend(_pal.Border, _accent, 0.28f);
+            using (var pen = new Pen(border, _moving ? 2 : 1) { DashStyle = _moving ? DashStyle.Dash : DashStyle.Solid })
             {
-                var rect = new Rectangle(0, 0, Width - 1, Height - 1);
                 if (_radius > 0) { using var path = Rounded(rect, _radius); g.DrawPath(pen, path); }
                 else g.DrawRectangle(pen, rect);
             }
 
-            var y = P(10);
-            if (_showHeader)
+            float top = 14;
+            var textX = Pad + (HasRing ? Ring + RingGap : 0);
+            var headerH = Math.Max(HasRing ? Ring : 0, HeaderTextHeight());
+            if (HasRing)
             {
-                // Slanted accent (HAULIX signature) + kicker
-                using (var b = new SolidBrush(_accent))
-                    g.FillPolygon(b, new[] { new Point(P(16), P(14)), new Point(P(19), P(14)), new Point(P(16), P(26)), new Point(P(13), P(26)) });
-                TextRenderer.DrawText(g, _kicker, _kickerFont, new Point(P(24), P(13)), _accent, TextFormatFlags.NoPadding);
-                TextRenderer.DrawText(g, "HAULIX", _kickerFont, new Rectangle(0, P(13), Width - P(14), P(14)), _pal.Muted, TextFormatFlags.Right | TextFormatFlags.NoPadding);
-                y = P(32);
+                // Progress ring with the percentage in the middle
+                var ringRect = new RectangleF(P(Pad) + P(3), P(top) + P(3), P(Ring) - P(6), P(Ring) - P(6));
+                using (var track = new Pen(_pal.Track, 5 * _ui)) g.DrawEllipse(track, ringRect);
+                using (var arc = new Pen(_accent, 5 * _ui) { StartCap = LineCap.Round, EndCap = LineCap.Round })
+                    if (_progress > 0.005) g.DrawArc(arc, ringRect, -90, (float)(360 * _progress));
+                TextRenderer.DrawText(g, $"{_progress * 100:0}%", _valueFont, Rectangle.Round(new RectangleF(P(Pad), P(top), P(Ring), P(Ring))), _pal.Ink,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
             }
-            if (_showCargo)
+            if (HasHeaderText)
             {
-                TextRenderer.DrawText(g, _cargo, _cargoFont, new Rectangle(P(14), y, Width - P(28), P(16)), _pal.Muted, TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
-                y += P(16);
+                // Center the text block next to the ring
+                var y = top + Math.Max(0, (headerH - HeaderTextHeight()) / 2);
+                var w = Width - P(textX) - P(Pad);
+                if (_showHeader)
+                {
+                    TextRenderer.DrawText(g, _kicker, _kickerFont, new Rectangle(P(textX), P(y), w, P(14)), _accent, TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
+                    TextRenderer.DrawText(g, "HAULIX", _kickerFont, new Rectangle(0, P(y), Width - P(Pad), P(14)), _pal.Muted, TextFormatFlags.Right | TextFormatFlags.NoPadding);
+                    y += 16;
+                }
+                if (_showRoute)
+                {
+                    TextRenderer.DrawText(g, _route, _routeFont, new Rectangle(P(textX), P(y), w, P(22)), _pal.Ink, TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
+                    y += 22;
+                }
+                if (_showCargo)
+                    TextRenderer.DrawText(g, _cargo, _cargoFont, new Rectangle(P(textX), P(y), w, P(16)), _pal.Muted, TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
             }
-            if (_showRoute)
-            {
-                TextRenderer.DrawText(g, _route, _routeFont, new Rectangle(P(14), y, Width - P(28), P(24)), _pal.Ink, TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
-                y += P(26);
-            }
-            if (_progress >= 0)
-            {
-                var bar = new Rectangle(P(14), y + P(6), Width - P(28) - P(40), P(6));
-                using (var track = new SolidBrush(_pal.Track)) g.FillRectangle(track, bar);
-                using (var fill = new SolidBrush(_accent)) g.FillRectangle(fill, bar.X, bar.Y, (int)(bar.Width * _progress), bar.Height);
-                TextRenderer.DrawText(g, $"{_progress * 100:0} %", _labelFont, new Rectangle(bar.Right, y + P(2), Width - bar.Right - P(14), P(16)), _pal.Muted, TextFormatFlags.Right | TextFormatFlags.NoPadding);
-                y += P(22);
-            }
+
+            var rowY = P(HeaderHeight());
             using var sep = new Pen(_pal.Sep);
             var first = true;
             foreach (var r in _rows)
             {
-                if (!first || _showHeader || _showCargo || _showRoute || _progress >= 0) g.DrawLine(sep, P(14), y, Width - P(14), y);
+                if (!first || HasRing || HasHeaderText) g.DrawLine(sep, P(Pad), rowY, Width - P(Pad), rowY);
                 first = false;
-                var ty = y + (int)((_rowH * _ui - _labelFont!.Height) / 2);
-                TextRenderer.DrawText(g, r.Label, _labelFont, new Rectangle(P(14), ty, Width / 2, P(16)), _pal.Muted, TextFormatFlags.NoPadding);
-                TextRenderer.DrawText(g, r.Value, _valueFont, new Rectangle(Width / 3, ty - 1, Width * 2 / 3 - P(14), P(18)), r.Color, TextFormatFlags.Right | TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
-                y += (int)(_rowH * _ui);
+                var ty = rowY + (int)((_rowH * _ui - _labelFont!.Height) / 2);
+                TextRenderer.DrawText(g, r.Label, _labelFont, new Rectangle(P(Pad), ty, Width / 2, P(16)), _pal.Muted, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, r.Value, _valueFont, new Rectangle(Width / 3, ty - 1, Width * 2 / 3 - P(Pad), P(18)), r.Color, TextFormatFlags.Right | TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
+                rowY += (int)(_rowH * _ui);
             }
         }
+
+        private static Color Blend(Color a, Color b, float t) =>
+            Color.FromArgb((int)(a.R + (b.R - a.R) * t), (int)(a.G + (b.G - a.G) * t), (int)(a.B + (b.B - a.B) * t));
 
         protected override void Dispose(bool disposing)
         {

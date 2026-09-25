@@ -599,6 +599,7 @@ const de = {
     [/^(\d+) cities visited$/, "$1 Städte besucht"], [/^(.+) · saved (.+)$/, (m) => `${m[1]} · gespeichert ${t(m[2])}`],
     [/^Navigate to (.+)$/, "Nach $1 navigieren"], [/^Go to (.+) garage$/, "Zur Garage $1"], [/^Open (.+)$/, "$1 öffnen"],
     [/^Search logbook for “(.+)”$/, "Fahrtenbuch nach „$1“ durchsuchen"], [/^(\d+) (gallons?|litres?)$/, "$1 $2"],
+    [/^Good (morning|afternoon|evening)(, (.+))?$/, (m) => `${{ morning: "Guten Morgen", afternoon: "Guten Tag", evening: "Guten Abend" }[m[1]]}${m[3] ? `, ${m[3]}` : ""}`],
     [/^HAULIX — (.+)$/, (m) => `HAULIX — ${t(m[1])}`], [/^Version (.+)$/, "Version $1"],
     [/^Showing the last values received (.+)\.$/, (m) => `Zuletzt empfangene Werte ${t(m[1])}.`],
   ],

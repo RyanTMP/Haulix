@@ -23,7 +23,12 @@
     "Road map & navigation": "Straßenkarte & Navigation", "Real ETS2 streets with routes to your job or any city.": "Echte ETS2-Straßen mit Routen zu deinem Auftrag oder jeder Stadt.",
     "Automatic logbook": "Automatisches Fahrtenbuch", "Every delivery with route, income, fuel and damage.": "Jede Lieferung mit Route, Einnahmen, Verbrauch und Schaden.",
     "Your company": "Deine Firma", "Trucks, trailers, garages and AI drivers from your save.": "Lkw, Auflieger, Garagen und KI-Fahrer aus deinem Spielstand.",
-    "I accept the license (GNU GPL v2)": "Ich akzeptiere die Lizenz (GNU GPL v2)", "HAULIX is free software.": "HAULIX ist freie Software.", "View license": "Lizenz anzeigen",
+    "I have read and accept the HAULIX License Agreement and the Privacy Policy": "Ich habe den HAULIX-Lizenzvertrag und die Datenschutzerklärung gelesen und akzeptiere sie", "Free for personal use": "Kostenlos für den privaten Gebrauch",
+    "Read the license agreement": "Lizenzvertrag lesen", "Read the privacy policy": "Datenschutzerklärung lesen", "License agreement": "Lizenzvertrag", "Privacy policy": "Datenschutzerklärung", "Accept and close": "Akzeptieren und schließen",
+    "New license agreement.": "Neuer Lizenzvertrag.", "Since version 0.0.8 HAULIX has its own license agreement and privacy policy. Please read them and accept them to continue.": "Seit Version 0.0.8 hat HAULIX einen eigenen Lizenzvertrag und eine Datenschutzerklärung. Bitte lies sie und akzeptiere sie, um fortzufahren.",
+    "Current job & HUD": "Aktueller Auftrag & HUD", "Real-time ETA, costs and a job card over your game.": "Echtzeit-Ankunft, Kosten und eine Auftragskarte über deinem Spiel.", "Every delivery with income, fuel, damage and driving score.": "Jede Lieferung mit Einnahmen, Verbrauch, Schaden und Fahrscore.",
+    "Achievements": "Erfolge", "More than 60 goals and a driver rank for your career.": "Über 60 Ziele und ein Fahrerrang für deine Karriere.", "Your free logbook and co-driver for Euro Truck Simulator 2. Everything stays on this PC.": "Dein kostenloses Fahrtenbuch und Beifahrer für Euro Truck Simulator 2. Alles bleibt auf diesem PC.",
+    "Your logbook, settings and backups are kept. Only the program files are replaced.": "Fahrtenbuch, Einstellungen und Sicherungen bleiben erhalten. Nur die Programmdateien werden ersetzt.",
     "Development build.": "Entwicklungs-Build.", "This setup does not contain the app. Build it with tools/release/build-release.ps1.": "Dieses Setup enthält die App nicht. Erstelle es mit tools/release/build-release.ps1.",
     "Cancel": "Abbrechen", "Continue": "Weiter", "Back": "Zurück", "Where to install": "Installationsort", "Browse": "Durchsuchen",
     "HAULIX installs for your Windows user only. No administrator rights are needed.": "HAULIX wird nur für deinen Windows-Benutzer installiert. Keine Administratorrechte nötig.",
@@ -104,6 +109,38 @@
 
   function actions(html) { $("#actions").innerHTML = html; }
 
+  /* ---- License agreement & privacy policy viewer (texts are embedded in the setup) ---- */
+  // HAULIX has its own license agreement since 0.0.8 (before: GNU GPL v2); updates from older versions must accept it again.
+  function licenseChanged(v) {
+    const [a = 0, b = 0, c = 0] = String(v || "0").split(/[.-]/).map((x) => parseInt(x, 10) || 0);
+    return a === 0 && b === 0 && c < 8;
+  }
+  const docs = {};
+  async function openDoc(which) {
+    let view = $("#docView");
+    if (!view) {
+      view = document.createElement("div");
+      view.id = "docView";
+      view.className = "doc-view";
+      document.body.append(view);
+    }
+    view.innerHTML = `<div class="doc-view__panel" role="dialog" aria-modal="true">
+        <div class="doc-view__head">
+          <div class="doc-view__tabs"><button data-a="doc-license" class="${which === "license" ? "is-active" : ""}">License agreement</button><button data-a="doc-privacy" class="${which === "privacy" ? "is-active" : ""}">Privacy policy</button></div>
+          <button class="doc-view__close" data-a="doc-close" aria-label="Close">${icon("x")}</button>
+        </div>
+        <pre class="doc-view__text">Loading…</pre>
+        <div class="doc-view__foot"><span class="faint">© 2026 RyanTMP · HAULIX</span><span class="spacer"></span><button class="btn btn--primary" data-a="doc-accept">Accept and close</button></div>
+      </div>`;
+    translateDom(view);
+    const file = which === "privacy" ? "PRIVACY.txt" : "LICENSE.txt";
+    try { docs[file] ??= await fetch(file).then((r) => (r.ok ? r.text() : Promise.reject(new Error(r.status)))); }
+    catch { docs[file] = "The document could not be loaded. You can read it at https://github.com/RyanTMP/Haulix"; }
+    view.querySelector(".doc-view__text").textContent = docs[file];
+  }
+  const closeDoc = () => $("#docView")?.remove();
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDoc(); });
+
   function render() {
     renderPage();
     translateDom(document.body);
@@ -134,15 +171,17 @@
       const update = i.mode === "update";
       page.innerHTML = `${langSwitch()}<div class="eyebrow-lg">${update ? `Update · v${esc(i.existingVersion || "?")} → v${esc(i.version)}` : "Welcome"}</div>
         <h1 class="title">${update ? "Update HAULIX" : "Install HAULIX"}</h1>
-        <p class="lead">${update ? "Your logbook, settings, backups and road map are kept. Only the program files are replaced." : "Offline telemetry and fleet intelligence for Euro Truck Simulator 2. Everything stays on this PC."}</p>
+        <p class="lead">${update ? "Your logbook, settings and backups are kept. Only the program files are replaced." : "Your free logbook and co-driver for Euro Truck Simulator 2. Everything stays on this PC."}</p>
         <div class="features">
           <div class="feature">${icon("gauge")}<div><strong>Live telemetry</strong><span>Speed, fuel, damage and job progress while you drive.</span></div></div>
-          <div class="feature">${icon("map")}<div><strong>Road map & navigation</strong><span>Real ETS2 streets with routes to your job or any city.</span></div></div>
-          <div class="feature">${icon("book-open")}<div><strong>Automatic logbook</strong><span>Every delivery with route, income, fuel and damage.</span></div></div>
-          <div class="feature">${icon("warehouse")}<div><strong>Your company</strong><span>Trucks, trailers, garages and AI drivers from your save.</span></div></div>
+          <div class="feature">${icon("briefcase")}<div><strong>Current job & HUD</strong><span>Real-time ETA, costs and a job card over your game.</span></div></div>
+          <div class="feature">${icon("book-open")}<div><strong>Automatic logbook</strong><span>Every delivery with income, fuel, damage and driving score.</span></div></div>
+          <div class="feature">${icon("award")}<div><strong>Achievements</strong><span>More than 60 goals and a driver rank for your career.</span></div></div>
         </div>
+        ${update && licenseChanged(i.existingVersion) ? `<div class="callout callout--accent" style="margin-top:12px">${icon("info")}<div><strong>New license agreement.</strong> Since version 0.0.8 HAULIX has its own license agreement and privacy policy. Please read them and accept them to continue.</div></div>` : ""}
         <label class="check-row"><input type="checkbox" id="accept" ${state.accepted ? "checked" : ""}>
-          <div><div class="t">I accept the license (GNU GPL v2)</div><div class="d">HAULIX is free software. <a class="link" data-a="license">View license</a></div></div></label>
+          <div><div class="t">I have read and accept the HAULIX License Agreement and the Privacy Policy</div>
+            <div class="d"><span>Free for personal use</span> · © 2026 RyanTMP · <a class="link" data-a="license">Read the license agreement</a> · <a class="link" data-a="privacy">Read the privacy policy</a></div></div></label>
         ${!i.hasPayload ? `<div class="callout callout--warn" style="margin-top:10px">${icon("triangle-alert")}<div><strong>Development build.</strong> This setup does not contain the app. Build it with tools/release/build-release.ps1.</div></div>` : ""}`;
       $("#accept").onchange = (e) => { state.accepted = e.target.checked; $("[data-a=next]").disabled = !state.accepted || !i.hasPayload; };
       actions(`<button class="btn btn--ghost" data-a="close">Cancel</button><span class="spacer"></span><button class="btn btn--primary" data-a="next" ${state.accepted && i.hasPayload ? "" : "disabled"}>Continue</button>`);
@@ -211,7 +250,15 @@
       case "next": state.step = 1; render(); break;
       case "back": state.step = 0; render(); break;
       case "browse": send({ cmd: "browse", current: state.dir }); break;
-      case "license": send({ cmd: "openFile" }); break;
+      case "license": case "doc-license": openDoc("license"); break;
+      case "privacy": case "doc-privacy": openDoc("privacy"); break;
+      case "doc-close": closeDoc(); break;
+      case "doc-accept":
+        closeDoc();
+        state.accepted = true;
+        if ($("#accept")) $("#accept").checked = true;
+        if ($("[data-a=next]")) $("[data-a=next]").disabled = !state.info?.hasPayload;
+        break;
       case "plugin": send({ cmd: "openUrl", url: "https://github.com/RenCloud/scs-sdk-plugin/releases" }); break;
       case "install":
         state.step = 2; render();

@@ -546,3 +546,6 @@
 .dash-near__row { display: flex; gap: 12px; align-items: center; }
 .dash-near__row > svg { width: 18px; height: 18px; color: var(--tier); flex-shrink: 0; }
 .dash-near__title { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Legal documents (license agreement, privacy policy) inside HAULIX */
+.legal-text { margin: 0; max-height: 62vh; overflow: auto; white-space: pre-wrap; font-family: var(--font-ui); font-size: 13px; line-height: 1.55; color: var(--text-2); }

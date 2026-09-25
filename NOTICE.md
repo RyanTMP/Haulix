@@ -1,21 +1,26 @@
 # HAULIX – Copyright and trademark notice
 
 **HAULIX – ETS2 Logger**
-Copyright © 2026 RyanTMP. All rights not expressly granted below are reserved.
+Copyright © 2026 RyanTMP. All rights reserved.
 
 ## The program
 
-The HAULIX program and its source code are the work of RyanTMP and are protected by copyright.
-They are made available under the **GNU General Public License, version 2** (see [LICENSE](LICENSE)).
-The GPL lets you use, study, share and modify the program under its conditions; it does **not** transfer the copyright – RyanTMP remains the copyright holder.
-Any copy or modified version must keep this notice and the licence, and must say that it was changed.
+The HAULIX program, its installer and its source code are the work of RyanTMP and are protected by copyright.
+From version 0.0.8 on, use of HAULIX is governed by the **HAULIX License Agreement** ([LICENSE](LICENSE)):
+free for personal use; copying, redistributing, reselling or modifying HAULIX is not allowed without written
+permission. The source code is publicly visible, but that does not grant any rights beyond the License Agreement.
+
+Versions up to and including 0.0.7 were published under the GNU General Public License v2; copies of those
+versions remain under that licence.
+
+How HAULIX handles data – today offline, later in the optional online services – is described in the
+**HAULIX Privacy Policy** ([PRIVACY.md](PRIVACY.md)).
 
 ## The HAULIX name, logo and artwork
 
 The name **HAULIX**, the HAULIX logos ("H" mark, wordmark, banner), the app icon and all other artwork in
-[`branding/`](branding) and `src/Haulix.App/wwwroot/assets/brand/` are **not** covered by the GPL.
-They are © 2026 RyanTMP, **all rights reserved**. You may not use them for other products, services or
-modified versions of HAULIX without written permission. Modified versions must use a different name and logo.
+[`branding/`](branding) and `src/Haulix.App/wwwroot/assets/brand/` are © 2026 RyanTMP, **all rights reserved**.
+You may not use them for other products, services or modified versions of HAULIX without written permission.
 You may show them unchanged to refer to HAULIX (for example in reviews, videos or links to this project).
 
 ## Services and games HAULIX works with
@@ -29,6 +34,6 @@ companies below; all names, logos and trademarks belong to their respective owne
 - **SpedV**, **Discord**, **Steam**, **GitHub**, **Microsoft**, **Windows** and **Microsoft Edge** are trademarks of their respective owners.
 
 Third-party software included in HAULIX, and its licences, are listed in
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). Those components remain the property of their authors.
 
 Contact: open an issue at https://github.com/RyanTMP/Haulix/issues · Website: https://www.haulix-logging.com

@@ -25,6 +25,10 @@ public interface IOnlineApi
 
     // Cloud sync (deliveries are identified by their dedupe key, so re-uploads are harmless)
     Task<int> UploadDeliveriesAsync(IReadOnlyList<Dictionary<string, object?>> deliveries, CancellationToken ct = default);
+
+    // Privacy (GDPR Art. 15, 17, 20): the user can download and delete everything the service stores about them.
+    Task<byte[]> ExportMyDataAsync(CancellationToken ct = default);
+    Task DeleteAccountAsync(CancellationToken ct = default);
 }
 
 /// <summary>The implementation in HAULIX 0.0.x: no server – every call reports that online features are not available.</summary>
@@ -41,6 +45,8 @@ public sealed class NoOnlineApi : IOnlineApi
     public Task<IReadOnlyList<VtcEvent>> GetEventsAsync(string? vtcId, CancellationToken ct = default) => throw Na();
     public Task<IReadOnlyList<LeaderboardEntry>> GetLeaderboardAsync(string m, string p, string? v, CancellationToken ct = default) => throw Na();
     public Task<int> UploadDeliveriesAsync(IReadOnlyList<Dictionary<string, object?>> d, CancellationToken ct = default) => throw Na();
+    public Task<byte[]> ExportMyDataAsync(CancellationToken ct = default) => throw Na();
+    public Task DeleteAccountAsync(CancellationToken ct = default) => throw Na();
 }
 
 /// <summary>
@@ -105,4 +111,9 @@ public sealed class SampleOnlineApi : IOnlineApi
 
     public Task<int> UploadDeliveriesAsync(IReadOnlyList<Dictionary<string, object?>> deliveries, CancellationToken ct = default) =>
         Task.FromResult(deliveries.Count);
+
+    public Task<byte[]> ExportMyDataAsync(CancellationToken ct = default) =>
+        Task.FromResult(System.Text.Encoding.UTF8.GetBytes("{\"account\":\"acc-demo\",\"sample\":true}"));
+
+    public Task DeleteAccountAsync(CancellationToken ct = default) => Task.CompletedTask;
 }

@@ -48,6 +48,7 @@
     <EmbeddedResource Include="..\Haulix.App\wwwroot\assets\brand\*.png" LogicalName="ui/assets/brand/%(Filename)%(Extension)" />
     <EmbeddedResource Include="..\Haulix.App\wwwroot\assets\icons.svg" LogicalName="ui/assets/icons.svg" />
     <EmbeddedResource Include="..\..\LICENSE" LogicalName="ui/LICENSE.txt" Condition="Exists('..\..\LICENSE')" />
+    <EmbeddedResource Include="..\..\PRIVACY.md" LogicalName="ui/PRIVACY.txt" Condition="Exists('..\..\PRIVACY.md')" />
     <!-- WebView2 (managed + native loader) -->
     <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)\lib\net462\Microsoft.Web.WebView2.Core.dll" LogicalName="lib/Microsoft.Web.WebView2.Core.dll" />
     <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)\lib\net462\Microsoft.Web.WebView2.WinForms.dll" LogicalName="lib/Microsoft.Web.WebView2.WinForms.dll" />

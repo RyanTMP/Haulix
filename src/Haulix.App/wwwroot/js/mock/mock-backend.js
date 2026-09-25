@@ -441,6 +441,8 @@ function handle(method, p) {
     case "image.copy": return true;
     case "shell.openUrl": return true;
     case "hud.preview": case "hud.place": case "sound.test": return true;
+    case "online.status": return { available: false, termsVersion: "1.0", termsAccepted: false, state: "NotAvailable", sample: false };
+    case "legal.get": return fetch(p.doc === "privacy" ? "/PRIVACY.md" : p.doc === "thirdparty" ? "/THIRD-PARTY-NOTICES.md" : "/LICENSE").then((r) => (r.ok ? r.text() : "Preview: the document is shown here in HAULIX."));
     case "voice.list": return { engineInstalled: false, windows: ["Microsoft Hedda Desktop", "Microsoft Zira Desktop"], natural: [["de_DE-thorsten-medium", "Thorsten", "de", "male"], ["de_DE-kerstin-low", "Kerstin", "de", "female"], ["en_US-amy-medium", "Amy", "en", "female"], ["en_US-ryan-medium", "Ryan", "en", "male"]].map(([id, name, lang, gender], i) => ({ id, name, lang, gender, sizeMb: 61, installed: i === 0 })) };
     case "voice.install": case "voice.remove": case "voice.test": return true;
     case "notify.test": setTimeout(() => mockDispatch?.({ event: "notify", data: { kind: "info", category: "test", title: "Job updates appear here", message: "While you drive, HAULIX shows milestones, deadline and fuel warnings over the game." } }), 50); return true;

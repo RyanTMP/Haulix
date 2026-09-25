@@ -9,6 +9,8 @@ All notable changes to HAULIX. The same list appears in the app under *What's ne
 - **Live map removed** – The planned live map with friends is no longer part of the online plans.
 - **Dashboard: your progress** – Where the map used to be, the dashboard now shows your driver rank and the achievements you are closest to.
 - **Smaller and faster** – The setup no longer carries the map files, and HAULIX starts without building a road map.
+- **New license agreement & privacy policy** – HAULIX now has its own license agreement: free for personal use, © RyanTMP, all rights reserved. It already covers the future online features (accounts, VTCs, your content, conduct). The setup shows it with the new privacy policy – read and accept it once.
+- **Online: privacy by default** – Settings → Online shows the terms for the future online service. Leaderboards, sharing with your VTC and cloud sync will stay off until you turn them on.
 
 <details><summary>Deutsch</summary>
 
@@ -17,6 +19,8 @@ All notable changes to HAULIX. The same list appears in the app under *What's ne
 - **Live-Karte entfernt** – Die geplante Live-Karte mit Freunden ist nicht mehr Teil der Online-Pläne.
 - **Übersicht: dein Fortschritt** – Wo früher die Karte war, zeigt die Übersicht jetzt deinen Fahrerrang und die Erfolge, die du fast erreicht hast.
 - **Kleiner und schneller** – Das Setup enthält keine Kartendateien mehr, und HAULIX startet, ohne eine Straßenkarte zu erstellen.
+- **Neuer Lizenzvertrag & Datenschutzerklärung** – HAULIX hat jetzt einen eigenen Lizenzvertrag: kostenlos für den privaten Gebrauch, © RyanTMP, alle Rechte vorbehalten. Er deckt schon die künftigen Online-Funktionen ab (Konten, VTCs, deine Inhalte, Verhalten). Das Setup zeigt ihn mit der neuen Datenschutzerklärung – einmal lesen und akzeptieren.
+- **Online: Datenschutz ab Werk** – Einstellungen → Online zeigt die Bedingungen für den künftigen Online-Dienst. Bestenlisten, Teilen mit deiner VTC und Cloud-Sync bleiben aus, bis du sie einschaltest.
 
 </details>
 

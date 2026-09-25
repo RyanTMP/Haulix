@@ -1,6 +1,6 @@
 # Third-party notices
 
-HAULIX (© 2026 RyanTMP) includes or uses the following software, fonts and data. Each remains the property
+HAULIX (© 2026 RyanTMP, all rights reserved) includes or uses the following software, fonts and data. Each remains the property
 of its authors and is used under the licence shown. Thank you to all of them.
 
 | Component | Owner | Licence | Used for |
@@ -58,7 +58,3 @@ PERFORMANCE OF THIS SOFTWARE.
 
 The fonts are used unmodified under the SIL Open Font License, Version 1.1 (https://openfontlicense.org).
 The fonts may be bundled and redistributed with software, but may not be sold on their own.
-
-## GNU General Public License v2
-
-HAULIX itself is distributed under this licence – see [LICENSE](LICENSE).

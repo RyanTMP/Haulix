@@ -315,10 +315,18 @@ public sealed class HaulixEngine : IDisposable
 
             case "cities.learned": return Queries.LearnedCities(Db);
             case "notify.test": Notifier.Test(); return true;
-            case "online.status": return Online.StatusPayload();
+            case "online.status": return Online.StatusPayload(Settings.Load().Online);
+            case "online.acceptTerms":
+                // Consent for the future online services (License Agreement Part B + Privacy Policy), stored with date.
+                UpdateSettings(s => { s.Online.AcceptedTermsVersion = Haulix.Core.Online.OnlineService.TermsVersion; s.Online.AcceptedTermsUtc = DateTime.UtcNow; });
+                return Online.StatusPayload(Settings.Load().Online);
+            case "online.revokeTerms":
+                UpdateSettings(s => { s.Online.AcceptedTermsVersion = null; s.Online.AcceptedTermsUtc = null; s.Online.CloudSync = false; s.Online.ShowOnLeaderboards = false; s.Online.ShareWithVtc = false; });
+                return Online.StatusPayload(Settings.Load().Online);
+            case "legal.get": return LegalText(Str(args, "doc") ?? "license");
             case "online.sample":
                 Online.UseSample = args.TryGetProperty("on", out var sampleOn) && sampleOn.GetBoolean();
-                return Online.StatusPayload();
+                return Online.StatusPayload(Settings.Load().Online);
             case "online.me": return Online.Api.MeAsync().GetAwaiter().GetResult();
             case "online.vtcs": return Online.Api.SearchVtcsAsync(Str(args, "query"), Str(args, "language"), Str(args, "region")).GetAwaiter().GetResult();
             case "online.members": return Online.Api.GetMembersAsync(Str(args, "vtcId") ?? "").GetAwaiter().GetResult();
@@ -410,6 +418,26 @@ public sealed class HaulixEngine : IDisposable
         Push?.Invoke("dataChanged", new { scope = "all" });
         Push?.Invoke("settings", Settings.Load());
         PushStatus();
+    }
+
+    /// <summary>
+    /// License agreement, privacy policy or third-party notices. The release ships them next to Haulix.exe
+    /// (tools/release/build-release.ps1); development builds read them from the repository root.
+    /// </summary>
+    private static string LegalText(string doc)
+    {
+        var (release, source) = doc switch
+        {
+            "privacy" => ("PRIVACY.txt", "PRIVACY.md"),
+            "thirdparty" => ("THIRD-PARTY-NOTICES.txt", "THIRD-PARTY-NOTICES.md"),
+            _ => ("LICENSE.txt", "LICENSE"),
+        };
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        if (File.Exists(Path.Combine(dir.FullName, release))) return File.ReadAllText(Path.Combine(dir.FullName, release));
+        for (var d = dir; d is not null; d = d.Parent)
+            if (File.Exists(Path.Combine(d.FullName, source)) && File.Exists(Path.Combine(d.FullName, "Haulix.slnx")))
+                return File.ReadAllText(Path.Combine(d.FullName, source));
+        return "The document could not be found. Read it at https://github.com/RyanTMP/Haulix";
     }
 
     private static string? Str(JsonElement e, string name) =>

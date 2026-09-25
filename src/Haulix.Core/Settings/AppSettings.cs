@@ -15,6 +15,7 @@ public sealed class AppSettings
     public NotificationSettings Notifications { get; set; } = new();
     public TruckersMpSettings TruckersMp { get; set; } = new();
     public HudSettings Hud { get; set; } = new();
+    public OnlineSettings Online { get; set; } = new();
 }
 
 public sealed class GeneralSettings
@@ -186,6 +187,23 @@ public sealed class AppearanceSettings
     public bool Animations { get; set; } = true;
     public bool Transparency { get; set; } = true;
     public bool SidebarCollapsed { get; set; }
+}
+
+/// <summary>
+/// Consent and privacy choices for the future HAULIX online services. Privacy by default: nothing is shared
+/// until the user accepts the terms and turns a feature on.
+/// </summary>
+public sealed class OnlineSettings
+{
+    /// <summary>Version of the license agreement (Part B) and privacy policy the user accepted; null = not yet.</summary>
+    public string? AcceptedTermsVersion { get; set; }
+    public DateTime? AcceptedTermsUtc { get; set; }
+    /// <summary>Show my name and results on public leaderboards.</summary>
+    public bool ShowOnLeaderboards { get; set; }
+    /// <summary>Back up my logbook to my HAULIX account.</summary>
+    public bool CloudSync { get; set; }
+    /// <summary>Share my deliveries with my VTC.</summary>
+    public bool ShareWithVtc { get; set; }
 }
 
 /// <summary>Persists <see cref="AppSettings"/> as one JSON document in the local database.</summary>

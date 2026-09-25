@@ -1,7 +1,7 @@
 import { html, raw, $, cx } from "../core/html.js";
 import { icon } from "../core/icons.js";
 import { store } from "../core/store.js";
-import { toggle, select, segmented, toast, confirm, skeleton } from "../components/ui.js";
+import { toggle, select, segmented, toast, confirm, skeleton, modal } from "../components/ui.js";
 import { on } from "../core/bridge.js";
 import { saveSettings, changeLanguage, showUpdate } from "../app.js";
 import { t } from "../core/i18n.js";
@@ -152,6 +152,14 @@ export default {
         ${section("online", "Online", html`
           <div class="callout" style="margin:14px 0 6px">${icon("globe")}<div><strong>The HAULIX online service is being prepared.</strong> Accounts, VTCs, job board, events, leaderboards and cloud sync are built into HAULIX already, but there is no server yet – nothing is sent from this PC.</div></div>
           ${row(html`Status`, "", html`<span class="badge badge--outline">${icon("clock", "icon icon-sm")}Not available yet</span>`)}
+          <div class="setting-group"><div class="setting-group__title">${icon("shield-check")}Terms & privacy</div>
+            ${row("Terms for online features", "Signing in will require accepting Part B of the HAULIX License Agreement (accounts, VTCs, your content, conduct) and the Privacy Policy. Nothing is sent before that.", html`<span id="termsState" class="badge badge--outline">${icon("clock", "icon icon-sm")}Not accepted yet</span>`)}
+            ${row("Read the documents", "", html`<div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn--sm" data-legal="license">${icon("file-text")}License agreement</button><button class="btn btn--sm" data-legal="privacy">${icon("shield")}Privacy policy</button></div>`)}
+            ${row("Privacy by default", "When the online service starts, every kind of sharing stays off until you turn it on.", "")}
+            ${row("Show me on leaderboards", "Your name and results on public leaderboards.", html`<span class="locked" data-tip="Coming later">${icon("lock")}${toggle("online.showOnLeaderboards", false, { disabled: true })}</span>`, "setting--locked")}
+            ${row("Share deliveries with my VTC", "Your deliveries count for your company's statistics.", html`<span class="locked" data-tip="Coming later">${icon("lock")}${toggle("online.shareWithVtc", false, { disabled: true })}</span>`, "setting--locked")}
+            ${row("Cloud sync", "Back up your logbook to your HAULIX account.", html`<span class="locked" data-tip="Coming later">${icon("lock")}${toggle("online.cloudSync", false, { disabled: true })}</span>`, "setting--locked")}
+          </div>
           ${row("Developer preview", "Shows the VTC and Online pages with local sample data (no network), to try the screens before the service starts.", toggle("online.sample", !!store.get("onlineSample")))}
         `)}
 
@@ -206,8 +214,9 @@ export default {
             <a class="btn btn--sm" href="#" data-url="https://github.com/RyanTMP/Haulix/releases">${icon("download")}Downloads</a>
             <a class="btn btn--sm btn--ghost" href="#" data-url="https://github.com/RyanTMP/Haulix/issues">${icon("circle-alert")}Report a problem</a></div>`)}
           ${row("Keyboard", "", html`<span class="muted" style="font-size:12px"><span class="kbd">Ctrl K</span> search · <span class="kbd">Alt 1–9</span> pages · <span class="kbd">Ctrl ,</span> settings</span>`)}
-          ${row("Credits", "Live data comes from the free SCS telemetry plugin by RenCloud. Charts with uPlot, icons by Lucide, voices by Piper. HAULIX is free software (GPL v2).", "")}
-          <p class="faint about-legal">© 2026 RyanTMP. HAULIX is licensed under the GNU GPL v2; the HAULIX name, logo and artwork are all rights reserved.</p>
+          ${row("License & privacy", "HAULIX is free for personal use under the HAULIX License Agreement. Your data stays on this PC – see the Privacy Policy.", html`<div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn--sm" data-legal="license">${icon("file-text")}License agreement</button><button class="btn btn--sm" data-legal="privacy">${icon("shield")}Privacy policy</button><button class="btn btn--sm btn--ghost" data-legal="thirdparty">${icon("list")}Third-party notices</button></div>`)}
+          ${row("Credits", "Live data comes from the free SCS telemetry plugin by RenCloud. Charts with uPlot, icons by Lucide, voices by Piper.", "")}
+          <p class="faint about-legal">© 2026 RyanTMP. All rights reserved. HAULIX, its name, logo and artwork belong to RyanTMP.</p>
           <p class="faint about-legal">HAULIX is an independent fan project, not affiliated with or endorsed by SCS Software, TruckersMP or any other company. Euro Truck Simulator 2 and American Truck Simulator are trademarks of SCS Software; all other names and trademarks belong to their owners.</p>
           <details class="about-dev"><summary>${icon("wrench")}For developers</summary>
             ${row("Custom update source", "URL of your own update manifest (JSON with version, url, notes). Leave empty to use GitHub.", html`<input class="input" name="general.updateFeedUrl" placeholder="https://…/haulix-update.json" style="width:260px" value="${s.general.updateFeedUrl || ""}">`)}
@@ -301,6 +310,19 @@ export default {
       input.value = AFK_DEFAULT;
       setting("truckersMp.message", AFK_DEFAULT);
     });
+
+    // License agreement, privacy policy and third-party notices, read inside HAULIX.
+    const LEGAL_TITLES = { license: "HAULIX License Agreement", privacy: "HAULIX Privacy Policy", thirdparty: "Third-party notices" };
+    root.querySelectorAll("[data-legal]").forEach((b) => b.addEventListener("click", async () => {
+      const text = await call("legal.get", { doc: b.dataset.legal }).catch((e) => e.message);
+      modal({ title: LEGAL_TITLES[b.dataset.legal], wide: true, body: html`<pre class="legal-text">${text}</pre>` });
+    }));
+    call("online.status").then((o) => {
+      const el = $("#termsState", root);
+      if (!el || !o?.termsAccepted) return;
+      el.className = "badge badge--ok";
+      el.innerHTML = html`${icon("circle-check", "icon icon-sm")}Accepted · version ${o.termsVersion}`.toString();
+    }).catch(() => {});
 
     root.querySelectorAll("[data-url]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); call("shell.openUrl", { url: a.dataset.url }).catch(() => {}); }));
     $("#checkUpdate", root)?.addEventListener("click", async () => {

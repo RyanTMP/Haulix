@@ -10,6 +10,14 @@ public sealed class OnlineService
     /// <summary>Flip to true (with a real <see cref="IOnlineApi"/>) when the HAULIX server exists.</summary>
     public const bool Available = false;
 
+    /// <summary>
+    /// Version of the HAULIX License Agreement (Part B – online services) and Privacy Policy. Signing in requires the
+    /// user to have accepted this version; raise it when the terms change so everyone is asked again.
+    /// </summary>
+    public const string TermsVersion = "1.0";
+
+    public static bool TermsAccepted(Settings.OnlineSettings s) => s.AcceptedTermsVersion == TermsVersion;
+
     private IOnlineApi _api = new NoOnlineApi();
 
     public OnlineState State { get; private set; } = OnlineState.NotAvailable;
@@ -22,9 +30,12 @@ public sealed class OnlineService
         set { _api = value ? new SampleOnlineApi() : new NoOnlineApi(); State = value ? OnlineState.SignedIn : OnlineState.NotAvailable; }
     }
 
-    public object StatusPayload() => new
+    public object StatusPayload(Settings.OnlineSettings s) => new
     {
         available = Available,
+        termsVersion = TermsVersion,
+        termsAccepted = TermsAccepted(s),
+        termsAcceptedUtc = s.AcceptedTermsUtc,
         state = State.ToString(),
         sample = UseSample,
         planned = new[] { "accounts", "vtc", "jobBoard", "events", "leaderboards", "cloudSync" },

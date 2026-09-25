@@ -72,3 +72,17 @@ p.lead { color: var(--text-2); font-size: 14px; line-height: 1.6; max-width: 520
 .done-mark { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: var(--ok-tint); color: var(--ok); margin-bottom: 20px; }
 .done-mark svg { width: 28px; height: 28px; }
 .done-mark--warn { background: var(--crit-tint); color: var(--crit); }
+
+/* License agreement / privacy policy viewer */
+.doc-view { position: fixed; inset: 0; z-index: 100; background: rgb(0 0 0 / 0.6); display: grid; place-items: center; padding: 28px; animation: doc-in 140ms ease-out; }
+@keyframes doc-in { from { opacity: 0; } }
+.doc-view__panel { width: min(760px, 100%); height: min(620px, 100%); display: flex; flex-direction: column; background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: var(--r-2); box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.8); overflow: hidden; }
+.doc-view__head { display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; border-bottom: 1px solid var(--border); }
+.doc-view__tabs { display: flex; gap: 4px; flex: 1; }
+.doc-view__tabs button { border: 0; background: transparent; color: var(--text-2); padding: 7px 12px; border-radius: 6px; font: inherit; font-size: 13px; cursor: pointer; }
+.doc-view__tabs button.is-active { background: var(--surface-3); color: var(--text); }
+.doc-view__close { width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--text-3); cursor: pointer; }
+.doc-view__close:hover { background: var(--surface-3); color: var(--text); }
+.doc-view__close svg { width: 16px; height: 16px; }
+.doc-view__text { flex: 1; margin: 0; padding: 18px 22px; overflow: auto; white-space: pre-wrap; font-family: var(--font-ui); font-size: 12.5px; line-height: 1.55; color: var(--text-2); }
+.doc-view__foot { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--border); font-size: 12px; }

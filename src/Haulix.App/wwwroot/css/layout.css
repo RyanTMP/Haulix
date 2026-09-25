@@ -153,3 +153,14 @@
 .stack { display: flex; flex-direction: column; gap: var(--gutter); }
 .page-max { max-width: 2400px; margin: 0 auto; }
 .section-head { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-3); }
+
+/* Pre-release notice above the top bar (0.0.7): HAULIX is preparing its online features. */
+.online-notice { display: flex; align-items: center; gap: 12px; margin: 12px var(--gutter) 0; padding: 10px 12px 10px 14px; border-radius: var(--r-2);
+  border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); background: color-mix(in srgb, var(--warn) 12%, var(--surface-1)); color: var(--text-2); font-size: 13px; line-height: 1.4; }
+.online-notice__icon { display: grid; place-items: center; color: var(--warn); flex-shrink: 0; }
+.online-notice__icon svg { width: 18px; height: 18px; }
+.online-notice__text { flex: 1; min-width: 0; }
+.online-notice__text b { color: var(--text); font-weight: 600; margin-right: 4px; }
+.online-notice__close { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: var(--text-3); cursor: pointer; flex-shrink: 0; }
+.online-notice__close:hover { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--text); }
+.online-notice__close svg { width: 15px; height: 15px; }

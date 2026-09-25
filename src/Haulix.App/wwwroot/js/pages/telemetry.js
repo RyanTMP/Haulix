@@ -178,7 +178,10 @@ export default {
               <div class="muted" style="font-size:12px;margin-bottom:12px"><span data-bind="from"></span> <span class="faint" data-bind="fromCo"></span> → <span data-bind="to"></span> <span class="faint" data-bind="toCo"></span></div>
               <div id="jobProg" style="margin-bottom:12px"></div>
               ${kv([["Cargo mass", html`<span data-bind="cargoMass">—</span>`, { icon: "weight" }], ["Planned distance", html`<span data-bind="planned">—</span>`, { icon: "route" }],
-                ["Remaining", html`<span data-bind="remaining">—</span>`, { icon: "milestone" }], ["Deadline", html`<span data-bind="deadline">—</span>`, { icon: "timer" }]], { compact: true })}`.toString()
+                ["Remaining", html`<span data-bind="remaining">—</span>`, { icon: "milestone" }],
+                ["Real-time ETA", html`<span class="accent" data-bind="etaReal">—</span> <span class="faint" data-bind="arrivalClock"></span>`, { icon: "timer" }],
+                ["Game ETA", html`<span data-bind="eta">—</span> <span class="faint" data-bind="onTime"></span>`, { icon: "clock" }],
+                ["Deadline", html`<span data-bind="deadline">—</span>`, { icon: "calendar" }]], { compact: true })}`.toString()
             : empty({ iconName: "package", title: "No active job", text: "Accept a job in ETS2 to track cargo, route progress and deadline.", compact: true }).toString();
           bindText(jb, v);
         }

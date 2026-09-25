@@ -200,7 +200,7 @@ let settings = {
   map: { defaultZoom: -5, followTruck: true, routeHistoryDays: 90, tileFolder: null, showEstimatedCities: true, layers: { truck: true, currentRoute: true, previousRoutes: true, garages: true, cities: true, services: false, dealers: false, recruitment: false, aiDrivers: true, fleet: true, events: false } },
   data: { autoBackup: true, backupIntervalHours: 24, backupKeep: 10, backupFolder: null },
   appearance: { accent: "amber", compact: false, animations: true, transparency: true, sidebarCollapsed: false },
-  hud: { position: "topCenter", x: 50, y: 5, opacity: 90, size: "medium", onlyOnJob: false, fields: ["speedLimit", "remaining", "etaReal", "arrival"] },
+  hud: { cardEnabled: true, position: "topRight", x: 85, y: 20, size: "medium", fields: ["remaining", "etaReal", "arrival", "deadline", "speed", "fuelRange"], mapEnabled: true, mapPosition: "bottomRight", mapX: 85, mapY: 75, mapSize: "medium", mapZoom: 2, mapRotate: true, opacity: 90, onlyOnJob: false },
   truckersMp: { antiAfk: false, message: "AFK - back soon", intervalMinutes: 8, chatKey: "Y", riskAccepted: false },
   notifications: { enabled: true, progress: true, warnings: true, overlay: true, voice: false, afkWarning: true, position: "topRight" },
 };
@@ -428,6 +428,8 @@ function handle(method, p) {
     case "image.copy": return true;
     case "shell.openUrl": return true;
     case "hud.preview": return true;
+    case "voice.list": return { engineInstalled: false, windows: ["Microsoft Hedda Desktop", "Microsoft Zira Desktop"], natural: [["de_DE-thorsten-medium", "Thorsten", "de", "male"], ["de_DE-kerstin-low", "Kerstin", "de", "female"], ["en_US-amy-medium", "Amy", "en", "female"], ["en_US-ryan-medium", "Ryan", "en", "male"]].map(([id, name, lang, gender], i) => ({ id, name, lang, gender, sizeMb: 61, installed: i === 0 })) };
+    case "voice.install": case "voice.remove": case "voice.test": return true;
     case "notify.test": setTimeout(() => mockDispatch?.({ event: "notify", data: { kind: "info", category: "test", title: "Job updates appear here", message: "While you drive, HAULIX shows milestones, deadline and fuel warnings over the game." } }), 50); return true;
     case "settings.save": settings = p.settings; return settings;
     case "ets2.detect": return detection;

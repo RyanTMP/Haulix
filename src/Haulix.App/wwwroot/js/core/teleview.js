@@ -38,6 +38,7 @@ export function teleValues(s) {
   return {
     speed: f.num(f.speedValue(Math.abs(s.speedKmh))),
     speedUnit: f.speedUnit(),
+    speedSub: [f.speedUnit(), s.speedLimitKmh > 1 ? `limit ${f.num(f.speedValue(s.speedLimitKmh))}` : "", s.cruiseControl ? `cruise ${f.num(f.speedValue(s.cruiseControlKmh))}` : ""].filter(Boolean).join(" · "),
     speedLimit: s.speedLimitKmh > 1 ? f.num(f.speedValue(s.speedLimitKmh)) : "",
     cruise: s.cruiseControl ? f.speed(s.cruiseControlKmh) : "Off",
     rpm: f.num(s.engineRpm),

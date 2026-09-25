@@ -102,6 +102,8 @@ public sealed class HaulixEngine : IDisposable
     public JobNotifier Notifier { get; }
     private readonly EtaEstimator _eta = new();
     public Achievements Achievements { get; }
+    /// <summary>Online service – locked in 0.0.x; the sample backend feeds the VTC/Online screens in the developer preview.</summary>
+    public Online.OnlineService Online { get; } = new();
     private bool _achievementsPrimed;
 
     /// <summary>Announces achievements reached since the last check (the very first check is silent).</summary>
@@ -340,6 +342,17 @@ public sealed class HaulixEngine : IDisposable
                 return new { cities = payload.Cities, routes = payload.Routes, events = payload.Events, historyDays = days };
             }
             case "notify.test": Notifier.Test(); return true;
+            case "online.status": return Online.StatusPayload();
+            case "online.sample":
+                Online.UseSample = args.TryGetProperty("on", out var sampleOn) && sampleOn.GetBoolean();
+                return Online.StatusPayload();
+            case "online.me": return Online.Api.MeAsync().GetAwaiter().GetResult();
+            case "online.vtcs": return Online.Api.SearchVtcsAsync(Str(args, "query"), Str(args, "language"), Str(args, "region")).GetAwaiter().GetResult();
+            case "online.members": return Online.Api.GetMembersAsync(Str(args, "vtcId") ?? "").GetAwaiter().GetResult();
+            case "online.jobs": return Online.Api.GetJobsAsync(Str(args, "vtcId") ?? "").GetAwaiter().GetResult();
+            case "online.events": return Online.Api.GetEventsAsync(Str(args, "vtcId")).GetAwaiter().GetResult();
+            case "online.leaderboard": return Online.Api.GetLeaderboardAsync(Str(args, "metric") ?? "km", Str(args, "period") ?? "week", Str(args, "vtcId")).GetAwaiter().GetResult();
+            case "online.live": return Online.Api.GetLivePositionsAsync(Str(args, "scope") ?? "vtc").GetAwaiter().GetResult();
             case "achievements.get":
             {
                 var list = Achievements.Evaluate(out _);

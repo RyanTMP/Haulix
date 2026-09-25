@@ -148,7 +148,7 @@ public sealed class MainForm : Form
             var appInFront = Visible && WindowState != FormWindowState.Minimized && ActiveForm == this;
             if (ns.Overlay && (!appInFront || n.Category == "test")) _overlay.Show(n, ns.Position);
             // Spoken too when enabled: audible even when ETS2 runs in exclusive fullscreen on a single monitor.
-            if (ns.Voice && (!appInFront || n.Category == "test")) _voice.Speak(n, _engine.Settings.Load().General);
+            if (ns.Voice && (!appInFront || n.Category == "test")) _voice.Speak(n, _engine.Settings.Load().General, ns);
         });
         _engine.Start();
         core.Navigate($"https://{HostName}/index.html");
@@ -265,6 +265,43 @@ public sealed class MainForm : Form
                     var url = Str(args, "url");
                     if (!Haulix.Core.Services.UpdateChecker.IsTrustedSetupUrl(url)) { error = "Not a HAULIX release download"; return true; }
                     _ = Task.Run(() => DownloadAndRunUpdate(url!));
+                    result = true;
+                    return true;
+                }
+                case "voice.list":
+                    result = new
+                    {
+                        natural = PiperVoices.Catalog.Select(v => new { id = v.Id, name = v.Name, lang = v.Lang, gender = v.Gender, sizeMb = v.SizeMb, installed = PiperVoices.Installed(v.Id) }),
+                        engineInstalled = PiperVoices.EngineInstalled,
+                        windows = VoiceAnnouncer.WindowsVoices(),
+                    };
+                    return true;
+                case "voice.install":
+                {
+                    // Download engine + voice in the background; progress goes to the UI as events.
+                    var id = Str(args, "id") ?? "";
+                    if (PiperVoices.Catalog.All(v => v.Id != id)) { error = "Unknown voice"; return true; }
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await PiperVoices.Install(id, (p, step) => Post(new { @event = "voiceProgress", data = new { id, pct = (int)(p * 100), step } }));
+                            Post(new { @event = "voiceInstalled", data = new { id } });
+                        }
+                        catch (Exception ex) { Post(new { @event = "voiceError", data = new { id, message = ex.Message } }); }
+                    });
+                    result = true;
+                    return true;
+                }
+                case "voice.remove":
+                    PiperVoices.Remove(Str(args, "id") ?? "");
+                    result = true;
+                    return true;
+                case "voice.test":
+                {
+                    var ns = _engine!.Settings.Load().Notifications;
+                    var lang = VoiceAnnouncer.Language(_engine.Settings.Load().General);
+                    _voice.Say(lang == "de" ? "Noch zehn Kilometer bis Prag. Ankunft in etwa neun Minuten." : "Ten kilometres left to Prague. Arriving in about nine minutes.", ns, lang);
                     result = true;
                     return true;
                 }

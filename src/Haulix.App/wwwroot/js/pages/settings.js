@@ -1,21 +1,25 @@
 import { html, raw, $, cx } from "../core/html.js";
 import { icon } from "../core/icons.js";
 import { store } from "../core/store.js";
-import { toggle, select, segmented, toast, confirm } from "../components/ui.js";
+import { toggle, select, segmented, toast, confirm, skeleton } from "../components/ui.js";
+import { on } from "../core/bridge.js";
 import { saveSettings, changeLanguage, showUpdate } from "../app.js";
 import { t } from "../core/i18n.js";
 import { currencyList } from "../core/format.js";
 import * as f from "../core/format.js";
 
 const SECTIONS = [
-  ["general", "General", "sliders-horizontal"], ["ets2", "ETS2", "truck"], ["telemetry", "Telemetry", "activity"], ["notifications", "Notifications", "bell"], ["hud", "In-game HUD", "gauge"], ["truckersmp", "TruckersMP", "users"],
+  ["general", "General", "sliders-horizontal"], ["ets2", "ETS2", "truck"], ["telemetry", "Telemetry", "activity"], ["notifications", "Notifications", "bell"], ["hud", "In-game HUD", "gauge"], ["truckersmp", "TruckersMP", "users"], ["online", "Online", "globe"],
   ["map", "Map", "map"], ["data", "Data", "database"], ["appearance", "Appearance", "palette"], ["about", "About", "info"],
 ];
 const ACCENTS = [["amber", "#ffb020", "Electric amber"], ["copper", "#e07a3f", "Copper"], ["ice", "#7cc4ff", "Ice blue"], ["signal", "#e8e9eb", "Signal white"]];
 const AFK_DEFAULT = "AFK - back soon";
-const HUD_FIELDS = [["speedLimit", "Speed limit"], ["speed", "Speed"], ["remaining", "Remaining distance"], ["etaReal", "Real-time ETA"], ["arrival", "Arrival time"],
-  ["etaGame", "Game ETA"], ["deadline", "Deadline buffer"], ["fuelRange", "Fuel range"], ["rest", "Next rest"], ["damage", "Truck wear"], ["gameTime", "Game time"]];
-const HUD_DEFAULT = ["speedLimit", "remaining", "etaReal", "arrival"];
+const HUD_FIELDS = [["remaining", "Remaining distance"], ["etaReal", "Real-time ETA"], ["arrival", "Arrival time"], ["etaGame", "Game ETA"], ["deadline", "Deadline buffer"],
+  ["speed", "Speed"], ["speedLimit", "Speed limit"], ["fuelRange", "Fuel range"], ["rest", "Next rest"], ["damage", "Damage"], ["gameTime", "Game time"]];
+const HUD_DEFAULT = ["remaining", "etaReal", "arrival", "deadline", "speed", "fuelRange"];
+const HUD_POSITIONS = [["topRight", "Top right"], ["topLeft", "Top left"], ["bottomRight", "Bottom right"], ["bottomLeft", "Bottom left"], ["custom", "Custom"]];
+const HUD_POS_OK = (p) => (HUD_POSITIONS.some(([k]) => k === p) ? p : null);
+const range = (name, label, value) => row(label, "0 % = left/top edge, 100 % = right/bottom edge.", html`<div class="range-row"><input type="range" name="${name}" min="0" max="100" step="1" value="${value}"><span class="num" data-range="${name}">${value} %</span></div>`);
 const FIELDS = [["vehicle", "Vehicle"], ["drivetrain", "Driver inputs"], ["fluids", "Fluids & gauges"], ["damage", "Damage"], ["navigation", "Location & navigation"], ["job", "Current job"], ["trailer", "Trailer"], ["lights", "Controls & lights"]];
 
 const row = (title, desc, control, cls = "") => html`<div class="${cx("setting", cls)}"><div><div class="setting__title">${title}</div>${desc ? html`<div class="setting__desc">${desc}</div>` : ""}</div><div class="setting__control">${control}</div></div>`;
@@ -75,25 +79,52 @@ export default {
           ${row("Warnings", "Deadline at risk, fuel range too short, new cargo damage and rest needed.", toggle("notifications.warnings", s.notifications?.warnings !== false))}
           ${row("Show over the game", "Small HAULIX cards on top of ETS2 while HAULIX runs in the background. Needs ETS2 in windowed or borderless fullscreen mode; exclusive fullscreen hides every overlay.", toggle("notifications.overlay", s.notifications?.overlay !== false))}
           ${row("ETS2 display mode", html`<span id="displayMode">Checking…</span>`, html`<button class="btn btn--sm hidden" id="setBorderless">${icon("monitor")}Switch to borderless</button>`)}
-          ${row("Read aloud", "Speaks notifications with the Windows voice. Also works in exclusive fullscreen and on a single monitor.", toggle("notifications.voice", !!s.notifications?.voice))}
+          <div class="setting-group"><div class="setting-group__title">${icon("bell")}Voice</div>
+            ${row("Read aloud", "Speaks notifications – audible even in exclusive fullscreen and on a single monitor.", toggle("notifications.voice", !!s.notifications?.voice))}
+            ${row("Voice engine", "Natural AI voices sound human and run offline on your PC (download once). Windows voices need no download.", segmented("notifications.voiceEngine", [["natural", "Natural AI voice"], ["windows", "Windows voice"]], s.notifications?.voiceEngine || "natural"))}
+            <div id="voiceNatural" class="${(s.notifications?.voiceEngine || "natural") === "natural" ? "" : "hidden"}"><div class="voice-list" id="voiceList">${skeleton(1)}</div>
+              <p class="faint" style="font-size:11px;margin:6px 0 10px">Voices from the open-source Piper project, stored in %LOCALAPPDATA%\Haulix\voices – not in the program folder.</p></div>
+            <div id="voiceWindows" class="${s.notifications?.voiceEngine === "windows" ? "" : "hidden"}">${row("Windows voice", "", html`<select class="select" name="notifications.windowsVoice" id="winVoice" style="width:240px"><option value="">Automatic (UI language)</option></select>`)}</div>
+            ${row("Speed", "", html`<div class="range-row"><input type="range" name="notifications.voiceRate" min="0.7" max="1.4" step="0.05" value="${s.notifications?.voiceRate ?? 1}"><span class="num" data-range-x="notifications.voiceRate">${(s.notifications?.voiceRate ?? 1).toFixed(2)}×</span></div>`)}
+            ${row("Volume", "", html`<div class="range-row"><input type="range" name="notifications.voiceVolume" min="0" max="100" step="5" value="${s.notifications?.voiceVolume ?? 90}"><span class="num" data-range="notifications.voiceVolume">${s.notifications?.voiceVolume ?? 90} %</span></div>`)}
+            ${row("Test", "Plays a sample announcement with the chosen voice.", html`<button class="btn btn--sm" id="voiceTest">${icon("play")}Play sample</button>`)}
+          </div>
           ${row("TruckersMP inactivity warning", "Warns after 8 and 27 minutes without input on TruckersMP, before the server's automatic AFK kick (10 min on full servers, otherwise 30 min). HAULIX never sends input to the game – avoiding the kick automatically is against the TruckersMP rules.", toggle("notifications.afkWarning", s.notifications?.afkWarning !== false))}
           ${row("Position", "Screen corner of the monitor ETS2 runs on.", select("notifications.position", [["topRight", "Top right"], ["topLeft", "Top left"], ["bottomRight", "Bottom right"], ["bottomLeft", "Bottom left"]], s.notifications?.position || "topRight"))}
           ${row("Test", "Shows a sample notification over all windows.", html`<button class="btn btn--sm" id="notifyTest">${icon("bell")}Send test</button>`)}
         `)}
 
         ${section("hud", "In-game HUD", html`
-          <div class="hud-preview-wrap"><div class="hud-preview" id="hudPreview"></div></div>
-          ${row("Show the HUD", "A bar of live values over ETS2 while you drive. Needs borderless fullscreen or window mode (see Notifications → ETS2 display mode).", toggle("general.hud", !!s.general.hud))}
+          <div class="hud-preview-wrap" id="hudScene"><div class="hudp-card" id="hudCardPrev"></div><div class="hudp-map" id="hudMapPrev"></div></div>
+          ${row("Show the HUD", "Widgets over ETS2 while you drive, like VTC trackers. Needs borderless fullscreen or window mode (see Notifications → ETS2 display mode).", toggle("general.hud", !!s.general.hud))}
           ${row("Only during a job", "Hide the HUD in free roam.", toggle("hud.onlyOnJob", !!s.hud?.onlyOnJob))}
-          ${row("Information", "Pick what the HUD shows. The speed limit sign is always on the left.", html`<div class="chips hud-fields" style="justify-content:flex-end">${HUD_FIELDS.map(([k, l]) => html`<label class="pill" style="cursor:pointer"><input type="checkbox" data-hud-field="${k}" ${raw((s.hud?.fields || HUD_DEFAULT).includes(k) ? "checked" : "")} style="accent-color:var(--accent)">${l}</label>`)}</div>`, "setting--stack")}
-          ${row("Position", "Where on the game screen the HUD sits.", select("hud.position", [["topCenter", "Top centre"], ["topLeft", "Top left"], ["topRight", "Top right"], ["bottomCenter", "Bottom centre"], ["bottomLeft", "Bottom left"], ["bottomRight", "Bottom right"], ["custom", "Custom"]], s.hud?.position || "topCenter"))}
-          <div id="hudCustom" class="${(s.hud?.position || "topCenter") === "custom" ? "" : "hidden"}">
-            ${row("Horizontal", "0 % = left edge, 100 % = right edge.", html`<div class="range-row"><input type="range" name="hud.x" min="0" max="100" step="1" value="${s.hud?.x ?? 50}"><span class="num" data-range="hud.x">${s.hud?.x ?? 50} %</span></div>`)}
-            ${row("Vertical", "0 % = top edge, 100 % = bottom edge.", html`<div class="range-row"><input type="range" name="hud.y" min="0" max="100" step="1" value="${s.hud?.y ?? 5}"><span class="num" data-range="hud.y">${s.hud?.y ?? 5} %</span></div>`)}
+          ${row("Visibility", "How opaque the widgets are over the game.", html`<div class="range-row"><input type="range" name="hud.opacity" min="20" max="100" step="5" value="${s.hud?.opacity ?? 90}"><span class="num" data-range="hud.opacity">${s.hud?.opacity ?? 90} %</span></div>`)}
+          <div class="setting-group"><div class="setting-group__title">${icon("package")}Job card</div>
+            ${row("Show the job card", "Cargo, route, progress and the rows you pick below.", toggle("hud.cardEnabled", s.hud?.cardEnabled !== false))}
+            ${row("Rows", "What the card lists under the route.", html`<div class="chips hud-fields" style="justify-content:flex-end">${HUD_FIELDS.map(([k, l]) => html`<label class="pill" style="cursor:pointer"><input type="checkbox" data-hud-field="${k}" ${raw((s.hud?.fields || HUD_DEFAULT).includes(k) ? "checked" : "")} style="accent-color:var(--accent)">${l}</label>`)}</div>`, "setting--stack")}
+            ${row("Position", "", select("hud.position", HUD_POSITIONS, HUD_POS_OK(s.hud?.position) || "topRight"))}
+            <div data-custom="hud.position" class="${s.hud?.position === "custom" ? "" : "hidden"}">
+              ${range("hud.x", "Horizontal", s.hud?.x ?? 85)}${range("hud.y", "Vertical", s.hud?.y ?? 20)}
+            </div>
+            ${row("Size", "", segmented("hud.size", [["small", "Small"], ["medium", "Medium"], ["large", "Large"]], s.hud?.size || "medium"))}
           </div>
-          ${row("Visibility", "How opaque the HUD is over the game.", html`<div class="range-row"><input type="range" name="hud.opacity" min="20" max="100" step="5" value="${s.hud?.opacity ?? 90}"><span class="num" data-range="hud.opacity">${s.hud?.opacity ?? 90} %</span></div>`)}
-          ${row("Size", "", segmented("hud.size", [["small", "Small"], ["medium", "Medium"], ["large", "Large"]], s.hud?.size || "medium"))}
-          ${row("Check position", "Shows the HUD over all windows for 10 seconds (with sample values when you are not driving).", html`<button class="btn btn--sm" id="hudTest">${icon("monitor")}Show on screen</button>`)}
+          <div class="setting-group"><div class="setting-group__title">${icon("map")}Mini map</div>
+            ${row("Show the mini map", "The roads around your truck with the route and a remaining-distance footer.", toggle("hud.mapEnabled", s.hud?.mapEnabled !== false))}
+            ${row("Turn with the truck", "Driving direction always points up (off: north up).", toggle("hud.mapRotate", s.hud?.mapRotate !== false))}
+            ${row("Zoom", "", segmented("hud.mapZoom", [["1", "Near"], ["2", "Medium"], ["3", "Far"]], String(s.hud?.mapZoom ?? 2)))}
+            ${row("Position", "", select("hud.mapPosition", HUD_POSITIONS, HUD_POS_OK(s.hud?.mapPosition) || "bottomRight"))}
+            <div data-custom="hud.mapPosition" class="${s.hud?.mapPosition === "custom" ? "" : "hidden"}">
+              ${range("hud.mapX", "Horizontal", s.hud?.mapX ?? 85)}${range("hud.mapY", "Vertical", s.hud?.mapY ?? 75)}
+            </div>
+            ${row("Size", "", segmented("hud.mapSize", [["small", "Small"], ["medium", "Medium"], ["large", "Large"]], s.hud?.mapSize || "medium"))}
+          </div>
+          ${row("Check position", "Shows both widgets over all windows for 10 seconds (with sample values when you are not driving).", html`<button class="btn btn--sm" id="hudTest">${icon("monitor")}Show on screen</button>`)}
+        `)}
+
+        ${section("online", "Online", html`
+          <div class="callout" style="margin:14px 0 6px">${icon("globe")}<div><strong>The HAULIX online service is being prepared.</strong> Accounts, VTCs, job board, events, leaderboards, live map and cloud sync are built into HAULIX already, but there is no server yet – nothing is sent from this PC.</div></div>
+          ${row(html`Status`, "", html`<span class="badge badge--outline">${icon("clock", "icon icon-sm")}Not available yet</span>`)}
+          ${row("Developer preview", "Shows the VTC and Online pages with local sample data (no network), to try the screens before the service starts.", toggle("online.sample", !!store.get("onlineSample")))}
         `)}
 
         ${section("truckersmp", "TruckersMP", html`
@@ -165,7 +196,7 @@ export default {
     }).then(() => toast({ kind: "success", title: "Saved", timeout: 1400 })).catch((e) => toast({ kind: "error", title: "Could not save", message: e.message }));
 
     const coerce = (name, v) => {
-      if (["hud.x", "hud.y", "hud.opacity", "truckersMp.intervalMinutes", "telemetry.updateHz", "telemetry.routePointSpacingM", "map.defaultZoom", "map.routeHistoryDays", "data.backupIntervalHours", "data.backupKeep"].includes(name)) return Number(v);
+      if (["notifications.voiceRate", "notifications.voiceVolume", "hud.x", "hud.y", "hud.mapX", "hud.mapY", "hud.mapZoom", "hud.opacity", "truckersMp.intervalMinutes", "telemetry.updateHz", "telemetry.routePointSpacingM", "map.defaultZoom", "map.routeHistoryDays", "data.backupIntervalHours", "data.backupKeep"].includes(name)) return Number(v);
       if (name === "ets2.profilePath" && !v) return null;
       return v;
     };
@@ -174,6 +205,10 @@ export default {
       const el = e.target;
       if (!el.name || !el.name.includes(".")) return;
       const v = el.type === "checkbox" ? el.checked : coerce(el.name, el.value);
+      if (el.name === "online.sample") {
+        call("online.sample", { on: v }).then(() => { store.set("onlineSample", v); toast({ kind: "info", title: v ? "Developer preview on" : "Developer preview off", message: v ? "The VTC and Online pages now show sample data." : "", timeout: 3000 }); });
+        return;
+      }
       if (el.name === "truckersMp.antiAfk" && v && !store.get("settings").truckersMp?.riskAccepted) {
         // Explicit confirmation before the first activation.
         confirm({ title: "Enable anti-AFK message?", danger: true, confirmLabel: "I accept the risk",
@@ -231,23 +266,67 @@ export default {
       el.querySelector("[data-dl]")?.addEventListener("click", (e) => { e.preventDefault(); call("shell.openUrl", { url: e.target.dataset.dl }); });
     });
 
-    // ---- In-game HUD: live preview, fields, sliders ----
+    // ---- Voice: natural AI voices (download on request) or Windows voices ----
+    const drawVoices = async () => {
+      const el = $("#voiceList", root);
+      if (!el) return;
+      const v = await call("voice.list").catch(() => null);
+      if (!v) { el.innerHTML = ""; return; }
+      const cur = store.get("settings").notifications || {};
+      const lang = store.get("settings").general.language === "en" || document.documentElement.lang === "en" ? "en" : "de";
+      const chosen = cur.voiceId || (v.natural.find((x) => x.lang === lang && x.installed) || v.natural.find((x) => x.lang === lang))?.id;
+      el.innerHTML = v.natural.map((x) => html`<div class="voice ${x.id === chosen ? "is-chosen" : ""}" data-voice="${x.id}">
+          <span class="voice__flag">${x.lang.toUpperCase()}</span>
+          <div class="grow"><strong>${x.name}</strong><span class="faint">${t(x.gender === "male" ? "Male voice" : "Female voice")} · ${x.sizeMb} MB</span>
+            <div class="progress progress--thin hidden" data-voice-progress="${x.id}"><div class="progress__fill" style="width:0%"></div></div></div>
+          ${x.installed
+            ? html`${x.id === chosen ? html`<span class="badge badge--ok">${icon("check", "icon icon-sm")}In use</span>` : html`<button class="btn btn--sm" data-use-voice="${x.id}">Use</button>`}<button class="btn btn--sm btn--ghost btn--icon" data-remove-voice="${x.id}" data-tip="Remove">${icon("trash-2")}</button>`
+            : html`<button class="btn btn--sm" data-install-voice="${x.id}">${icon("download")}Download</button>`}
+        </div>`.toString()).join("");
+      const win = $("#winVoice", root);
+      if (win && win.options.length <= 1) v.windows.forEach((n) => win.add(new Option(n, n, false, n === cur.windowsVoice)));
+    };
+    drawVoices();
+    const offVoice = [
+      on("voiceProgress", (p) => { const bar = root.querySelector(`[data-voice-progress="${p.id}"]`); if (bar) { bar.classList.remove("hidden"); bar.firstElementChild.style.width = `${p.pct}%`; } }),
+      on("voiceInstalled", (p) => { setting("notifications.voiceId", p.id); drawVoices(); }),
+      on("voiceError", (p) => { toast({ kind: "error", title: "Voice download failed", message: p.message }); drawVoices(); }),
+    ];
+    $("#voiceList", root)?.addEventListener("click", async (e) => {
+      const ins = e.target.closest("[data-install-voice]"), use = e.target.closest("[data-use-voice]"), rem = e.target.closest("[data-remove-voice]");
+      if (ins) { ins.disabled = true; ins.classList.add("is-loading"); await call("voice.install", { id: ins.dataset.installVoice }); }
+      if (use) { await setting("notifications.voiceId", use.dataset.useVoice); drawVoices(); }
+      if (rem) { await call("voice.remove", { id: rem.dataset.removeVoice }); drawVoices(); }
+    });
+    root.querySelectorAll('[data-seg="notifications.voiceEngine"] button').forEach((b) => b.addEventListener("click", () => {
+      $("#voiceNatural", root)?.classList.toggle("hidden", b.dataset.value !== "natural");
+      $("#voiceWindows", root)?.classList.toggle("hidden", b.dataset.value !== "windows");
+    }));
+    root.querySelector('input[name="notifications.voiceRate"]')?.addEventListener("input", (e) => { const o = root.querySelector('[data-range-x="notifications.voiceRate"]'); if (o) o.textContent = `${(+e.target.value).toFixed(2)}×`; });
+    $("#voiceTest", root)?.addEventListener("click", () => call("voice.test").catch(() => {}));
+
+    // ---- In-game HUD: live preview of both widgets, rows, sliders ----
     const drawHudPreview = () => {
       const h = store.get("settings").hud || {};
       const fields = h.fields || HUD_DEFAULT;
-      const sample = { speed: ["78", "KM/H"], remaining: ["214 km", "REMAINING"], etaReal: ["9 min", "REAL-TIME ETA"], arrival: ["14:42", "ARRIVAL"], etaGame: ["2 h 50", "GAME ETA"],
-        deadline: ["1 h 35", "BUFFER"], fuelRange: ["640 km", "FUEL RANGE"], rest: ["5 h 10", "NEXT REST"], damage: ["4%", "TRUCK WEAR"], gameTime: ["14:35", "GAME TIME"] };
-      const el = $("#hudPreview", root);
-      if (!el) return;
-      el.style.opacity = String((h.opacity ?? 90) / 100);
-      el.dataset.size = h.size || "medium";
-      el.innerHTML = html`<i class="hud-preview__bar"></i>${fields.includes("speedLimit") ? html`<span class="hud-preview__sign">80</span>` : ""}
-        ${HUD_FIELDS.filter(([k]) => k !== "speedLimit" && fields.includes(k)).map(([k]) => html`<span class="hud-preview__cell ${k === "etaReal" ? "is-accent" : ""}"><b>${sample[k][0]}</b><small>${t(sample[k][1])}</small></span>`)}`.toString();
-      const wrap = el.parentElement;
-      const pos = h.position || "topCenter";
-      wrap.dataset.pos = pos;
-      el.style.left = pos === "custom" ? `${h.x ?? 50}%` : "";
-      el.style.top = pos === "custom" ? `${h.y ?? 5}%` : "";
+      const sample = { remaining: ["Remaining", "214 km"], etaReal: ["Real-time ETA", "9 min"], arrival: ["Arrival", "14:42"], etaGame: ["Game ETA", "2 h 50 min"],
+        deadline: ["Deadline buffer", "1 h 35 min"], speed: ["Speed", "78 km/h · limit 80"], speedLimit: ["Speed limit", "80 km/h"], fuelRange: ["Fuel range", "640 km"],
+        rest: ["Next rest", "5 h 10 min"], damage: ["Cargo damage", "1.2 %"], gameTime: ["Game time", "14:35"] };
+      const scene = $("#hudScene", root);
+      if (!scene) return;
+      scene.style.setProperty("--hud-opacity", String((h.opacity ?? 90) / 100));
+      const card = $("#hudCardPrev", root), map = $("#hudMapPrev", root);
+      card.classList.toggle("hidden", h.cardEnabled === false);
+      map.classList.toggle("hidden", h.mapEnabled === false);
+      card.dataset.size = h.size || "medium"; map.dataset.size = h.mapSize || "medium";
+      card.innerHTML = html`<div class="hudp-card__kicker"><i></i>${t("CURRENT JOB")}<span>HAULIX</span></div><div class="hudp-card__cargo">Steel coils · 22.4 t</div>
+        <div class="hudp-card__route">Hamburg → Prague</div><div class="hudp-card__bar"><i style="width:67%"></i><span>67 %</span></div>
+        ${HUD_FIELDS.filter(([k]) => fields.includes(k)).map(([k]) => html`<div class="hudp-card__row ${k === "etaReal" ? "is-accent" : k === "deadline" ? "is-ok" : ""}"><span>${t(sample[k][0])}</span><b>${sample[k][1]}</b></div>`)}`.toString();
+      map.innerHTML = html`<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 70 L100 55" /><path d="M30 0 L45 100" class="minor" /><path d="M50 100 C 52 70, 50 50, 58 0" class="route" /></svg><i class="hudp-map__truck"></i><div class="hudp-map__foot">214 km · 9 min</div>`.toString();
+      const place = (el, pos, x, y) => { el.dataset.pos = HUD_POS_OK(pos) || el.dataset.default; el.style.left = el.dataset.pos === "custom" ? `${x}%` : ""; el.style.top = el.dataset.pos === "custom" ? `${y}%` : ""; };
+      card.dataset.default = "topRight"; map.dataset.default = "bottomRight";
+      place(card, h.position, h.x ?? 85, h.y ?? 20);
+      place(map, h.mapPosition, h.mapX ?? 85, h.mapY ?? 75);
     };
     drawHudPreview();
     const offHud = store.on("settings", drawHudPreview);
@@ -260,9 +339,10 @@ export default {
       const out = root.querySelector(`[data-range="${r.name}"]`);
       if (out) out.textContent = `${r.value} %`;
       const h = store.get("settings").hud;
-      if (h) { if (r.name === "hud.opacity") h.opacity = +r.value; if (r.name === "hud.x") h.x = +r.value; if (r.name === "hud.y") h.y = +r.value; drawHudPreview(); }
+      if (h && r.name.startsWith("hud.")) { h[r.name.slice(4)] = +r.value; drawHudPreview(); }
     }));
-    root.querySelector('select[name="hud.position"]')?.addEventListener("change", (e) => $("#hudCustom", root).classList.toggle("hidden", e.target.value !== "custom"));
+    ["hud.position", "hud.mapPosition"].forEach((n) => root.querySelector(`select[name="${n}"]`)?.addEventListener("change", (e) =>
+      root.querySelector(`[data-custom="${n}"]`)?.classList.toggle("hidden", e.target.value !== "custom")));
     $("#showChangelog", root)?.addEventListener("click", () => import("../core/changelog.js").then((m) => m.showChangelog()));
     $("#hudTest", root)?.addEventListener("click", () => call("hud.preview").then(() => toast({ kind: "info", title: "HUD shown for 10 seconds", message: "Check the position on your game monitor.", timeout: 4000 })).catch(() => {}));
 
@@ -387,6 +467,6 @@ export default {
     page.addEventListener("scroll", mark);
     if (params[0]) setTimeout(() => $(`#sec-${params[0]}`, root)?.scrollIntoView(), 50);
     mark();
-    return () => { page.removeEventListener("scroll", mark); offMap(); offHud(); };
+    return () => { page.removeEventListener("scroll", mark); offMap(); offHud(); offVoice.forEach((o) => o?.()); };
   },
 };

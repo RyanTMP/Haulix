@@ -76,6 +76,16 @@ public sealed class Router
         return best;
     }
 
+    /// <summary>Edges whose geometry may touch the rectangle (grid lookup; used by the in-game mini map).</summary>
+    public HashSet<int> EdgesIn(float minX, float minZ, float maxX, float maxZ)
+    {
+        var set = new HashSet<int>();
+        for (var cx = (int)MathF.Floor(minX / Cell); cx <= (int)MathF.Floor(maxX / Cell); cx++)
+        for (var cz = (int)MathF.Floor(minZ / Cell); cz <= (int)MathF.Floor(maxZ / Cell); cz++)
+            if (_grid.TryGetValue(Key(cx, cz), out var edges)) set.UnionWith(edges);
+        return set;
+    }
+
     /// <summary>Vertices within <paramref name="radius"/> of a point (goal set for a destination).</summary>
     public HashSet<int> VerticesNear(float x, float z, float radius)
     {

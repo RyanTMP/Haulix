@@ -9,6 +9,7 @@ import { loadCities, countryName } from "../core/cities.js";
 import { loadMapData, mapReady } from "../core/mapdata.js";
 import { saveSettings } from "../app.js";
 import * as f from "../core/format.js";
+import { t } from "../core/i18n.js";
 
 // [key, label, swatch, default]
 const LAYERS = [
@@ -52,6 +53,7 @@ export default {
       <aside class="nav-panel" id="navPanel"></aside></div>
       <aside class="map-panel" id="mapPanel"></aside>
       <div class="map-info hidden" id="mapInfo"></div>
+      <div class="map-trip hidden" id="mapTrip"></div>
     </div>`;
   },
 
@@ -442,6 +444,7 @@ export default {
     await load();
     await loadStreets();
     drawRoute();
+    renderTrip();
 
     // Initial view: truck, or everything we know
     const s0 = store.get("telemetry")?.snapshot;
@@ -466,6 +469,20 @@ export default {
       }
     });
 
+    // Trip strip: destination, remaining distance, real-time ETA and arrival while a route is active.
+    const renderTrip = () => {
+      const el = $("#mapTrip", root);
+      const r = store.get("route");
+      const eta = store.get("telemetry")?.snapshot?.eta;
+      if (!el) return;
+      if (!r?.points?.length || r.error) { el.classList.add("hidden"); return; }
+      el.classList.remove("hidden");
+      el.innerHTML = html`<div class="map-trip__dest">${icon("flag")}${r.destination.name}</div>
+        <div class="map-trip__stat"><b>${f.dist(eta ? eta.remainingKm : remainingKm(r.points, routeHint))}</b><small>${t("Remaining")}</small></div>
+        ${eta ? html`<div class="map-trip__stat is-accent"><b>${f.duration(Math.max(60, eta.realSeconds), { short: true })}</b><small>${t("Real-time ETA")}</small></div>
+          <div class="map-trip__stat"><b>${f.time(eta.arrivalUtc)}</b><small>${t("Arrival")}</small></div>` : ""}`.toString();
+    };
+
     let lastNavRender = 0;
     const update = () => {
       const s = store.get("telemetry")?.snapshot;
@@ -487,13 +504,13 @@ export default {
         routeHint = progressIndex(r.points, s.x, s.z, routeHint);
         nav.update(remainingLatLngs(r.points, routeHint, { x: s.x, z: s.z }));
       }
-      if (Date.now() - lastNavRender > 2000 && document.activeElement?.id !== "navSearch") { lastNavRender = Date.now(); renderNav(); }
+      if (Date.now() - lastNavRender > 2000 && document.activeElement?.id !== "navSearch") { lastNavRender = Date.now(); renderNav(); renderTrip(); }
     };
     update();
     const offs = [
       store.on("telemetry", update),
       store.on("profile", draw),
-      store.on("route", () => { routeHint = 0; drawRoute(); }),
+      store.on("route", () => { routeHint = 0; drawRoute(); renderTrip(); }),
       store.on("mapStatus", (m) => { if (m.state === "ready" && !streets) loadStreets(); else if (document.activeElement?.id !== "navSearch") renderNav(); }),
     ];
     const refresh = setInterval(() => { if (isLive()) load(); }, 45000);

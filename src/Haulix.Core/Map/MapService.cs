@@ -356,6 +356,22 @@ public sealed class MapService : IDisposable
         return pts;
     }
 
+    /// <summary>Road polylines (world x/z pairs) and their class within a square around a point, for the mini map.</summary>
+    public List<(float[] Points, int Class)> RoadsNear(float x, float z, float radius)
+    {
+        var router = _router;
+        var net = _network;
+        var result = new List<(float[], int)>();
+        if (router is null || net is null) return result;
+        foreach (var e in router.EdgesIn(x - radius, z - radius, x + radius, z + radius))
+        {
+            var pts = new List<float>();
+            foreach (var (px, pz) in net.EdgePoints(e)) { pts.Add(px); pts.Add(pz); }
+            if (pts.Count >= 4) result.Add((pts.ToArray(), net.EdgeClass[e] & 0x0F));
+        }
+        return result;
+    }
+
     /// <summary>In-game km left on HAULIX's current route from the truck's position (world metres × 19), or null.</summary>
     public double? RemainingRouteKm(TelemetrySnapshot s)
     {

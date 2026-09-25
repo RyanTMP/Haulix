@@ -100,22 +100,40 @@ public sealed class DataSettings
 /// Anti-AFK message for TruckersMP. Off by default: automatically avoiding the server's inactivity kick is
 /// against the TruckersMP rules and can get the account banned; the user enables it at their own risk.
 /// </summary>
-/// <summary>The in-game HUD bar (shown over ETS2 in borderless/windowed mode). Enabled lives in General.Hud.</summary>
+/// <summary>
+/// In-game HUD widgets shown over ETS2 (borderless/windowed mode); the master switch is General.Hud.
+/// Two widgets like SpedV: a job card (route, progress, ETA, …) and a mini map around the truck.
+/// </summary>
 public sealed class HudSettings
 {
-    /// <summary>topCenter | topLeft | topRight | bottomCenter | bottomLeft | bottomRight | custom</summary>
-    public string Position { get; set; } = "topCenter";
-    /// <summary>Custom position: centre of the HUD in percent of the screen (0–100).</summary>
-    public double X { get; set; } = 50;
-    public double Y { get; set; } = 5;
-    /// <summary>Visibility in percent (20–100).</summary>
-    public int Opacity { get; set; } = 90;
+    // ---- Job card ----
+    public bool CardEnabled { get; set; } = true;
+    /// <summary>topLeft | topRight | bottomLeft | bottomRight | custom</summary>
+    public string Position { get; set; } = "topRight";
+    /// <summary>Custom position: centre of the widget in percent of the screen (0–100).</summary>
+    public double X { get; set; } = 85;
+    public double Y { get; set; } = 20;
     /// <summary>small | medium | large</summary>
     public string Size { get; set; } = "medium";
+    /// <summary>Rows of the job card in order: remaining, etaReal, arrival, etaGame, deadline, speed, speedLimit, fuelRange, rest, damage, gameTime.</summary>
+    public List<string> Fields { get; set; } = ["remaining", "etaReal", "arrival", "deadline", "speed", "fuelRange"];
+
+    // ---- Mini map ----
+    public bool MapEnabled { get; set; } = true;
+    public string MapPosition { get; set; } = "bottomRight";
+    public double MapX { get; set; } = 85;
+    public double MapY { get; set; } = 75;
+    public string MapSize { get; set; } = "medium";
+    /// <summary>1 = close (city streets) … 3 = far (motorways).</summary>
+    public int MapZoom { get; set; } = 2;
+    /// <summary>Turn the map with the truck (heading up) instead of north up.</summary>
+    public bool MapRotate { get; set; } = true;
+
+    // ---- Both ----
+    /// <summary>Visibility in percent (20–100).</summary>
+    public int Opacity { get; set; } = 90;
     /// <summary>Only while a job is active.</summary>
     public bool OnlyOnJob { get; set; }
-    /// <summary>Shown fields in order: speedLimit, speed, remaining, etaReal, arrival, etaGame, deadline, fuelRange, rest, damage, gameTime.</summary>
-    public List<string> Fields { get; set; } = ["speedLimit", "remaining", "etaReal", "arrival"];
 }
 
 public sealed class TruckersMpSettings
@@ -143,6 +161,16 @@ public sealed class NotificationSettings
     public bool Overlay { get; set; } = true;
     /// <summary>Read notifications aloud (Windows speech) – works even in exclusive fullscreen.</summary>
     public bool Voice { get; set; }
+    /// <summary>natural (Piper AI voice, downloaded on request) | windows (installed Windows voices).</summary>
+    public string VoiceEngine { get; set; } = "natural";
+    /// <summary>Piper voice id (e.g. de_DE-thorsten-medium); empty = default for the UI language.</summary>
+    public string VoiceId { get; set; } = "";
+    /// <summary>Windows voice name; empty = the first voice of the UI language.</summary>
+    public string WindowsVoice { get; set; } = "";
+    /// <summary>Speaking rate, 0.7 (slow) – 1.4 (fast).</summary>
+    public double VoiceRate { get; set; } = 1.0;
+    /// <summary>Volume 0–100.</summary>
+    public int VoiceVolume { get; set; } = 90;
     /// <summary>On TruckersMP: warn before the server's inactivity kick (10 min on full servers, 30 min otherwise).</summary>
     public bool AfkWarning { get; set; } = true;
     /// <summary>Screen corner for the overlay: topRight | topLeft | bottomRight | bottomLeft.</summary>

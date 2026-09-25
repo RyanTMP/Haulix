@@ -2,6 +2,28 @@
 
 All notable changes to HAULIX. The same list appears in the app under *What's new* (Settings → About).
 
+## 0.0.6 BETA
+
+- **New in-game HUD like VTC trackers** – Instead of the bar at the top: a job card (cargo, route, progress, remaining distance, real-time ETA, arrival, deadline buffer, speed, fuel range …) and a mini map with the roads around your truck and your route. Each widget has its own corner or custom position and size.
+- **Mini map** – Turns with the truck or stays north-up, three zoom levels, route in amber, remaining distance and ETA at the bottom edge.
+- **Natural AI voices** – Notifications can be read by human-sounding AI voices (Thorsten, Kerstin, Amy, Ryan, Alba …) – offline, free, no API key; downloaded once on request. Windows voices remain available, with speed and volume.
+- **Cleaner design** – More room, rounder cards without divider lines, calmer sidebar with a highlighted active page, translucent top bar and glass panels on the map.
+- **Telemetry at a glance** – Real-time ETA and arrival in the top row, speed with limit and cruise control, and ETA, game ETA and buffer in the job card.
+- **Cleaner map** – Legend and layers open with the Layers button; a trip strip shows destination, remaining distance, real-time ETA and arrival.
+- **Online groundwork** – Accounts, VTCs, job board, events, leaderboards, live map and cloud sync are prepared (not switched on yet). Settings → Online → Developer preview shows the pages with sample data.
+
+<details><summary>Deutsch</summary>
+
+- **Neues HUD im Spiel wie bei VTC-Trackern** – Statt der Leiste oben: eine Auftragskarte (Fracht, Route, Fortschritt, Restdistanz, Echtzeit-ETA, Ankunft, Fristpuffer, Geschwindigkeit, Reichweite …) und eine Minikarte mit den Straßen um deinen Lkw und deiner Route. Jedes Widget mit eigener Ecke oder eigener Position und Größe.
+- **Minikarte** – Dreht sich mit dem Lkw oder bleibt nach Norden ausgerichtet, drei Zoomstufen, Route in Amber, Restdistanz und ETA am unteren Rand.
+- **Natürliche KI-Stimmen** – Benachrichtigungen können von menschlich klingenden KI-Stimmen vorgelesen werden (Thorsten, Kerstin, Amy, Ryan, Alba …) – offline, kostenlos, ohne API-Schlüssel; einmaliger Download auf Wunsch. Windows-Stimmen bleiben wählbar, mit Tempo und Lautstärke.
+- **Aufgeräumteres Design** – Mehr Luft, rundere Karten ohne Trennlinien, ruhigere Seitenleiste mit hervorgehobener aktiver Seite, durchscheinende Kopfleiste und Glas-Panels auf der Karte.
+- **Telemetrie auf einen Blick** – Echtzeit-ETA und Ankunft in der oberen Reihe, Geschwindigkeit mit Limit und Tempomat, dazu ETA, Spiel-ETA und Puffer in der Auftragskarte.
+- **Aufgeräumte Karte** – Legende und Ebenen öffnen sich über den Ebenen-Knopf; ein Fahrtstreifen zeigt Ziel, Restdistanz, Echtzeit-ETA und Ankunft.
+- **Online-Grundlage** – Konten, VTCs, Auftragsbörse, Events, Bestenlisten, Live-Karte und Cloud-Sync sind vorbereitet (noch nicht eingeschaltet). Einstellungen → Online → Entwickler-Vorschau zeigt die Seiten mit Beispieldaten.
+
+</details>
+
 ## 0.0.5 BETA
 
 - **In-game HUD, fully customisable** – Choose what it shows: speed limit, speed (red when too fast), remaining distance, real-time ETA, arrival time, game ETA, deadline buffer, fuel range, next rest, truck wear and game time.

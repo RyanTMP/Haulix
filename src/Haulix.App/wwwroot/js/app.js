@@ -10,6 +10,7 @@ import { setLanguage, resolveLanguage, startAutoTranslate, locale } from "./core
 const PAGES = {
   dashboard: () => import("./pages/dashboard.js"),
   telemetry: () => import("./pages/telemetry.js"),
+  job: () => import("./pages/job.js"),
   map: () => import("./pages/map.js"),
   logbook: () => import("./pages/logbook.js"),
   trucks: () => import("./pages/trucks.js"),
@@ -35,6 +36,7 @@ const NAV = [
   { section: "Operate" },
   { id: "dashboard", label: "Dashboard", icon: "layout-dashboard", key: "1" },
   { id: "telemetry", label: "Telemetry", icon: "gauge", key: "2" },
+  { id: "job", label: "Current job", icon: "briefcase", dot: () => !!store.get("telemetry")?.snapshot?.onJob },
   { id: "map", label: "Map", icon: "map", key: "3" },
   { id: "logbook", label: "Logbook", icon: "book-open", key: "4", badge: () => store.get("counts")?.deliveries },
   { section: "Fleet" },
@@ -68,9 +70,11 @@ async function boot() {
   await Promise.all([loadIcons(), connect(), loadCities()]);
 
   on("status", (s) => store.set("status", s));
+  let onJob = null;
   on("telemetry", (t) => {
     pushHistory(t.snapshot);
     store.set("telemetry", t);
+    if (!!t.snapshot?.onJob !== onJob) { onJob = !!t.snapshot?.onJob; updateNavBadges(); }
   });
   on("profile", (p) => store.set("profile", p));
   on("settings", (s) => applySettings(s));
@@ -355,6 +359,7 @@ function updateFreshness() {
 
 function updateNavBadges() {
   for (const n of NAV) {
+    if (n.dot) { document.querySelector(`[data-badge="${n.id}"]`)?.classList.toggle("nav__badge--live", !!n.dot()); continue; }
     if (!n.badge) continue;
     const el = document.querySelector(`[data-badge="${n.id}"]`);
     if (!el) continue;

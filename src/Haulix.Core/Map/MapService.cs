@@ -476,13 +476,30 @@ public sealed class MapService : IDisposable
     // game re-routed), HAULIX plans alternatives and takes the one whose length matches the game.
     private int _gameMismatch;
     private double _lastGameKm;
-    private DateTime _lastGameCheckUtc, _lastMatchUtc;
+    private DateTime _lastGameCheckUtc, _lastMatchUtc, _lastNoticeUtc;
+    private string? _noticeJob;
+    private int _noticeCount;
     private volatile bool _matching;
 
     /// <summary>Raised when HAULIX adopted a different route to follow the in-game navigation (km, matched).</summary>
     public event Action<double, bool>? GameRouteAdjusted;
 
-    private static double Tolerance(double gameKm) => Math.Max(3, gameKm * 0.05) + 1.5;
+    // HAULIX's road map and the game's GPS never measure exactly alike (ramps, city streets, the 1:19 scale), so
+    // the two distances drift apart by a few percent while driving. That drift is corrected silently; only a real
+    // change of the in-game route is announced (this used to fire every ~10 km).
+    private static double Tolerance(double gameKm) => Math.Max(4, gameKm * 0.07) + 2;
+    private static readonly TimeSpan NoticeCooldown = TimeSpan.FromMinutes(10);
+    private const int MaxNoticesPerJob = 3;
+
+    private bool MayAnnounce()
+    {
+        if (_noticeJob != _jobKey) { _noticeJob = _jobKey; _noticeCount = 0; }
+        var now = DateTime.UtcNow;
+        if (_noticeCount >= MaxNoticesPerJob || now - _lastNoticeUtc < NoticeCooldown) return false;
+        _noticeCount++;
+        _lastNoticeUtc = now;
+        return true;
+    }
 
     private void CheckGameRoute(TelemetrySnapshot s)
     {
@@ -496,7 +513,7 @@ public sealed class MapService : IDisposable
         var ours = RemainingRouteKm(s) ?? 0;
         var off = Math.Abs(gameKm - ours) > Tolerance(gameKm);
         // A sudden jump of the game's distance (more than driving could explain) = the player changed the route.
-        var jumped = _lastGameKm > 0 && Math.Abs(gameKm - _lastGameKm) > 4;
+        var jumped = _lastGameKm > 0 && Math.Abs(gameKm - _lastGameKm) > Math.Max(8, _lastGameKm * 0.08);
         _lastGameKm = gameKm;
         _gameMismatch = off ? _gameMismatch + 1 : 0;
 
@@ -512,14 +529,16 @@ public sealed class MapService : IDisposable
             var dest = r.Destination;
             _ = Task.Run(() =>
             {
-                try { MatchGame(s, dest, gameKm); }
+                try { MatchGame(s, dest, gameKm, announce: jumped, oursKm: ours); }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Route matching failed: {ex}"); }
                 finally { _matching = false; }
             });
         }
     }
 
-    private void MatchGame(TelemetrySnapshot s, RouteDestination dest, double gameKm)
+    /// <param name="announce">True only when the game's distance jumped (the player picked another route);
+    /// gradual drift is re-matched without a notification.</param>
+    private void MatchGame(TelemetrySnapshot s, RouteDestination dest, double gameKm, bool announce, double oursKm)
     {
         var router = _router;
         if (router is null) return;
@@ -534,7 +553,12 @@ public sealed class MapService : IDisposable
         if (!matched)
         {
             // Nothing on the road map matches: keep the current line but say so.
-            if (current.GameRoute != "differs") { Route = current with { GameRoute = "differs" }; RouteChanged?.Invoke(Route); GameRouteAdjusted?.Invoke(gameKm, false); }
+            if (current.GameRoute != "differs")
+            {
+                Route = current with { GameRoute = "differs" };
+                RouteChanged?.Invoke(Route);
+                if (announce && MayAnnounce()) GameRouteAdjusted?.Invoke(gameKm, false);
+            }
             return;
         }
         _progressIndex = 0;
@@ -543,7 +567,8 @@ public sealed class MapService : IDisposable
         Route = new RouteState("job", dest, best.Points.Select(v => MathF.Round(v, 1)).ToArray(), best.LengthMeters,
             Math.Round(km, 0), DateTime.UtcNow, null, "matched");
         RouteChanged?.Invoke(Route);
-        GameRouteAdjusted?.Invoke(km, true);
+        // Only a clearly different route is worth a notification.
+        if (announce && Math.Abs(km - oursKm) > Math.Max(8, oursKm * 0.1) && MayAnnounce()) GameRouteAdjusted?.Invoke(km, true);
     }
 
     private RouteState? Recompute(string mode, RouteDestination dest)

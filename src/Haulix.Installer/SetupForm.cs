@@ -53,13 +53,16 @@ namespace Haulix.Installer
             try
             {
                 CoreWebView2Environment.SetLoaderDllFolderPath(Path.Combine(Program.TempDir, "lib"));
-                var env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(Program.TempDir, "wv2"));
+                // Missing on some Windows 10 PCs: install Microsoft's WebView2 Runtime first (HAULIX and this setup need it).
+                if (!Prerequisites.WebView2Installed() && !Prerequisites.InstallWebView2(null, System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "de"))
+                    throw new WebView2RuntimeNotFoundException();
+                var env =await CoreWebView2Environment.CreateAsync(null, Path.Combine(Program.TempDir, "wv2"));
                 await _web.EnsureCoreWebView2Async(env);
             }
             catch (Exception ex) when (ex is WebView2RuntimeNotFoundException || ex is DllNotFoundException || ex is FileNotFoundException)
             {
                 var r = MessageBox.Show(this,
-                    "HAULIX needs the Microsoft Edge WebView2 Runtime (included with Windows 11 and most Windows 10 PCs).\n\nOpen the Microsoft download page now?",
+                    "HAULIX needs the Microsoft Edge WebView2 Runtime (included with Windows 11 and most Windows 10 PCs). Setup could not install it automatically – please check your internet connection.\n\nOpen the Microsoft download page now?",
                     Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (r == DialogResult.Yes) OpenUrl("https://developer.microsoft.com/microsoft-edge/webview2/");
                 Close();

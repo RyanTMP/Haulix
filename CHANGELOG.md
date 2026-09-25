@@ -2,6 +2,40 @@
 
 All notable changes to HAULIX. The same list appears in the app under *What's new* (Settings → About).
 
+## 0.0.7 BETA
+
+- **New: Current job page** – Everything about the job you are driving, like VTC trackers: route and progress, real-time ETA, deadline buffer, income after tolls, ferries and fines, a live driving score with its penalties, a speed profile and a timeline of the trip.
+- **Better achievements** – More than 60 goals in bronze, silver, gold and platinum across career, distance, driving, cargo, explorer and business – with points, a driver rank, "almost there" hints and recently unlocked. Your earlier unlocks are kept.
+- **HUD: place it anywhere** – "Place on screen" makes the job card draggable over your game – drag it, double-click to save. You can also drag it in the preview in Settings, or pick one of eight fixed spots.
+- **HUD: many more options** – Style (dark, glass, light, high contrast), accent colour, size, width, row spacing, rounded corners, which sections to show and new rows: income, destination company, cruise control, gear, fuel, truck and trailer wear, clock.
+- **Mini map removed** – The game already has its own map and navigation, so the HUD is now just the job card.
+- **Fixed: route notifications every 10 km** – HAULIX no longer reports a route change every few kilometres. Small differences to the in-game navigation are corrected silently; only a real route change is announced (at most every 10 minutes).
+- **Fixed: logbook cards cut in half** – Income, distance, XP and €/km at the top of a delivery are shown in full again.
+- **New default anti-AFK message** – The default TruckersMP message now says you are logging your trips with HAULIX (www.haulix-logging.com). Your own message is kept; the old default is replaced.
+- **Setup installs what HAULIX needs** – The setup checks for Windows 10/11 and installs the Microsoft Edge WebView2 Runtime automatically when it is missing. .NET is included in HAULIX, nothing else to install.
+- **Friendlier About page** – A short, clear About section with what HAULIX does, your data, links to the website and downloads, and a way to report problems. Technical details moved under "For developers".
+- **Notification sounds** – Short chimes for job updates, milestones and warnings, and a louder alarm with the TruckersMP AFK warning. Soft or digital style, volume and each type can be switched on and off – in Settings → ETS2 → Notifications & sounds.
+- **New settings layout** – Settings are split into three categories: HAULIX (general, look, data, about), Euro Truck Simulator 2 (game, telemetry, notifications, HUD, TruckersMP, map) and American Truck Simulator (coming later).
+- **Copyright and credits** – HAULIX © 2026 RyanTMP: the HAULIX name, logo and artwork are all rights reserved. Every game, service and open-source project HAULIX uses is credited to its owner.
+
+<details><summary>Deutsch</summary>
+
+- **Neu: Seite "Aktueller Auftrag"** – Alles zum Auftrag, den du fährst, wie bei VTC-Trackern: Route und Fortschritt, Echtzeit-Ankunft, Fristpuffer, Einnahmen nach Maut, Fähren und Bußgeldern, Live-Fahrscore mit Abzügen, Geschwindigkeitsprofil und Verlauf der Fahrt.
+- **Bessere Erfolge** – Über 60 Ziele in Bronze, Silber, Gold und Platin für Karriere, Strecke, Fahren, Fracht, Entdecker und Unternehmen – mit Punkten, Fahrerrang, "Fast geschafft" und zuletzt freigeschalteten Erfolgen. Bisherige Erfolge bleiben erhalten.
+- **HUD: frei platzieren** – "Auf dem Bildschirm platzieren" macht die Auftragskarte über dem Spiel verschiebbar – ziehen, Doppelklick speichert. Du kannst sie auch in der Vorschau in den Einstellungen ziehen oder eine von acht festen Positionen wählen.
+- **HUD: viel mehr Optionen** – Stil (dunkel, Glas, hell, hoher Kontrast), Akzentfarbe, Größe, Breite, Zeilenabstand, runde Ecken, welche Bereiche sichtbar sind und neue Zeilen: Einnahmen, Zielfirma, Tempomat, Gang, Kraftstoff, Lkw- und Anhänger-Verschleiß, Uhrzeit.
+- **Minikarte entfernt** – Das Spiel hat schon eine eigene Karte und Navigation, deshalb ist das HUD jetzt nur noch die Auftragskarte.
+- **Behoben: Routen-Hinweis alle 10 km** – HAULIX meldet nicht mehr alle paar Kilometer eine Routenänderung. Kleine Abweichungen zur Navigation im Spiel werden still korrigiert; nur eine echte Routenänderung wird gemeldet (höchstens alle 10 Minuten).
+- **Behoben: Fahrtenbuch-Karten halb abgeschnitten** – Einnahmen, Strecke, XP und €/km oben in einer Lieferung werden wieder vollständig angezeigt.
+- **Neue Standard-Anti-AFK-Nachricht** – Die Standardnachricht für TruckersMP sagt jetzt, dass du deine Fahrten mit HAULIX aufzeichnest (www.haulix-logging.com). Eigene Nachrichten bleiben; die alte Standardnachricht wird ersetzt.
+- **Setup installiert, was HAULIX braucht** – Das Setup prüft auf Windows 10/11 und installiert die Microsoft Edge WebView2 Runtime automatisch, wenn sie fehlt. .NET ist in HAULIX enthalten, sonst ist nichts zu installieren.
+- **Freundlichere Über-Seite** – Ein kurzer, klarer Über-Bereich: was HAULIX kann, deine Daten, Links zu Website und Downloads und ein Weg, Probleme zu melden. Technische Details stehen unter "Für Entwickler".
+- **Benachrichtigungstöne** – Kurze Töne für Auftrags-Updates, Meilensteine und Warnungen und ein lauterer Alarm bei der TruckersMP-AFK-Warnung. Stil sanft oder digital, Lautstärke und jede Art einzeln schaltbar – unter Einstellungen → ETS2 → Benachrichtigungen & Töne.
+- **Neue Einstellungen** – Die Einstellungen sind in drei Kategorien aufgeteilt: HAULIX (Allgemein, Aussehen, Daten, Info), Euro Truck Simulator 2 (Spiel, Telemetrie, Benachrichtigungen, HUD, TruckersMP, Karte) und American Truck Simulator (kommt später).
+- **Urheberrecht und Danksagungen** – HAULIX © 2026 RyanTMP: Name, Logo und Grafiken von HAULIX sind geschützt, alle Rechte vorbehalten. Jedes Spiel, jeder Dienst und jedes Open-Source-Projekt, das HAULIX nutzt, wird seinem Inhaber zugeordnet.
+
+</details>
+
 ## 0.0.6 BETA
 
 - **New in-game HUD like VTC trackers** – Instead of the bar at the top: a job card (cargo, route, progress, remaining distance, real-time ETA, arrival, deadline buffer, speed, fuel range …) and a mini map with the roads around your truck and your route. Each widget has its own corner or custom position and size.

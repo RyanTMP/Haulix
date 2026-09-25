@@ -27,7 +27,7 @@
     "Development build.": "Entwicklungs-Build.", "This setup does not contain the app. Build it with tools/release/build-release.ps1.": "Dieses Setup enthält die App nicht. Erstelle es mit tools/release/build-release.ps1.",
     "Cancel": "Abbrechen", "Continue": "Weiter", "Back": "Zurück", "Where to install": "Installationsort", "Browse": "Durchsuchen",
     "HAULIX installs for your Windows user only. No administrator rights are needed.": "HAULIX wird nur für deinen Windows-Benutzer installiert. Keine Administratorrechte nötig.",
-    "Space required": "Speicherbedarf", "Your data": "Deine Daten", "Start menu shortcut": "Startmenü-Verknüpfung",
+    "Space required": "Speicherbedarf", "Requirements": "Voraussetzungen", "Your data": "Deine Daten", "Start menu shortcut": "Startmenü-Verknüpfung",
     "Find HAULIX in the Start menu and Windows search.": "HAULIX im Startmenü und in der Windows-Suche.", "Desktop shortcut": "Desktop-Verknüpfung",
     "Install the ETS2 telemetry plugin": "ETS2-Telemetrie-Plugin installieren", "ETS2 was not found on this PC.": "ETS2 wurde auf diesem PC nicht gefunden.",
     "Already installed. Setup keeps it up to date.": "Bereits installiert. Setup hält es aktuell.",
@@ -150,7 +150,7 @@
       page.innerHTML = `<div class="eyebrow-lg">Options</div><h1 class="title">Where to install</h1>
         <p class="lead">HAULIX installs for your Windows user only. No administrator rights are needed.</p>
         <div class="path-box" style="margin-top:22px"><input class="input" id="dir" value="${esc(state.dir)}"><button class="btn" data-a="browse">${icon("folder-open")}Browse</button></div>
-        <div class="facts"><span>Space required <b>${esc(i.sizeMb)} MB</b></span><span>Your data <b>${esc(i.dataDir)}</b></span></div>
+        <div class="facts"><span>Space required <b>${esc(i.sizeMb)} MB</b></span><span>Your data <b>${esc(i.dataDir)}</b></span><span>Requirements <b>Windows 10/11 · WebView2 ✓</b></span></div>
         <div class="divider"></div>
         <label class="check-row"><input type="checkbox" id="startMenu" ${state.startMenu ? "checked" : ""}><div><div class="t">Start menu shortcut</div><div class="d">Find HAULIX in the Start menu and Windows search.</div></div></label>
         <label class="check-row"><input type="checkbox" id="desktop" ${state.desktop ? "checked" : ""}><div><div class="t">Desktop shortcut</div></div></label>

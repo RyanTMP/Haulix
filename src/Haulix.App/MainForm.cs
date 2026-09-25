@@ -147,6 +147,20 @@ public sealed class MainForm : Form
             var ns = _engine.Settings.Load().Notifications;
             var appInFront = Visible && WindowState != FormWindowState.Minimized && ActiveForm == this;
             if (ns.Overlay && (!appInFront || n.Category == "test")) _overlay.Show(n, ns.Position);
+            // A short chime first (the AFK alarm always, it is the point of that warning).
+            if (ns.Sounds && (!appInFront || n.Category is "test" or "afk"))
+            {
+                var sound = NotificationSounds.For(n.Kind, n.Category);
+                var wanted = sound switch
+                {
+                    "afk" => ns.SoundAfk,
+                    "warning" or "critical" => ns.SoundWarnings,
+                    "job" => ns.SoundJob,
+                    "success" => n.Category == "job" ? ns.SoundJob : ns.SoundProgress,
+                    _ => n.Category == "test" || ns.SoundProgress,
+                };
+                if (wanted) _voice.Chime(sound, ns);
+            }
             // Spoken too when enabled: audible even when ETS2 runs in exclusive fullscreen on a single monitor.
             if (ns.Voice && (!appInFront || n.Category == "test")) _voice.Speak(n, _engine.Settings.Load().General, ns);
         });
@@ -305,9 +319,23 @@ public sealed class MainForm : Form
                     result = true;
                     return true;
                 }
+                case "sound.test":
+                {
+                    // Settings → Notifications → Sounds: play one sound with the current style and volume.
+                    var sound = Str(args, "sound") ?? "info";
+                    if (Array.IndexOf(NotificationSounds.Kinds, sound) < 0) sound = "info";
+                    _voice.Chime(sound, _engine!.Settings.Load().Notifications);
+                    result = true;
+                    return true;
+                }
                 case "hud.preview":
                     // Show the HUD for a few seconds over everything so the user can check position and size.
                     _hud?.Preview(10);
+                    result = true;
+                    return true;
+                case "hud.place":
+                    // The card becomes draggable on the game monitor; a double-click saves the position.
+                    BeginInvoke(() => _hud?.BeginPlacement());
                     result = true;
                     return true;
                 case "shell.openUrl":

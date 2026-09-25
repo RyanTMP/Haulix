@@ -33,7 +33,7 @@ internal sealed class AntiAfk : IDisposable
         {
             var cfg = _engine.Settings.Load().TruckersMp;
             if (!cfg.AntiAfk || !cfg.RiskAccepted || !TruckersMp.Active()) return;
-            var message = string.IsNullOrWhiteSpace(cfg.Message) ? new Haulix.Core.Settings.TruckersMpSettings().Message : cfg.Message.Trim();
+            var message = string.IsNullOrWhiteSpace(cfg.Message) ? Haulix.Core.Settings.TruckersMpSettings.DefaultMessage : cfg.Message.Trim();
             var interval = TimeSpan.FromMinutes(Math.Clamp(cfg.IntervalMinutes, 2, 25));
             var now = DateTime.UtcNow;
             var idleSince = _engine.Notifier.LastActivityUtc;

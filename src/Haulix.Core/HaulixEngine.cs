@@ -353,6 +353,9 @@ public sealed class HaulixEngine : IDisposable
             case "online.events": return Online.Api.GetEventsAsync(Str(args, "vtcId")).GetAwaiter().GetResult();
             case "online.leaderboard": return Online.Api.GetLeaderboardAsync(Str(args, "metric") ?? "km", Str(args, "period") ?? "week", Str(args, "vtcId")).GetAwaiter().GetResult();
             case "online.live": return Online.Api.GetLivePositionsAsync(Str(args, "scope") ?? "vtc").GetAwaiter().GetResult();
+            case "job.current":
+                // Job page: live stats, costs, timeline and speed profile of the job in progress.
+                return new { detail = Recorder.CurrentJobDetail(), snapshot = LastSnapshot, route = Map.Route };
             case "achievements.get":
             {
                 var list = Achievements.Evaluate(out _);
@@ -423,6 +426,20 @@ public sealed class HaulixEngine : IDisposable
             default:
                 throw new InvalidOperationException($"Unknown method '{method}'.");
         }
+    }
+
+    /// <summary>Changes settings from the host side (e.g. the HUD was dragged to a new place) and tells the UI.</summary>
+    public AppSettings UpdateSettings(Action<AppSettings> change)
+    {
+        AppSettings s;
+        lock (_settingsGate)
+        {
+            s = Settings.Load();
+            change(s);
+            Settings.Save(s);
+        }
+        Push?.Invoke("settings", s);
+        return s;
     }
 
     /// <summary>Import into an existing file (import/restore from dialog).</summary>

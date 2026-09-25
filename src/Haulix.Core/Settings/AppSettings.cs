@@ -97,50 +97,58 @@ public sealed class DataSettings
 }
 
 /// <summary>
-/// Anti-AFK message for TruckersMP. Off by default: automatically avoiding the server's inactivity kick is
-/// against the TruckersMP rules and can get the account banned; the user enables it at their own risk.
-/// </summary>
-/// <summary>
-/// In-game HUD widgets shown over ETS2 (borderless/windowed mode); the master switch is General.Hud.
-/// Two widgets like SpedV: a job card (route, progress, ETA, …) and a mini map around the truck.
+/// In-game HUD shown over ETS2 (borderless/windowed mode); the master switch is General.Hud.
+/// A job card like SpedV (route, progress, ETA, …) – the game has its own map, so there is no mini map.
 /// </summary>
 public sealed class HudSettings
 {
-    // ---- Job card ----
     public bool CardEnabled { get; set; } = true;
-    /// <summary>topLeft | topRight | bottomLeft | bottomRight | custom</summary>
+    /// <summary>topLeft | topCenter | topRight | middleLeft | middleRight | bottomLeft | bottomCenter | bottomRight | custom</summary>
     public string Position { get; set; } = "topRight";
-    /// <summary>Custom position: centre of the widget in percent of the screen (0–100).</summary>
+    /// <summary>Custom position: centre of the card in percent of the screen (0–100). Set by dragging ("Place on screen").</summary>
     public double X { get; set; } = 85;
     public double Y { get; set; } = 20;
-    /// <summary>small | medium | large</summary>
+    /// <summary>Distance from the screen edge in pixels (corner positions).</summary>
+    public int Margin { get; set; } = 16;
+    /// <summary>Legacy size preset (small | medium | large); used while <see cref="Scale"/> is 0.</summary>
     public string Size { get; set; } = "medium";
-    /// <summary>Rows of the job card in order: remaining, etaReal, arrival, etaGame, deadline, speed, speedLimit, fuelRange, rest, damage, gameTime.</summary>
+    /// <summary>Size in percent (60–180); 0 = from <see cref="Size"/>.</summary>
+    public int Scale { get; set; }
+    /// <summary>Card width in pixels at 100 % (220–420).</summary>
+    public int Width { get; set; } = 290;
+    /// <summary>dark | glass | light | contrast</summary>
+    public string Theme { get; set; } = "dark";
+    /// <summary>app (same as HAULIX) | amber | copper | green | blue | red | purple | white</summary>
+    public string Accent { get; set; } = "app";
+    /// <summary>compact | normal | roomy</summary>
+    public string Density { get; set; } = "normal";
+    public bool Rounded { get; set; } = true;
+    public bool ShowHeader { get; set; } = true;
+    public bool ShowCargo { get; set; } = true;
+    public bool ShowRoute { get; set; } = true;
+    public bool ShowProgress { get; set; } = true;
+    /// <summary>Rows in order: remaining, etaReal, arrival, etaGame, deadline, income, company, speed, speedLimit, cruise, gear,
+    /// fuel, fuelRange, rest, damage, truckDamage, trailerDamage, gameTime, clock.</summary>
     public List<string> Fields { get; set; } = ["remaining", "etaReal", "arrival", "deadline", "speed", "fuelRange"];
-
-    // ---- Mini map ----
-    public bool MapEnabled { get; set; } = true;
-    public string MapPosition { get; set; } = "bottomRight";
-    public double MapX { get; set; } = 85;
-    public double MapY { get; set; } = 75;
-    public string MapSize { get; set; } = "medium";
-    /// <summary>1 = close (city streets) … 3 = far (motorways).</summary>
-    public int MapZoom { get; set; } = 2;
-    /// <summary>Turn the map with the truck (heading up) instead of north up.</summary>
-    public bool MapRotate { get; set; } = true;
-
-    // ---- Both ----
     /// <summary>Visibility in percent (20–100).</summary>
     public int Opacity { get; set; } = 90;
     /// <summary>Only while a job is active.</summary>
     public bool OnlyOnJob { get; set; }
 }
 
+/// <summary>
+/// Anti-AFK message for TruckersMP. Off by default: automatically avoiding the server's inactivity kick is
+/// against the TruckersMP rules and can get the account banned; the user enables it at their own risk.
+/// </summary>
 public sealed class TruckersMpSettings
 {
     public bool AntiAfk { get; set; }
     /// <summary>The chat message that is sent while the player is inactive.</summary>
-    public string Message { get; set; } = "AFK - back soon";
+    public string Message { get; set; } = DefaultMessage;
+
+    public const string DefaultMessage = "AFK - back soon! Logging my trips with HAULIX, free ETS2 tracker: www.haulix-logging.com";
+    /// <summary>The default of HAULIX 0.0.3 – 0.0.6; replaced by the new default when still unchanged.</summary>
+    public const string LegacyDefaultMessage = "AFK - back soon";
     /// <summary>Minutes of inactivity between messages (the server kicks after 10 min when full).</summary>
     public int IntervalMinutes { get; set; } = 8;
     /// <summary>Key that opens the TruckersMP chat (default Y).</summary>
@@ -171,6 +179,20 @@ public sealed class NotificationSettings
     public double VoiceRate { get; set; } = 1.0;
     /// <summary>Volume 0–100.</summary>
     public int VoiceVolume { get; set; } = 90;
+    /// <summary>Play a short sound with notifications (HAULIX's own synthesised chimes).</summary>
+    public bool Sounds { get; set; } = true;
+    /// <summary>soft (bell-like) | digital</summary>
+    public string SoundStyle { get; set; } = "soft";
+    /// <summary>Sound volume 0–100.</summary>
+    public int SoundVolume { get; set; } = 70;
+    /// <summary>Sound for job updates: accepted, delivered, cancelled, fines.</summary>
+    public bool SoundJob { get; set; } = true;
+    /// <summary>Sound for milestones, route changes and achievements.</summary>
+    public bool SoundProgress { get; set; } = true;
+    /// <summary>Sound for deadline, fuel, damage and rest warnings.</summary>
+    public bool SoundWarnings { get; set; } = true;
+    /// <summary>Alarm sound with the TruckersMP inactivity warning.</summary>
+    public bool SoundAfk { get; set; } = true;
     /// <summary>On TruckersMP: warn before the server's inactivity kick (10 min on full servers, 30 min otherwise).</summary>
     public bool AfkWarning { get; set; } = true;
     /// <summary>Screen corner for the overlay: topRight | topLeft | bottomRight | bottomLeft.</summary>
@@ -203,6 +225,7 @@ public sealed class SettingsStore(Database db)
         using var c = db.Open();
         var json = Database.Scalar<string>(c, "SELECT value FROM settings WHERE key = 'app'");
         _cached = string.IsNullOrEmpty(json) ? new AppSettings() : JsonSerializer.Deserialize<AppSettings>(json, Json) ?? new AppSettings();
+        if (_cached.TruckersMp.Message?.Trim() == TruckersMpSettings.LegacyDefaultMessage) _cached.TruckersMp.Message = TruckersMpSettings.DefaultMessage;
         return _cached;
     }
 

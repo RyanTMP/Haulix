@@ -16,8 +16,10 @@
     <AssemblyName>HAULIX-Setup</AssemblyName>
     <RootNamespace>Haulix.Installer</RootNamespace>
     <Product>HAULIX ETS2 Logger Setup</Product>
-    <Company>HAULIX</Company>
-    <Version>0.0.6-beta</Version>
+    <Company>RyanTMP</Company>
+    <Version>0.0.7-beta</Version>
+    <Copyright>Copyright © 2026 RyanTMP</Copyright>
+    <Authors>RyanTMP</Authors>
     <PlatformTarget>x64</PlatformTarget>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <!-- WebView2 is embedded as resources (single exe); don't copy its DLLs next to the exe. -->

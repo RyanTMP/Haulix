@@ -46,6 +46,14 @@ namespace Haulix.Installer
                 return 0;
             }
 
+            if (mode == SetupMode.Install && !Prerequisites.WindowsSupported())
+            {
+                var de = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "de";
+                MessageBox.Show(de ? "HAULIX benötigt Windows 10 (Version 1809 oder neuer) oder Windows 11." : "HAULIX needs Windows 10 (version 1809 or newer) or Windows 11.",
+                    "HAULIX Setup", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return 1;
+            }
+
             TempDir = Path.Combine(Path.GetTempPath(), "HAULIX-Setup-" + Guid.NewGuid().ToString("N").Substring(0, 8));
             Directory.CreateDirectory(TempDir);
             try

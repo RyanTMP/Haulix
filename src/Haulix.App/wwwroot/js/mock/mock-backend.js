@@ -200,7 +200,7 @@ let settings = {
   map: { defaultZoom: -5, followTruck: true, routeHistoryDays: 90, tileFolder: null, showEstimatedCities: true, layers: { truck: true, currentRoute: true, previousRoutes: true, garages: true, cities: true, services: false, dealers: false, recruitment: false, aiDrivers: true, fleet: true, events: false } },
   data: { autoBackup: true, backupIntervalHours: 24, backupKeep: 10, backupFolder: null },
   appearance: { accent: "amber", compact: false, animations: true, transparency: true, sidebarCollapsed: false },
-  hud: { cardEnabled: true, position: "topRight", x: 85, y: 20, size: "medium", fields: ["remaining", "etaReal", "arrival", "deadline", "speed", "fuelRange"], mapEnabled: true, mapPosition: "bottomRight", mapX: 85, mapY: 75, mapSize: "medium", mapZoom: 2, mapRotate: true, opacity: 90, onlyOnJob: false },
+  hud: { cardEnabled: true, position: "topRight", x: 85, y: 20, size: "medium", fields: ["remaining", "etaReal", "arrival", "deadline", "speed", "fuelRange"], opacity: 90, onlyOnJob: false },
   truckersMp: { antiAfk: false, message: "AFK - back soon", intervalMinutes: 8, chatKey: "Y", riskAccepted: false },
   notifications: { enabled: true, progress: true, warnings: true, overlay: true, voice: false, afkWarning: true, position: "topRight" },
 };
@@ -413,21 +413,34 @@ function handle(method, p) {
     case "settings.get": return settings;
     case "ets2.display": return { mode: "exclusive", gameRunning: false };
     case "ets2.setBorderless": return { ok: true, display: { mode: "borderless", gameRunning: false } };
-    case "achievements.get": return [
-      ["first_delivery", "package", "bronze", "First delivery", "Deliver your first job.", 1, 1],
-      ["deliveries_50", "package", "silver", "Regular", "Deliver 50 jobs.", 50, 50],
-      ["deliveries_250", "package", "gold", "Road veteran", "Deliver 250 jobs.", 64, 250],
-      ["km_10000", "route", "bronze", "10,000 km", "Drive 10,000 km in total.", 10000, 10000],
-      ["km_100000", "route", "silver", "100,000 km", "Drive 100,000 km in total.", 38420, 100000],
-      ["perfect_10", "award", "silver", "Clean driver", "10 deliveries with a driving score of 95 or more.", 4, 10],
-      ["night_10", "moon", "bronze", "Night owl", "Finish 10 deliveries between 22:00 and 05:00 (game time).", 10, 10],
-      ["millionaire", "badge-euro", "gold", "Millionaire", "Have €1,000,000 in the bank.", 958481, 1000000],
-    ].map(([id, icon, tier, title, description, progress, target]) => ({ id, icon, tier, title, description, progress, target, unlocked: progress >= target, unlockedUtc: progress >= target ? new Date(Date.now() - 86400e3 * 3).toISOString() : null }));
+    case "achievements.get": {
+      const pts = { bronze: 10, silver: 25, gold: 50, platinum: 100 };
+      const fam = [
+        ["deliveries", "career", "package", 64, "Deliver {0} jobs.", [["first_delivery", "bronze", 1, "First delivery"], ["deliveries_10", "bronze", 10, "On the road"], ["deliveries_50", "silver", 50, "Regular"], ["deliveries_250", "gold", 250, "Road veteran"], ["deliveries_1000", "platinum", 1000, "Legend of the road"]]],
+        ["hours", "career", "timer", 71, "Drive {0} hours with HAULIX running.", [["hours_10", "bronze", 10, "Warmed up"], ["hours_100", "silver", 100, "Long shifts"], ["hours_500", "gold", 500, "Life on the road"]]],
+        ["night", "career", "moon", 12, "Finish {0} deliveries at night.", [["night_10", "bronze", 10, "Night owl"], ["night_50", "silver", 50, "Night shift"]]],
+        ["distance", "distance", "route", 38420, "Drive {0} km in total.", [["km_10000", "bronze", 10000, "10,000 km"], ["km_100000", "silver", 100000, "100,000 km"], ["km_500000", "gold", 500000, "Half a million"], ["km_1000000", "platinum", 1000000, "Million-kilometre club"]]],
+        ["longhaul", "distance", "navigation", 1037, "One delivery of {0} km or more.", [["longhaul_1000", "bronze", 1000, "Cross-country"], ["longhaul_1500", "silver", 1500, "Long haul"], ["longhaul_2500", "gold", 2500, "Continental"]]],
+        ["perfect", "driving", "award", 8, "{0} deliveries with a driving score of 95 or more.", [["perfect_1", "bronze", 1, "Textbook"], ["perfect_10", "silver", 10, "Clean driver"], ["perfect_50", "gold", 50, "Model driver"], ["perfect_200", "platinum", 200, "Flawless"]]],
+        ["nodamage", "driving", "shield-check", 31, "{0} deliveries without cargo damage.", [["nodamage_5", "bronze", 5, "Careful"], ["nodamage_25", "silver", 25, "Handle with care"], ["nodamage_100", "gold", 100, "Not a scratch"]]],
+        ["eco", "driving", "droplet", 3, "{0} deliveries of 300 km+ under 28 l/100 km.", [["eco_10", "silver", 10, "Eco driver"], ["eco_50", "gold", 50, "Fuel whisperer"]]],
+        ["heavy", "cargo", "weight", 24.7, "Deliver a load of {0} t or more.", [["heavy_25t", "bronze", 25, "Loaded up"], ["heavy_40t", "silver", 40, "Heavy hauler"], ["heavy_60t", "gold", 60, "Heavyweight"]]],
+        ["cargotypes", "cargo", "layers", 27, "Haul {0} different cargo types.", [["cargo_10", "bronze", 10, "Versatile"], ["cargo_50", "silver", 50, "Specialist"], ["cargo_100", "gold", 100, "Seen it all"]]],
+        ["cities", "explorer", "map-pin", 118, "Visit {0} cities.", [["cities_25", "bronze", 25, "Sightseer"], ["cities_100", "silver", 100, "City collector"], ["cities_250", "gold", 250, "Cartographer"]]],
+        ["countries", "explorer", "globe", 13, "Visit cities in {0} countries.", [["countries_5", "bronze", 5, "Border crosser"], ["countries_15", "gold", 15, "Across Europe"], ["countries_25", "platinum", 25, "Every corner"]]],
+        ["money", "business", "badge-euro", 958481, "Have €{0} in the bank.", [["money_100k", "bronze", 100000, "Savings"], ["millionaire", "gold", 1000000, "Millionaire"], ["money_10m", "platinum", 10000000, "Tycoon"]]],
+        ["fleet", "business", "truck", 10, "Own {0} trucks.", [["fleet_1", "bronze", 1, "Owner-operator"], ["fleet_10", "silver", 10, "Fleet owner"], ["fleet_50", "gold", 50, "Logistics group"]]],
+      ];
+      return fam.flatMap(([family, category, icon, value, desc, levels]) => levels.map(([id, tier, target, title], i) => ({
+        id, icon, tier, title, description: desc.replace("{0}", target.toLocaleString("en")), progress: Math.min(value, target), target,
+        unlocked: value >= target, unlockedUtc: value >= target ? new Date(Date.now() - 86400e3 * (3 + i * 4)).toISOString() : null,
+        family, category, level: i + 1, levels: levels.length, points: pts[tier] })));
+    }
     case "update.check": return { enabled: !!settings.general.updateFeedUrl, available: false, current: "0.0.4-beta" };
     case "image.save": return "C:\\Users\\you\\Pictures\\haulix-card.png";
     case "image.copy": return true;
     case "shell.openUrl": return true;
-    case "hud.preview": return true;
+    case "hud.preview": case "hud.place": case "sound.test": return true;
     case "voice.list": return { engineInstalled: false, windows: ["Microsoft Hedda Desktop", "Microsoft Zira Desktop"], natural: [["de_DE-thorsten-medium", "Thorsten", "de", "male"], ["de_DE-kerstin-low", "Kerstin", "de", "female"], ["en_US-amy-medium", "Amy", "en", "female"], ["en_US-ryan-medium", "Ryan", "en", "male"]].map(([id, name, lang, gender], i) => ({ id, name, lang, gender, sizeMb: 61, installed: i === 0 })) };
     case "voice.install": case "voice.remove": case "voice.test": return true;
     case "notify.test": setTimeout(() => mockDispatch?.({ event: "notify", data: { kind: "info", category: "test", title: "Job updates appear here", message: "While you drive, HAULIX shows milestones, deadline and fuel warnings over the game." } }), 50); return true;
@@ -445,6 +458,33 @@ function handle(method, p) {
       const pts = [];
       if (r._route) for (let i = 0; i < r._route.length; i += 2) pts.push({ x: r._route[i], z: r._route[i + 1], speed: 60 + Math.sin(i) * 20, t: r.startedUtc });
       return { delivery: strip(r), points: pts };
+    }
+    case "job.current": {
+      const s = snapshot();
+      if (!s.onJob) return { detail: null, snapshot: s, route: mockRoute };
+      const profile = [];
+      for (let km = 0; km <= 118; km += 0.5) {
+        const lim = km < 6 ? 50 : km < 20 ? 80 : km < 95 ? 90 : 80;
+        profile.push([km, Math.max(0, Math.round(lim - 8 + Math.sin(km / 3) * 7 + (km > 60 && km < 64 ? 12 : 0))), lim]);
+      }
+      const at = (min) => new Date(Date.now() - min * 60e3).toISOString();
+      return {
+        snapshot: s, route: mockRoute,
+        detail: {
+          startedUtc: at(95), distanceKm: 118, fuelUsedL: 36.4, consumptionL100: 30.8, maxSpeedKmh: 94, avgSpeedKmh: 76, driveSeconds: 5400,
+          speedingSeconds: 212, speedingPct: 3.9, truckDamageDelta: 0.004, trailerDamageDelta: 0.002,
+          fines: 1, fineTotal: 1050, tolls: 2, tollTotal: 740, ferries: 0, ferryTotal: 0, refuels: 1, refuelLitres: 310,
+          score: { score: 81, speedingPct: 3.9, cargoDamagePct: 0.8, truckDamagePct: 0.4, fines: 1, late: false, speedingPenalty: 2, cargoPenalty: 2, truckPenalty: 1, finePenalty: 8, latePenalty: 0 },
+          timeline: [
+            { atUtc: at(95), type: "start", amount: 14820, detail: "Eurogoodies, Hamburg", km: 0 },
+            { atUtc: at(71), type: "toll", amount: 420, detail: "Toll gate", km: 31.2 },
+            { atUtc: at(52), type: "refuel", amount: null, detail: "310 L", km: 58.9 },
+            { atUtc: at(40), type: "fine", amount: 1050, detail: "Speeding", km: 62.4 },
+            { atUtc: at(18), type: "toll", amount: 320, detail: "Toll gate", km: 97.0 },
+          ],
+          profile,
+        },
+      };
     }
     case "logbook.recent": return deliveries.slice(0, p.limit || 8).map(strip);
     case "events.recent": return [

@@ -44,9 +44,12 @@ Get-ChildItem $appOut -Filter *.xml | ForEach-Object { [IO.File]::Delete($_.Full
 Invoke-HaulixSign -Files @(Join-Path $appOut "Haulix.exe") -Required:$RequireSigning | Out-Null
 Copy-Item LICENSE (Join-Path $appOut "LICENSE.txt")
 Copy-Item third_party\scs-sdk-plugin\LICENSE (Join-Path $appOut "LICENSE-scs-sdk-plugin.txt")
+Copy-Item NOTICE.md (Join-Path $appOut "NOTICE.txt")
+Copy-Item THIRD-PARTY-NOTICES.md (Join-Path $appOut "THIRD-PARTY-NOTICES.txt")
 Set-Content -Path (Join-Path $appOut "SOURCE.txt") -Encoding UTF8 -Value @"
 HAULIX ETS2 Logger $Version
-HAULIX is free software under the GNU General Public License v2 (see LICENSE.txt).
+Copyright © 2026 RyanTMP. HAULIX is licensed under the GNU General Public License v2 (see LICENSE.txt).
+The HAULIX name, logo and artwork are © RyanTMP, all rights reserved (see NOTICE.txt).
 The complete source code is distributed alongside this program as HAULIX-$Version-source.zip.
 "@
 

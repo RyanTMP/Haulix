@@ -8,22 +8,41 @@ import { t } from "../core/i18n.js";
 import { currencyList } from "../core/format.js";
 import * as f from "../core/format.js";
 
-const SECTIONS = [
-  ["general", "General", "sliders-horizontal"], ["ets2", "ETS2", "truck"], ["telemetry", "Telemetry", "activity"], ["notifications", "Notifications", "bell"], ["hud", "In-game HUD", "gauge"], ["truckersmp", "TruckersMP", "users"], ["online", "Online", "globe"],
-  ["map", "Map", "map"], ["data", "Data", "database"], ["appearance", "Appearance", "palette"], ["about", "About", "info"],
+// Three categories: HAULIX itself, ETS2 and (later) ATS. Each lists its own sections in the side navigation.
+const CATEGORIES = [
+  ["haulix", "HAULIX", "sliders-horizontal", "App, look, data and about"],
+  ["ets2", "Euro Truck Simulator 2", "truck", "Game, telemetry, HUD, notifications, map"],
+  ["ats", "American Truck Simulator", "flag", "Coming later"],
 ];
+const SECTIONS = [
+  ["general", "General", "sliders-horizontal", "haulix"], ["appearance", "Appearance", "palette", "haulix"], ["online", "Online", "globe", "haulix"],
+  ["data", "Data", "database", "haulix"], ["about", "About", "info", "haulix"],
+  ["ets2", "Game & profile", "truck", "ets2"], ["telemetry", "Telemetry", "activity", "ets2"], ["notifications", "Notifications & sounds", "bell", "ets2"],
+  ["hud", "In-game HUD", "gauge", "ets2"], ["truckersmp", "TruckersMP", "users", "ets2"], ["map", "Map", "map", "ets2"],
+  ["ats", "American Truck Simulator", "flag", "ats"],
+];
+const CAT_OF = Object.fromEntries(SECTIONS.map(([id, , , c]) => [id, c]));
 const ACCENTS = [["amber", "#ffb020", "Electric amber"], ["copper", "#e07a3f", "Copper"], ["ice", "#7cc4ff", "Ice blue"], ["signal", "#e8e9eb", "Signal white"]];
-const AFK_DEFAULT = "AFK - back soon";
-const HUD_FIELDS = [["remaining", "Remaining distance"], ["etaReal", "Real-time ETA"], ["arrival", "Arrival time"], ["etaGame", "Game ETA"], ["deadline", "Deadline buffer"],
-  ["speed", "Speed"], ["speedLimit", "Speed limit"], ["fuelRange", "Fuel range"], ["rest", "Next rest"], ["damage", "Damage"], ["gameTime", "Game time"]];
+const AFK_DEFAULT = "AFK - back soon! Logging my trips with HAULIX, free ETS2 tracker: www.haulix-logging.com";
+// [key, label, preview label, preview value, preview tone]
+const HUD_FIELDS = [["remaining", "Remaining distance", "Remaining", "214 km"], ["etaReal", "Real-time ETA", "Real-time ETA", "9 min", "is-accent"], ["arrival", "Arrival time", "Arrival", "14:42"],
+  ["etaGame", "Game ETA", "Game ETA", "2 h 50 min"], ["deadline", "Deadline buffer", "Deadline buffer", "1 h 35 min", "is-ok"], ["income", "Income", "Income", "14,820 €", "is-ok"],
+  ["company", "Destination company", "Destination", "Posped"], ["speed", "Speed", "Speed", "78 km/h · limit 80"], ["speedLimit", "Speed limit", "Speed limit", "80 km/h"],
+  ["cruise", "Cruise control", "Cruise control", "80 km/h", "is-accent"], ["gear", "Gear", "Gear", "11"], ["fuel", "Fuel", "Fuel", "412 l · 51.5 %"], ["fuelRange", "Fuel range", "Fuel range", "640 km"],
+  ["rest", "Next rest", "Next rest", "5 h 10 min"], ["damage", "Cargo damage", "Cargo damage", "1.2 %"], ["truckDamage", "Truck wear", "Truck wear", "5 %"],
+  ["trailerDamage", "Trailer wear", "Trailer wear", "2 %"], ["gameTime", "Game time", "Game time", "14:35"], ["clock", "Time of day (PC)", "Time", "21:07"]];
 const HUD_DEFAULT = ["remaining", "etaReal", "arrival", "deadline", "speed", "fuelRange"];
-const HUD_POSITIONS = [["topRight", "Top right"], ["topLeft", "Top left"], ["bottomRight", "Bottom right"], ["bottomLeft", "Bottom left"], ["custom", "Custom"]];
+const HUD_POSITIONS = [["topRight", "Top right"], ["topCenter", "Top centre"], ["topLeft", "Top left"], ["middleRight", "Middle right"], ["middleLeft", "Middle left"],
+  ["bottomRight", "Bottom right"], ["bottomCenter", "Bottom centre"], ["bottomLeft", "Bottom left"], ["custom", "Custom (dragged)"]];
 const HUD_POS_OK = (p) => (HUD_POSITIONS.some(([k]) => k === p) ? p : null);
-const range = (name, label, value) => row(label, "0 % = left/top edge, 100 % = right/bottom edge.", html`<div class="range-row"><input type="range" name="${name}" min="0" max="100" step="1" value="${value}"><span class="num" data-range="${name}">${value} %</span></div>`);
+const HUD_ACCENTS = [["app", "", "Same as HAULIX"], ["amber", "#ffb020", "Amber"], ["copper", "#e07a3f", "Copper"], ["green", "#3dd68c", "Green"], ["blue", "#7cc4ff", "Blue"],
+  ["red", "#f0474f", "Red"], ["purple", "#a78bfa", "Purple"], ["white", "#e8e9eb", "White"]];
+const hudScale = (h) => (h?.scale >= 50 ? h.scale : { small: 82, large: 125 }[h?.size] || 100);
+const slider = (name, min, max, step, value, unit) => html`<div class="range-row"><input type="range" name="${name}" min="${min}" max="${max}" step="${step}" value="${value}" data-unit="${unit}"><span class="num" data-range="${name}">${value}${unit}</span></div>`;
 const FIELDS = [["vehicle", "Vehicle"], ["drivetrain", "Driver inputs"], ["fluids", "Fluids & gauges"], ["damage", "Damage"], ["navigation", "Location & navigation"], ["job", "Current job"], ["trailer", "Trailer"], ["lights", "Controls & lights"]];
 
 const row = (title, desc, control, cls = "") => html`<div class="${cx("setting", cls)}"><div><div class="setting__title">${title}</div>${desc ? html`<div class="setting__desc">${desc}</div>` : ""}</div><div class="setting__control">${control}</div></div>`;
-const section = (id, title, body) => html`<section class="card" id="sec-${id}"><header class="card__head"><h2 class="label">${title}</h2></header><div class="card__body" style="padding-top:4px;padding-bottom:4px">${body}</div></section>`;
+const section = (id, title, body) => html`<section class="card" id="sec-${id}" data-cat="${CAT_OF[id]}"><header class="card__head"><h2 class="label">${title}</h2></header><div class="card__body" style="padding-top:4px;padding-bottom:4px">${body}</div></section>`;
 
 export default {
   title: "Settings",
@@ -33,8 +52,9 @@ export default {
     const s = store.get("settings");
     const det = store.get("detection");
     const st = store.get("status");
-    return html`<div class="settings">
-      <nav class="settings__nav">${SECTIONS.map(([id, l, i]) => html`<a href="#/settings/${id}" data-sec="${id}">${icon(i)}${l}</a>`)}</nav>
+    return html`<div class="settings-cats" role="tablist">${CATEGORIES.map(([id, l, i, sub]) => html`<button class="settings-cat" role="tab" data-cat-tab="${id}">${icon(i)}<span><b>${l}</b><small>${sub}</small></span>${id === "ats" ? html`<em class="nav__soon">Soon</em>` : ""}</button>`)}</div>
+    <div class="settings">
+      <nav class="settings__nav">${SECTIONS.map(([id, l, i, c]) => html`<a href="#/settings/${id}" data-sec="${id}" data-cat="${c}">${icon(i)}${l}</a>`)}</nav>
       <div>
         ${section("general", "General", html`
           ${row("Language", "Uses your Windows display language unless you choose one.", select("general.language", [["auto", "Automatic (Windows)"], ["en", "English"], ["de", "Deutsch"]], s.general.languageChosen ? s.general.language : "auto"))}
@@ -49,7 +69,7 @@ export default {
           ${row("Discord application ID", html`Create an application named "HAULIX" in the <a class="link" href="#" data-url="https://discord.com/developers/applications">Discord Developer Portal</a> and paste its Application ID here. Optional: upload images named "haulix" and "truck" under Rich Presence → Art Assets.`, html`<input class="input" name="general.discordAppId" inputmode="numeric" placeholder="e.g. 1234567890123456789" style="width:230px" value="${s.general.discordAppId || ""}" disabled>`, "setting--locked")}
         `)}
 
-        ${section("ets2", "ETS2", html`
+        ${section("ets2", "Game & profile", html`
           <div class="callout ${det?.gamePath ? "" : "callout--warn"}" style="margin:14px 0 6px">${icon(det?.gamePath ? "circle-check" : "triangle-alert")}
             <div>${det?.gamePath ? html`<strong>ETS2 detected.</strong> ${det.pluginInstalled ? "Telemetry plugin installed." : "Telemetry plugin missing, so live data is unavailable."} Save format: ${det.saveFormat || "unknown"}.` : html`<strong>ETS2 not found automatically.</strong> Set the installation folder below.`}</div></div>
           ${row("Automatic detection", "Find the game through Steam and your Documents folder.", toggle("ets2.autoDetect", s.ets2.autoDetect))}
@@ -59,7 +79,6 @@ export default {
           ${row("Save to read", "“Latest” follows autosaves automatically.", html`<select class="select" name="ets2.saveSelection" id="saveSel"><option value="latest">Latest save</option></select>`)}
           ${row("Watch for new saves", "Re-read the profile whenever ETS2 writes a save.", toggle("ets2.watchSaves", s.ets2.watchSaves))}
           ${row("Import in-game delivery history", "Add jobs from the save's delivery log to the logbook.", toggle("ets2.importSaveHistory", s.ets2.importSaveHistory))}
-          ${row("American Truck Simulator", "Support for ATS (map, profiles and telemetry) is planned.", html`<span class="badge badge--outline">${icon("clock", "icon icon-sm")}Coming later</span>`)}
           ${row("Re-run detection", "", html`<button class="btn btn--sm" id="redetect">${icon("refresh-cw")}Detect again</button><a class="btn btn--sm btn--ghost" href="#/setup">Setup wizard</a>`)}
         `)}
 
@@ -79,6 +98,15 @@ export default {
           ${row("Warnings", "Deadline at risk, fuel range too short, new cargo damage and rest needed.", toggle("notifications.warnings", s.notifications?.warnings !== false))}
           ${row("Show over the game", "Small HAULIX cards on top of ETS2 while HAULIX runs in the background. Needs ETS2 in windowed or borderless fullscreen mode; exclusive fullscreen hides every overlay.", toggle("notifications.overlay", s.notifications?.overlay !== false))}
           ${row("ETS2 display mode", html`<span id="displayMode">Checking…</span>`, html`<button class="btn btn--sm hidden" id="setBorderless">${icon("monitor")}Switch to borderless</button>`)}
+          <div class="setting-group"><div class="setting-group__title">${icon("bell")}Sounds</div>
+            ${row("Play sounds", "A short chime with notifications, so you notice them while driving.", toggle("notifications.sounds", s.notifications?.sounds !== false))}
+            ${row("Sound style", "", segmented("notifications.soundStyle", [["soft", "Soft"], ["digital", "Digital"]], s.notifications?.soundStyle || "soft"))}
+            ${row("Volume", "", slider("notifications.soundVolume", 0, 100, 5, s.notifications?.soundVolume ?? 70, " %"))}
+            ${row("Job updates", "Job accepted, delivered, cancelled and fines.", html`<div class="row" style="gap:8px">${toggle("notifications.soundJob", s.notifications?.soundJob !== false)}<button class="btn btn--sm btn--ghost btn--icon" data-sound="job" data-tip="Play">${icon("play")}</button></div>`)}
+            ${row("Milestones & achievements", "Distance milestones, route changes and new achievements.", html`<div class="row" style="gap:8px">${toggle("notifications.soundProgress", s.notifications?.soundProgress !== false)}<button class="btn btn--sm btn--ghost btn--icon" data-sound="success" data-tip="Play">${icon("play")}</button></div>`)}
+            ${row("Warnings", "Deadline, fuel, damage and rest.", html`<div class="row" style="gap:8px">${toggle("notifications.soundWarnings", s.notifications?.soundWarnings !== false)}<button class="btn btn--sm btn--ghost btn--icon" data-sound="warning" data-tip="Play">${icon("play")}</button></div>`)}
+            ${row("AFK warning alarm", "A louder alarm with the TruckersMP inactivity warning – plays even while HAULIX is open.", html`<div class="row" style="gap:8px">${toggle("notifications.soundAfk", s.notifications?.soundAfk !== false)}<button class="btn btn--sm btn--ghost btn--icon" data-sound="afk" data-tip="Play">${icon("play")}</button></div>`)}
+          </div>
           <div class="setting-group"><div class="setting-group__title">${icon("bell")}Voice</div>
             ${row("Read aloud", "Speaks notifications – audible even in exclusive fullscreen and on a single monitor.", toggle("notifications.voice", !!s.notifications?.voice))}
             ${row("Voice engine", "Natural AI voices sound human and run offline on your PC (download once). Windows voices need no download.", segmented("notifications.voiceEngine", [["natural", "Natural AI voice"], ["windows", "Windows voice"]], s.notifications?.voiceEngine || "natural"))}
@@ -95,30 +123,31 @@ export default {
         `)}
 
         ${section("hud", "In-game HUD", html`
-          <div class="hud-preview-wrap" id="hudScene"><div class="hudp-card" id="hudCardPrev"></div><div class="hudp-map" id="hudMapPrev"></div></div>
-          ${row("Show the HUD", "Widgets over ETS2 while you drive, like VTC trackers. Needs borderless fullscreen or window mode (see Notifications → ETS2 display mode).", toggle("general.hud", !!s.general.hud))}
+          <div class="hud-preview-wrap" id="hudScene"><div class="hudp-card" id="hudCardPrev" data-tip="Drag to place"></div><span class="hud-preview-hint">${t("Drag the card to place it")}</span></div>
+          ${row("Show the HUD", "A job card over ETS2 while you drive, like VTC trackers. Needs borderless fullscreen or window mode (see Notifications → ETS2 display mode).", toggle("general.hud", !!s.general.hud))}
           ${row("Only during a job", "Hide the HUD in free roam.", toggle("hud.onlyOnJob", !!s.hud?.onlyOnJob))}
-          ${row("Visibility", "How opaque the widgets are over the game.", html`<div class="range-row"><input type="range" name="hud.opacity" min="20" max="100" step="5" value="${s.hud?.opacity ?? 90}"><span class="num" data-range="hud.opacity">${s.hud?.opacity ?? 90} %</span></div>`)}
-          <div class="setting-group"><div class="setting-group__title">${icon("package")}Job card</div>
-            ${row("Show the job card", "Cargo, route, progress and the rows you pick below.", toggle("hud.cardEnabled", s.hud?.cardEnabled !== false))}
-            ${row("Rows", "What the card lists under the route.", html`<div class="chips hud-fields" style="justify-content:flex-end">${HUD_FIELDS.map(([k, l]) => html`<label class="pill" style="cursor:pointer"><input type="checkbox" data-hud-field="${k}" ${raw((s.hud?.fields || HUD_DEFAULT).includes(k) ? "checked" : "")} style="accent-color:var(--accent)">${l}</label>`)}</div>`, "setting--stack")}
-            ${row("Position", "", select("hud.position", HUD_POSITIONS, HUD_POS_OK(s.hud?.position) || "topRight"))}
-            <div data-custom="hud.position" class="${s.hud?.position === "custom" ? "" : "hidden"}">
-              ${range("hud.x", "Horizontal", s.hud?.x ?? 85)}${range("hud.y", "Vertical", s.hud?.y ?? 20)}
-            </div>
-            ${row("Size", "", segmented("hud.size", [["small", "Small"], ["medium", "Medium"], ["large", "Large"]], s.hud?.size || "medium"))}
+          <div class="setting-group"><div class="setting-group__title">${icon("move")}Place</div>
+            ${row("Place on screen", "Makes the card draggable over the game: drag it anywhere, double-click to save, right-click to cancel.", html`<div class="row" style="gap:8px"><button class="btn btn--sm btn--primary" id="hudPlace">${icon("move")}Place on screen</button><button class="btn btn--sm" id="hudTest">${icon("monitor")}Show for 10 s</button></div>`)}
+            ${row("Position", "Or pick a fixed spot. Dragging switches to “Custom”.", select("hud.position", HUD_POSITIONS, HUD_POS_OK(s.hud?.position) || "topRight"))}
+            ${row("Distance from the edge", "", slider("hud.margin", 0, 120, 2, s.hud?.margin ?? 16, " px"))}
           </div>
-          <div class="setting-group"><div class="setting-group__title">${icon("map")}Mini map</div>
-            ${row("Show the mini map", "The roads around your truck with the route and a remaining-distance footer.", toggle("hud.mapEnabled", s.hud?.mapEnabled !== false))}
-            ${row("Turn with the truck", "Driving direction always points up (off: north up).", toggle("hud.mapRotate", s.hud?.mapRotate !== false))}
-            ${row("Zoom", "", segmented("hud.mapZoom", [["1", "Near"], ["2", "Medium"], ["3", "Far"]], String(s.hud?.mapZoom ?? 2)))}
-            ${row("Position", "", select("hud.mapPosition", HUD_POSITIONS, HUD_POS_OK(s.hud?.mapPosition) || "bottomRight"))}
-            <div data-custom="hud.mapPosition" class="${s.hud?.mapPosition === "custom" ? "" : "hidden"}">
-              ${range("hud.mapX", "Horizontal", s.hud?.mapX ?? 85)}${range("hud.mapY", "Vertical", s.hud?.mapY ?? 75)}
-            </div>
-            ${row("Size", "", segmented("hud.mapSize", [["small", "Small"], ["medium", "Medium"], ["large", "Large"]], s.hud?.mapSize || "medium"))}
+          <div class="setting-group"><div class="setting-group__title">${icon("palette")}Look</div>
+            ${row("Style", "", segmented("hud.theme", [["dark", "Dark"], ["glass", "Glass"], ["light", "Light"], ["contrast", "High contrast"]], s.hud?.theme || "dark"))}
+            ${row("Accent colour", "", html`<div class="hud-swatches" data-hud-accent>${HUD_ACCENTS.map(([k, c, l]) => html`<button type="button" data-value="${k}" style="--sw:${c}" data-tip="${l}" class="${(s.hud?.accent || "app") === k ? "is-active" : ""}"></button>`)}</div>`)}
+            ${row("Size", "", slider("hud.scale", 60, 180, 5, hudScale(s.hud), " %"))}
+            ${row("Width", "", slider("hud.width", 220, 420, 10, s.hud?.width ?? 290, " px"))}
+            ${row("Row spacing", "", segmented("hud.density", [["compact", "Compact"], ["normal", "Normal"], ["roomy", "Roomy"]], s.hud?.density || "normal"))}
+            ${row("Visibility", "How opaque the card is over the game.", slider("hud.opacity", 20, 100, 5, s.hud?.opacity ?? 90, " %"))}
+            ${row("Rounded corners", "", toggle("hud.rounded", s.hud?.rounded !== false))}
           </div>
-          ${row("Check position", "Shows both widgets over all windows for 10 seconds (with sample values when you are not driving).", html`<button class="btn btn--sm" id="hudTest">${icon("monitor")}Show on screen</button>`)}
+          <div class="setting-group"><div class="setting-group__title">${icon("package")}Content</div>
+            ${row("Header", "“Current job” line with the HAULIX mark.", toggle("hud.showHeader", s.hud?.showHeader !== false))}
+            ${row("Cargo", "Cargo name and weight.", toggle("hud.showCargo", s.hud?.showCargo !== false))}
+            ${row("Route", "Start → destination city.", toggle("hud.showRoute", s.hud?.showRoute !== false))}
+            ${row("Progress bar", "", toggle("hud.showProgress", s.hud?.showProgress !== false))}
+            ${row("Rows", "What the card lists, in this order.", html`<div class="chips hud-fields" style="justify-content:flex-end">${HUD_FIELDS.map(([k, l]) => html`<label class="pill" style="cursor:pointer"><input type="checkbox" data-hud-field="${k}" ${raw((s.hud?.fields || HUD_DEFAULT).includes(k) ? "checked" : "")} style="accent-color:var(--accent)">${l}</label>`)}</div>`, "setting--stack")}
+            ${row("Reset", "Back to the standard HUD.", html`<button class="btn btn--sm btn--ghost" id="hudReset">${icon("rotate-ccw")}Reset HUD</button>`)}
+          </div>
         `)}
 
         ${section("online", "Online", html`
@@ -170,19 +199,51 @@ export default {
         `)}
 
         ${section("about", "About", html`
-          <div class="row" style="gap:20px;padding:18px 0">
-            <img class="brand-img" src="assets/brand/wordmark-outline.png" alt="HAULIX" style="height:38px">
-            <div><div class="num">Version ${store.get("version")}</div><div class="faint" style="font-size:12px">Offline telemetry and fleet intelligence for Euro Truck Simulator 2</div></div>
+          <div class="about-hero">
+            <img class="brand-img" src="assets/brand/wordmark-outline.png" alt="HAULIX" style="height:40px">
+            <div class="grow"><div class="about-hero__lead">Your free logbook and co-driver for Euro Truck Simulator 2.</div>
+              <div class="faint" style="font-size:12px">Version <span class="num">${f.versionLabel(store.get("version"))}</span> · made by RyanTMP</div></div>
+            <button class="btn btn--sm" id="showChangelog">${icon("sparkles")}What's new</button>
           </div>
-          ${row("What's new", "Everything added since version 0.0.2.", html`<button class="btn btn--sm" id="showChangelog">${icon("file-text")}Open changelog</button>`)}
-          ${row("Check for updates", "HAULIX asks the public HAULIX releases on GitHub for a new version on start and every 6 hours – no account, no own server. Only the version number is requested.", html`<div class="row" style="gap:8px">${toggle("general.updateCheck", s.general.updateCheck !== false)}<button class="btn btn--sm" id="checkUpdate">${icon("refresh-cw")}Check now</button></div>`)}
-          ${row("Custom update source", "Advanced: URL of your own update manifest (JSON with version, url, notes). Leave empty to use GitHub.", html`<input class="input" name="general.updateFeedUrl" placeholder="https://…/haulix-update.json" style="width:260px" value="${s.general.updateFeedUrl || ""}">`)}
-          <div id="updateResult"></div>          ${row("Offline", "HAULIX needs no account and no server. All data stays on this PC; only the optional update check asks GitHub for the latest version.", html`<span class="badge badge--ok">${icon("cloud-off")}Local only</span>`)}
-          ${row("Telemetry", "Reads the SCS SDK shared memory written by scs-telemetry.dll (RenCloud scs-sdk-plugin, revision 12).", "")}
-          ${row("Open-source components", "Leaflet (BSD-2), uPlot (MIT), Lucide icons (ISC), Inter / Barlow Condensed / JetBrains Mono (OFL).", "")}
-          ${row("Design system", "Colours, type, components and markers used across HAULIX.", html`<a class="btn btn--sm" href="#/design">${icon("palette")}Open reference</a>`)}
+          <div class="about-points">
+            <div>${icon("book-open")}<span><strong>Logs every delivery</strong> with route, income, fuel and a driving score – automatically.</span></div>
+            <div>${icon("gauge")}<span><strong>Live dashboard</strong>, current job, real-time ETA and a map with the whole ETS2 world.</span></div>
+            <div>${icon("monitor")}<span><strong>In-game HUD and notifications</strong> over your game, optionally read out by a natural voice.</span></div>
+            <div>${icon("shield-check")}<span><strong>Private:</strong> no account, no ads, no tracking. Your data stays on this PC.</span></div>
+          </div>
+          ${row("Updates", "HAULIX looks for new versions on start and every 6 hours and installs them with one click.", html`<div class="row" style="gap:8px">${toggle("general.updateCheck", s.general.updateCheck !== false)}<button class="btn btn--sm" id="checkUpdate">${icon("refresh-cw")}Check now</button></div>`)}
+          <div id="updateResult"></div>
+          ${row("Your data", "Logbook, settings and backups are stored only on this PC. The only thing HAULIX asks the internet is whether a new version exists.", html`<span class="badge badge--ok">${icon("cloud-off")}Stays on your PC</span>`)}
+          ${row("Links", "", html`<div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end">
+            <a class="btn btn--sm" href="#" data-url="https://www.haulix-logging.com">${icon("globe")}Website</a>
+            <a class="btn btn--sm" href="#" data-url="https://github.com/RyanTMP/Haulix/releases">${icon("download")}Downloads</a>
+            <a class="btn btn--sm btn--ghost" href="#" data-url="https://github.com/RyanTMP/Haulix/issues">${icon("circle-alert")}Report a problem</a></div>`)}
           ${row("Keyboard", "", html`<span class="muted" style="font-size:12px"><span class="kbd">Ctrl K</span> search · <span class="kbd">Alt 1–9</span> pages · <span class="kbd">Ctrl ,</span> settings</span>`)}
+          ${row("Credits", "Live data comes from the free SCS telemetry plugin by RenCloud. Map with Leaflet, charts with uPlot, icons by Lucide, voices by Piper. HAULIX is free software (GPL v2).", "")}
+          <p class="faint about-legal">© 2026 RyanTMP. HAULIX is licensed under the GNU GPL v2; the HAULIX name, logo and artwork are all rights reserved.</p>
+          <p class="faint about-legal">HAULIX is an independent fan project, not affiliated with or endorsed by SCS Software, TruckersMP or any other company. Euro Truck Simulator 2 and American Truck Simulator are trademarks of SCS Software; all other names and trademarks belong to their owners.</p>
+          <details class="about-dev"><summary>${icon("wrench")}For developers</summary>
+            ${row("Custom update source", "URL of your own update manifest (JSON with version, url, notes). Leave empty to use GitHub.", html`<input class="input" name="general.updateFeedUrl" placeholder="https://…/haulix-update.json" style="width:260px" value="${s.general.updateFeedUrl || ""}">`)}
+            ${row("Telemetry", "Reads the SCS SDK shared memory written by scs-telemetry.dll (RenCloud scs-sdk-plugin, revision 12).", "")}
+            ${row("Open-source components", "Leaflet (BSD-2), uPlot (MIT), Lucide icons (ISC), Piper (MIT), Inter / Barlow Condensed / JetBrains Mono (OFL).", "")}
+            ${row("Design system", "Colours, type, components and markers used across HAULIX.", html`<a class="btn btn--sm" href="#/design">${icon("palette")}Open reference</a>`)}
+          </details>
         `)}
+
+        <section class="card vtc-soon" id="sec-ats" data-cat="ats">
+          <div class="card__body vtc-soon__body">
+            <div class="vtc-soon__icon">${icon("flag")}</div>
+            <span class="badge badge--outline">${icon("clock", "icon icon-sm")}Coming later</span>
+            <h2 class="vtc-soon__title">American Truck Simulator</h2>
+            <p class="vtc-soon__lead">This feature is not available in the current HAULIX version.</p>
+            <p class="muted vtc-soon__text">Later HAULIX will support American Truck Simulator too: the same logbook, live job page, HUD and notifications – with miles, dollars and the ATS map. HAULIX works fully with ETS2 today.</p>
+            <div class="vtc-soon__points">
+              <div>${icon("book-open")}<span>Logbook and statistics for your ATS company</span></div>
+              <div>${icon("map")}<span>ATS road map with navigation to your job</span></div>
+              <div>${icon("gauge")}<span>In-game HUD, notifications and sounds in ATS</span></div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>`;
   },
@@ -196,7 +257,7 @@ export default {
     }).then(() => toast({ kind: "success", title: "Saved", timeout: 1400 })).catch((e) => toast({ kind: "error", title: "Could not save", message: e.message }));
 
     const coerce = (name, v) => {
-      if (["notifications.voiceRate", "notifications.voiceVolume", "hud.x", "hud.y", "hud.mapX", "hud.mapY", "hud.mapZoom", "hud.opacity", "truckersMp.intervalMinutes", "telemetry.updateHz", "telemetry.routePointSpacingM", "map.defaultZoom", "map.routeHistoryDays", "data.backupIntervalHours", "data.backupKeep"].includes(name)) return Number(v);
+      if (["notifications.voiceRate", "notifications.voiceVolume", "notifications.soundVolume", "hud.x", "hud.y", "hud.margin", "hud.scale", "hud.width", "hud.opacity", "truckersMp.intervalMinutes", "telemetry.updateHz", "telemetry.routePointSpacingM", "map.defaultZoom", "map.routeHistoryDays", "data.backupIntervalHours", "data.backupKeep"].includes(name)) return Number(v);
       if (name === "ets2.profilePath" && !v) return null;
       return v;
     };
@@ -304,45 +365,87 @@ export default {
     }));
     root.querySelector('input[name="notifications.voiceRate"]')?.addEventListener("input", (e) => { const o = root.querySelector('[data-range-x="notifications.voiceRate"]'); if (o) o.textContent = `${(+e.target.value).toFixed(2)}×`; });
     $("#voiceTest", root)?.addEventListener("click", () => call("voice.test").catch(() => {}));
+    root.querySelectorAll("[data-sound]").forEach((b) => b.addEventListener("click", () => call("sound.test", { sound: b.dataset.sound }).catch(() => {})));
 
-    // ---- In-game HUD: live preview of both widgets, rows, sliders ----
+    // ---- In-game HUD: live preview (drag it to place it), rows, sliders, look ----
     const drawHudPreview = () => {
       const h = store.get("settings").hud || {};
       const fields = h.fields || HUD_DEFAULT;
-      const sample = { remaining: ["Remaining", "214 km"], etaReal: ["Real-time ETA", "9 min"], arrival: ["Arrival", "14:42"], etaGame: ["Game ETA", "2 h 50 min"],
-        deadline: ["Deadline buffer", "1 h 35 min"], speed: ["Speed", "78 km/h · limit 80"], speedLimit: ["Speed limit", "80 km/h"], fuelRange: ["Fuel range", "640 km"],
-        rest: ["Next rest", "5 h 10 min"], damage: ["Cargo damage", "1.2 %"], gameTime: ["Game time", "14:35"] };
-      const scene = $("#hudScene", root);
-      if (!scene) return;
+      const scene = $("#hudScene", root), card = $("#hudCardPrev", root);
+      if (!scene || !card || card.classList.contains("is-dragging")) return;
       scene.style.setProperty("--hud-opacity", String((h.opacity ?? 90) / 100));
-      const card = $("#hudCardPrev", root), map = $("#hudMapPrev", root);
-      card.classList.toggle("hidden", h.cardEnabled === false);
-      map.classList.toggle("hidden", h.mapEnabled === false);
-      card.dataset.size = h.size || "medium"; map.dataset.size = h.mapSize || "medium";
-      card.innerHTML = html`<div class="hudp-card__kicker"><i></i>${t("CURRENT JOB")}<span>HAULIX</span></div><div class="hudp-card__cargo">Steel coils · 22.4 t</div>
-        <div class="hudp-card__route">Hamburg → Prague</div><div class="hudp-card__bar"><i style="width:67%"></i><span>67 %</span></div>
-        ${HUD_FIELDS.filter(([k]) => fields.includes(k)).map(([k]) => html`<div class="hudp-card__row ${k === "etaReal" ? "is-accent" : k === "deadline" ? "is-ok" : ""}"><span>${t(sample[k][0])}</span><b>${sample[k][1]}</b></div>`)}`.toString();
-      map.innerHTML = html`<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 70 L100 55" /><path d="M30 0 L45 100" class="minor" /><path d="M50 100 C 52 70, 50 50, 58 0" class="route" /></svg><i class="hudp-map__truck"></i><div class="hudp-map__foot">214 km · 9 min</div>`.toString();
-      const place = (el, pos, x, y) => { el.dataset.pos = HUD_POS_OK(pos) || el.dataset.default; el.style.left = el.dataset.pos === "custom" ? `${x}%` : ""; el.style.top = el.dataset.pos === "custom" ? `${y}%` : ""; };
-      card.dataset.default = "topRight"; map.dataset.default = "bottomRight";
-      place(card, h.position, h.x ?? 85, h.y ?? 20);
-      place(map, h.mapPosition, h.mapX ?? 85, h.mapY ?? 75);
+      const accent = HUD_ACCENTS.find(([k]) => k === (h.accent || "app"))?.[1] || getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ffb020";
+      card.style.setProperty("--hc-accent", accent);
+      card.style.setProperty("--hc-w", String(h.width ?? 290));
+      card.style.setProperty("--hc-scale", String(hudScale(h) / 100));
+      card.dataset.theme = h.theme || "dark";
+      card.dataset.density = h.density || "normal";
+      card.toggleAttribute("data-square", h.rounded === false);
+      card.innerHTML = html`${h.showHeader !== false ? html`<div class="hudp-card__kicker"><i></i>${t("CURRENT JOB")}<span>HAULIX</span></div>` : ""}
+        ${h.showCargo !== false ? html`<div class="hudp-card__cargo">Steel coils · 22.4 t</div>` : ""}
+        ${h.showRoute !== false ? html`<div class="hudp-card__route">Hamburg → Prague</div>` : ""}
+        ${h.showProgress !== false ? html`<div class="hudp-card__bar"><em><i style="width:67%"></i></em><span>67 %</span></div>` : ""}
+        ${fields.map((k) => HUD_FIELDS.find(([x]) => x === k)).filter(Boolean).map(([, , l, v, tone]) => html`<div class="hudp-card__row ${tone || ""}"><span>${t(l)}</span><b>${v}</b></div>`)}`.toString();
+      card.dataset.pos = HUD_POS_OK(h.position) || "topRight";
+      card.style.left = card.dataset.pos === "custom" ? `${h.x ?? 85}%` : "";
+      card.style.top = card.dataset.pos === "custom" ? `${h.y ?? 20}%` : "";
+      const sel = root.querySelector('select[name="hud.position"]');
+      if (sel && sel.value !== card.dataset.pos) sel.value = card.dataset.pos;
     };
     drawHudPreview();
     const offHud = store.on("settings", drawHudPreview);
+
+    // Drag the preview card inside the mini screen: sets a custom position (percent of the screen).
+    $("#hudCardPrev", root)?.addEventListener("pointerdown", (e) => {
+      const card = e.currentTarget, scene = $("#hudScene", root);
+      const box = scene.getBoundingClientRect(), r = card.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      card.setPointerCapture(e.pointerId);
+      card.classList.add("is-dragging");
+      card.dataset.pos = "custom";
+      let x = 0, y = 0;
+      const move = (ev) => {
+        x = Math.round(Math.min(100, Math.max(0, ((ev.clientX - dx - box.left) / box.width) * 100)) * 10) / 10;
+        y = Math.round(Math.min(100, Math.max(0, ((ev.clientY - dy - box.top) / box.height) * 100)) * 10) / 10;
+        card.style.left = `${x}%`; card.style.top = `${y}%`;
+      };
+      move(e);
+      const up = () => {
+        card.removeEventListener("pointermove", move);
+        card.classList.remove("is-dragging");
+        saveSettings((s) => { s.hud.position = "custom"; s.hud.x = x; s.hud.y = y; })
+          .then(() => toast({ kind: "success", title: "HUD position saved", timeout: 1600 }));
+      };
+      card.addEventListener("pointermove", move);
+      card.addEventListener("pointerup", up, { once: true });
+    });
     root.querySelectorAll("[data-hud-field]").forEach((cb) => cb.addEventListener("change", (e) => {
       e.stopPropagation();
-      const picked = [...root.querySelectorAll("[data-hud-field]")].filter((x) => x.checked).map((x) => x.dataset.hudField);
-      setting("hud.fields", HUD_FIELDS.map(([k]) => k).filter((k) => picked.includes(k)));
+      // Newly ticked rows go to the end, so the order is the order of ticking.
+      const cur = (store.get("settings").hud?.fields || HUD_DEFAULT).filter((k) => root.querySelector(`[data-hud-field="${k}"]`)?.checked);
+      const added = [...root.querySelectorAll("[data-hud-field]")].filter((x) => x.checked && !cur.includes(x.dataset.hudField)).map((x) => x.dataset.hudField);
+      setting("hud.fields", [...cur, ...added]);
     }));
     root.querySelectorAll('input[type=range]').forEach((r) => r.addEventListener("input", () => {
       const out = root.querySelector(`[data-range="${r.name}"]`);
-      if (out) out.textContent = `${r.value} %`;
+      if (out) out.textContent = `${r.value}${r.dataset.unit ?? " %"}`;
       const h = store.get("settings").hud;
       if (h && r.name.startsWith("hud.")) { h[r.name.slice(4)] = +r.value; drawHudPreview(); }
     }));
-    ["hud.position", "hud.mapPosition"].forEach((n) => root.querySelector(`select[name="${n}"]`)?.addEventListener("change", (e) =>
-      root.querySelector(`[data-custom="${n}"]`)?.classList.toggle("hidden", e.target.value !== "custom")));
+    $("[data-hud-accent]", root)?.addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-value]");
+      if (!b) return;
+      root.querySelectorAll("[data-hud-accent] button").forEach((x) => x.classList.toggle("is-active", x === b));
+      setting("hud.accent", b.dataset.value);
+    });
+    $("#hudReset", root)?.addEventListener("click", async () => {
+      if (!(await confirm({ title: "Reset the HUD?", text: "Position, look and rows go back to the standard HUD.", confirmLabel: "Reset" }))) return;
+      await saveSettings((s) => { s.hud = { cardEnabled: true, onlyOnJob: s.hud?.onlyOnJob ?? false }; });
+      location.reload();
+    });
+    $("#hudPlace", root)?.addEventListener("click", () => call("hud.place")
+      .then(() => toast({ kind: "info", title: "Place the HUD", message: "Switch to your game monitor: drag the card, double-click it to save, right-click to cancel.", timeout: 7000 }))
+      .catch((err) => toast({ kind: "error", title: "Not available", message: err.message })));
     $("#showChangelog", root)?.addEventListener("click", () => import("../core/changelog.js").then((m) => m.showChangelog()));
     $("#hudTest", root)?.addEventListener("click", () => call("hud.preview").then(() => toast({ kind: "info", title: "HUD shown for 10 seconds", message: "Check the position on your game monitor.", timeout: 4000 })).catch(() => {}));
 
@@ -457,16 +560,29 @@ export default {
 
     // Section highlighting + deep links (#/settings/ets2)
     const page = root;
-    const secs = SECTIONS.map(([id]) => [id, $(`#sec-${id}`, root)]);
+    // Categories (HAULIX / ETS2 / ATS): only the chosen one's sections are shown; deep links pick the right one.
+    let cat = CAT_OF[params[0]] || "haulix";
+    const secs = () => SECTIONS.filter(([, , , c]) => c === cat).map(([id]) => [id, $(`#sec-${id}`, root)]);
     const mark = () => {
-      let active = secs[0][0];
-      for (const [id, el] of secs) if (el.getBoundingClientRect().top < 160) active = id;
+      const list = secs();
+      let active = list[0][0];
+      for (const [id, el] of list) if (el.getBoundingClientRect().top < 200) active = id;
       root.querySelectorAll("[data-sec]").forEach((a) => a.classList.toggle("is-active", a.dataset.sec === active));
     };
-    root.querySelectorAll("[data-sec]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); $(`#sec-${a.dataset.sec}`, root).scrollIntoView({ behavior: "smooth" }); }));
+    const showCat = (c, sec) => {
+      cat = c;
+      root.querySelectorAll("[data-cat]").forEach((el) => el.classList.toggle("hidden", el.dataset.cat !== c));
+      root.querySelectorAll("[data-cat-tab]").forEach((b) => { b.classList.toggle("is-active", b.dataset.catTab === c); b.setAttribute("aria-selected", String(b.dataset.catTab === c)); });
+      const target = sec && CAT_OF[sec] === c ? sec : secs()[0][0];
+      history.replaceState(null, "", `#/settings/${target}`);
+      if (sec) setTimeout(() => $(`#sec-${sec}`, root)?.scrollIntoView(), 50);
+      else $(".settings-cats", root)?.scrollIntoView();
+      mark();
+    };
+    root.querySelectorAll("[data-cat-tab]").forEach((b) => b.addEventListener("click", () => showCat(b.dataset.catTab)));
+    root.querySelectorAll("[data-sec]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); $(`#sec-${a.dataset.sec}`, root).scrollIntoView({ behavior: "smooth" }); history.replaceState(null, "", `#/settings/${a.dataset.sec}`); }));
     page.addEventListener("scroll", mark);
-    if (params[0]) setTimeout(() => $(`#sec-${params[0]}`, root)?.scrollIntoView(), 50);
-    mark();
+    showCat(cat, params[0] && CAT_OF[params[0]] ? params[0] : null);
     return () => { page.removeEventListener("scroll", mark); offMap(); offHud(); offVoice.forEach((o) => o?.()); };
   },
 };

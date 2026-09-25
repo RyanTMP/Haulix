@@ -28,7 +28,15 @@ public sealed class TripRecorder
         // Driving score inputs
         public double SpeedingSeconds;
         public double StartTruckDamage;
+        public double StartTrailerDamage;
         public int Fines;
+        // Job page: costs, timeline and speed profile
+        public long FineTotal, TollTotal, FerryTotal;
+        public int Tolls, Ferries, Refuels;
+        public double RefuelLitres;
+        public readonly List<object> Timeline = new();
+        public readonly List<double[]> Profile = new(); // [km since start, speed, limit]
+        public double LastProfileKm = -1;
     }
 
     private sealed class ActiveRoute
@@ -97,9 +105,75 @@ public sealed class TripRecorder
                     maxSpeedKmh = _job.MaxSpeed,
                     avgSpeedKmh = _job.SpeedSamples == 0 ? 0 : _job.SpeedSum / _job.SpeedSamples,
                     driveSeconds = _job.DriveSeconds,
+                    speedingSeconds = _job.SpeedingSeconds,
+                    fines = _job.Fines,
+                    liveScore = LiveScore()?.Score,
                 };
             }
         }
+    }
+
+    /// <summary>Everything the Job page shows about the job in progress (polled every few seconds, not pushed).</summary>
+    public object? CurrentJobDetail()
+    {
+        lock (_lock)
+        {
+            if (_job is null) return null;
+            var s = _prev;
+            var km = s is null ? 0 : Math.Max(0, s.OdometerKm - _job.StartOdometer);
+            return new
+            {
+                startedUtc = _job.StartedUtc,
+                gameStartMinute = _job.GameStartMinute,
+                startedAtSource = _job.StartedAtSource,
+                distanceKm = km,
+                fuelUsedL = _job.FuelUsed,
+                consumptionL100 = km > 1 ? _job.FuelUsed * 100 / km : 0,
+                maxSpeedKmh = _job.MaxSpeed,
+                avgSpeedKmh = _job.SpeedSamples == 0 ? 0 : _job.SpeedSum / _job.SpeedSamples,
+                driveSeconds = _job.DriveSeconds,
+                speedingSeconds = _job.SpeedingSeconds,
+                speedingPct = _job.DriveSeconds > 30 ? _job.SpeedingSeconds * 100 / _job.DriveSeconds : 0,
+                truckDamageDelta = s is null ? 0 : Math.Max(0, s.TruckDamage - _job.StartTruckDamage),
+                trailerDamageDelta = s is null ? 0 : Math.Max(0, s.TrailerDamage - _job.StartTrailerDamage),
+                fines = _job.Fines, fineTotal = _job.FineTotal,
+                tolls = _job.Tolls, tollTotal = _job.TollTotal,
+                ferries = _job.Ferries, ferryTotal = _job.FerryTotal,
+                refuels = _job.Refuels, refuelLitres = _job.RefuelLitres,
+                score = LiveScore(),
+                timeline = _job.Timeline.ToArray(),
+                profile = _job.Profile.ToArray(),
+            };
+        }
+    }
+
+    /// <summary>Driving score as it would be if the job were delivered now.</summary>
+    private DrivingScore? LiveScore()
+    {
+        if (_job is null || _prev is null || _job.DriveSeconds < 30) return null;
+        var s = _prev;
+        var late = _job.Job.JobDeadlineGameMinutes > 0 && s.GameTimeMinutes > _job.Job.JobDeadlineGameMinutes;
+        return DrivingScore.Compute(_job.DriveSeconds, _job.SpeedingSeconds, s.CargoDamage, Math.Max(0, s.TruckDamage - _job.StartTruckDamage), _job.Fines, late);
+    }
+
+    /// <summary>Adds an entry to the running job's timeline and its cost counters.</summary>
+    private void JobEvent(TelemetrySnapshot s, DateTime at, string type, long? amount, string detail)
+    {
+        if (_job is null) return;
+        var a = amount ?? 0;
+        switch (type)
+        {
+            case "fine": _job.FineTotal += a; break;
+            case "toll": _job.Tolls++; _job.TollTotal += a; break;
+            case "ferry" or "train": _job.Ferries++; _job.FerryTotal += a; break;
+            case "refuel": _job.Refuels++; _job.RefuelLitres += s.Gameplay.RefuelLitres; break;
+        }
+        _job.Timeline.Add(new
+        {
+            atUtc = at, gameMinute = s.GameTimeMinutes, type, amount, detail,
+            km = Math.Round(Math.Max(0, s.OdometerKm - _job.StartOdometer), 1),
+        });
+        if (_job.Timeline.Count > 300) _job.Timeline.RemoveAt(1); // keep the start entry
     }
 
     public void OnSample(TelemetrySnapshot s)
@@ -145,6 +219,15 @@ public sealed class TripRecorder
                         _job.SpeedSamples++;
                         _job.DriveSeconds += dt;
                         if (s.SpeedLimitKmh > 1 && s.SpeedKmh > s.SpeedLimitKmh + 5) _job.SpeedingSeconds += dt;
+                    }
+                    // Speed profile for the Job page: one point every 250 m, thinned out on very long jobs.
+                    var jobKm = s.OdometerKm - _job.StartOdometer;
+                    if (jobKm >= 0 && (_job.LastProfileKm < 0 || jobKm - _job.LastProfileKm >= 0.25))
+                    {
+                        _job.LastProfileKm = jobKm;
+                        _job.Profile.Add([Math.Round(jobKm, 2), Math.Round(Math.Max(0, s.SpeedKmh)), Math.Round(Math.Max(0, s.SpeedLimitKmh))]);
+                        if (_job.Profile.Count > 4000)
+                            for (var i = _job.Profile.Count - 2; i > 0; i -= 2) _job.Profile.RemoveAt(i);
                     }
                 }
 
@@ -218,7 +301,9 @@ public sealed class TripRecorder
             StartedAtSource = atSource && s.SpeedKmh < 5,
             Job = Clone(s),
             StartTruckDamage = s.TruckDamage,
+            StartTrailerDamage = s.TrailerDamage,
         };
+        JobEvent(s, now, "start", (long)s.JobIncome, $"{s.SourceCompany}, {s.SourceCity}".Trim(' ', ','));
         // Split the breadcrumb trail so this job gets its own route.
         FlushRoute();
         _route = null;
@@ -397,6 +482,7 @@ public sealed class TripRecorder
         Database.Exec(c, "INSERT INTO events(at_utc, profile_id, demo, type, amount, detail, x, z) VALUES($a,$p,$d,$t,$m,$dt,$x,$z)",
             ("$a", Iso(at)), ("$p", _profileId()), ("$d", s.Demo ? 1 : 0), ("$t", type), ("$m", amount), ("$dt", detail), ("$x", s.X), ("$z", s.Z));
         EventRecorded?.Invoke(type, amount, detail);
+        JobEvent(s, at, type, amount, detail);
     }
 
     private static void LearnCity(SqliteConnection c, string? id, string name, double x, double z)

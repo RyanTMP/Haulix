@@ -14,7 +14,7 @@ namespace Haulix.App;
 /// </summary>
 internal sealed class VoiceAnnouncer : IDisposable
 {
-    private readonly BlockingCollection<(string Text, NotificationSettings Cfg, string Lang)> _queue = new();
+    private readonly BlockingCollection<(string? Text, NotificationSettings Cfg, string Lang, byte[]? Wav)> _queue = new();
     private readonly Thread _worker;
     private SpeechSynthesizer? _synth;
 
@@ -37,7 +37,13 @@ internal sealed class VoiceAnnouncer : IDisposable
 
     public void Say(string text, NotificationSettings cfg, string lang)
     {
-        if (_queue.Count < 5) _queue.Add((text, cfg, lang));
+        if (_queue.Count < 6) _queue.Add((text, cfg, lang, null));
+    }
+
+    /// <summary>Queues a notification sound (played before any announcement that follows it).</summary>
+    public void Chime(string sound, NotificationSettings cfg)
+    {
+        if (_queue.Count < 6) _queue.Add((null, cfg, "", NotificationSounds.Wav(sound, cfg.SoundStyle)));
     }
 
     /// <summary>Installed Windows voices (for the settings list).</summary>
@@ -53,10 +59,12 @@ internal sealed class VoiceAnnouncer : IDisposable
 
     private void Run()
     {
-        foreach (var (text, cfg, lang) in _queue.GetConsumingEnumerable())
+        foreach (var (text, cfg, lang, wav) in _queue.GetConsumingEnumerable())
         {
             try
             {
+                if (wav is not null) { PlayWav(wav, cfg.SoundVolume); continue; }
+                if (text is null) continue;
                 var voice = string.IsNullOrEmpty(cfg.VoiceId) ? PiperVoices.DefaultFor(lang) : cfg.VoiceId;
                 if (cfg.VoiceEngine != "windows" && PiperVoices.Installed(voice)) PlayWav(PiperVoices.Synthesize(voice, text, cfg.VoiceRate), cfg.VoiceVolume);
                 else SpeakWindows(text, cfg, lang);

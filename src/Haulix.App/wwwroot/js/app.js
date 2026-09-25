@@ -277,11 +277,10 @@ function renderShell() {
         <div class="sidebar__status" id="sidebarStatus"></div>
       </aside>
       <div class="main">
-        ${sessionStorageGet("haulix.onlineNotice") === "hidden" ? "" : html`<div class="online-notice" id="onlineNotice" role="status">
+        <div class="online-notice" id="onlineNotice" role="status">
           <span class="online-notice__icon">${icon("triangle-alert")}</span>
           <span class="online-notice__text"><b>HAULIX is preparing to go ONLINE.</b> Updates now come more frequently and may add features that are not available yet and do not represent the final version.</span>
-          <button class="online-notice__close" id="onlineNoticeClose" data-tip="Hide until next start" aria-label="Hide">${icon("x")}</button>
-        </div>`}
+        </div>
         <header class="topbar">
           <div class="topbar__title"><h1 id="pageTitle">Dashboard</h1><span class="topbar__crumb" id="pageCrumb"></span></div>
           <div class="topbar__actions">
@@ -295,8 +294,6 @@ function renderShell() {
         <main class="page" id="page"></main>
       </div>
     </div>`);
-
-  $("#onlineNoticeClose")?.addEventListener("click", () => { sessionStorageSet("haulix.onlineNotice", "hidden"); $("#onlineNotice")?.remove(); });
 
   $("#railToggle").onclick = () => {
     const rail = document.documentElement.dataset.rail === "true";

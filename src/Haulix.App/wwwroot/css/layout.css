@@ -161,6 +161,3 @@
 .online-notice__icon svg { width: 18px; height: 18px; }
 .online-notice__text { flex: 1; min-width: 0; }
 .online-notice__text b { color: var(--text); font-weight: 600; margin-right: 4px; }
-.online-notice__close { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: var(--text-3); cursor: pointer; flex-shrink: 0; }
-.online-notice__close:hover { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--text); }
-.online-notice__close svg { width: 15px; height: 15px; }

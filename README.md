@@ -51,7 +51,7 @@ Want to build HAULIX yourself or contribute? See [docs/DEVELOPING.md](docs/DEVEL
 
 ## Legal
 
-**HAULIX © 2026 RyanTMP. All rights reserved.** HAULIX is free for personal use under the [HAULIX License Agreement](LICENSE); copying, reselling or modifying it is not allowed. The source code is public so you can see what HAULIX does, but that grants no further rights. The **HAULIX name, logo and artwork** belong to RyanTMP – see [NOTICE.md](NOTICE.md). How HAULIX handles data: [Privacy Policy](PRIVACY.md). (Versions up to 0.0.7 were released under the GNU GPL v2.)
+**HAULIX © 2026 RyanTMP. All rights reserved.** HAULIX is free for personal use under the [RyanTMP Software License Agreement](LICENSE); copying, reselling or modifying it is not allowed. The source code is public so you can see what HAULIX does, but that grants no further rights. The **HAULIX name, logo and artwork** belong to RyanTMP – see [NOTICE.md](NOTICE.md). How HAULIX handles data: [Privacy Policy](PRIVACY.md). (Versions up to 0.0.7 were released under the GNU GPL v2.)
 
 HAULIX is an independent fan project and is not affiliated with or endorsed by SCS Software, TruckersMP or any other company. *Euro Truck Simulator 2* and *American Truck Simulator* are trademarks of SCS Software. All other names and trademarks belong to their owners.
 
@@ -72,6 +72,6 @@ HAULIX uses great work by others – the SCS telemetry plugin by RenCloud, uPlot
 
 **Voraussetzungen:** Windows 10 oder 11 und Euro Truck Simulator 2. Fehlt die Microsoft Edge WebView2 Runtime (auf manchen Windows-10-PCs), installiert das Setup sie automatisch. .NET musst du nicht installieren.
 
-**Datenschutz:** Alles bleibt auf deinem PC. HAULIX fragt im Internet nur, ob es eine neue Version gibt. Details: [Datenschutzerklärung (englisch)](PRIVACY.md) · Lizenz: [HAULIX-Lizenzvertrag](LICENSE) – kostenlos für den privaten Gebrauch.
+**Datenschutz:** Alles bleibt auf deinem PC. HAULIX fragt im Internet nur, ob es eine neue Version gibt. Details: [Datenschutzerklärung (englisch)](PRIVACY.md) · Lizenz: [RyanTMP-Softwarelizenzvertrag](LICENSE) – kostenlos für den privaten Gebrauch.
 
 **Updates:** HAULIX prüft beim Start und alle 6 Stunden auf neue Versionen und aktualisiert sich mit einem Klick – Fahrtenbuch und Einstellungen bleiben erhalten. Alle Änderungen stehen im [Changelog](CHANGELOG.md) und in HAULIX unter *Einstellungen → Über → Neuigkeiten*.

@@ -32,7 +32,7 @@ namespace Haulix.Installer
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(920, 600);
+            ClientSize = new Size(1040, 680);
             Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
             _web = new WebView2 { Dock = DockStyle.Fill, DefaultBackgroundColor = Background };
             Controls.Add(_web);
@@ -125,6 +125,7 @@ namespace Haulix.Installer
                     {
                         var dir = new SetupEngine().Install(S("dir"), B("desktop"), B("startMenu"), B("plugin"), Progress);
                         SetupEngine.SaveLanguage(S("language"));
+                        SetupEngine.SavePreferences(S("prefs"));
                         Send("installed", dir);
                     });
                     break;

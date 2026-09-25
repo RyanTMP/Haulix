@@ -196,6 +196,18 @@ namespace Haulix.Installer
             catch (Exception) { }
         }
 
+        /// <summary>Hands the options picked in a custom install to HAULIX (JSON, read and removed on its next start).</summary>
+        public static void SavePreferences(string json)
+        {
+            if (string.IsNullOrEmpty(json) || json.Length > 4000 || json[0] != '{') return;
+            try
+            {
+                using (var k = Registry.CurrentUser.CreateSubKey(@"Software\HAULIX"))
+                    k.SetValue("SetupPrefs", json);
+            }
+            catch (Exception) { }
+        }
+
         public static void Launch(string dir)
         {
             var exe = Path.Combine(dir, AppExe);

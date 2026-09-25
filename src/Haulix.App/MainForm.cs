@@ -159,6 +159,8 @@ public sealed class MainForm : Form
             if (ns.Voice && (!appInFront || n.Category == "test")) _voice.Speak(n, _engine.Settings.Load().General, ns);
         });
         _engine.Start();
+        // Setup choices like "Start with Windows" also need the host side (Run key).
+        if (_engine.InstallerPreferencesApplied) ApplyHostSettings(_engine.Settings.Load());
         core.Navigate($"https://{HostName}/index.html");
     }
 

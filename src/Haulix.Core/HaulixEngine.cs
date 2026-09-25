@@ -121,9 +121,13 @@ public sealed class HaulixEngine : IDisposable
     /// <summary>Push notification to the UI: (event name, payload).</summary>
     public event Action<string, object?>? Push;
 
+    /// <summary>True when this start applied choices from the setup (the host then re-applies autostart etc.).</summary>
+    public bool InstallerPreferencesApplied { get; private set; }
+
     public void Start()
     {
         ApplyInstallerLanguage();
+        InstallerPreferencesApplied = ApplyInstallerPreferences();
         var s = Settings.Load();
         Telemetry.IntervalMs = 1000 / Math.Clamp(s.Telemetry.UpdateHz, 1, 30);
         _ = Task.Run(() =>
@@ -159,6 +163,57 @@ public sealed class HaulixEngine : IDisposable
         catch (Exception)
         {
             // Registry unavailable: keep the current language setting.
+        }
+    }
+
+    /// <summary>
+    /// Choices made in the setup (Custom install): stored as JSON under HKCU\Software\HAULIX\SetupPrefs, applied
+    /// once on the next start and removed. Only known keys are read. Returns true when something was applied.
+    /// </summary>
+    public bool ApplyInstallerPreferences()
+    {
+        if (!OperatingSystem.IsWindows()) return false;
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\HAULIX", writable: true);
+            if (key?.GetValue("SetupPrefs") is not string json || json.Length == 0) return false;
+            key.DeleteValue("SetupPrefs", false);
+            using var doc = JsonDocument.Parse(json);
+            var p = doc.RootElement;
+            bool? B(string k) => p.TryGetProperty(k, out var v) && v.ValueKind is JsonValueKind.True or JsonValueKind.False ? v.GetBoolean() : null;
+            string? S(string k) => p.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+            var borderless = false;
+            UpdateSettings(s =>
+            {
+                if (S("units") is "metric" or "imperial") s.General.Units = S("units")!;
+                if (S("currency") is { Length: 3 } cur) s.General.Currency = cur.ToUpperInvariant();
+                if (S("theme") is "dark" or "midnight" or "light") s.General.Theme = S("theme")!;
+                if (S("accent") is "amber" or "copper" or "ice" or "signal") s.Appearance.Accent = S("accent")!;
+                if (B("launchWithWindows") is { } lw) s.General.LaunchWithWindows = lw;
+                if (B("startMinimized") is { } sm) s.General.StartMinimized = sm;
+                if (B("minimizeToTray") is { } mt) s.General.MinimizeToTray = mt;
+                if (B("updateCheck") is { } uc) s.General.UpdateCheck = uc;
+                if (B("hud") is { } hud) s.General.Hud = hud;
+                if (B("notifications") is { } n) s.Notifications.Enabled = n;
+                if (B("overlay") is { } ov) s.Notifications.Overlay = ov;
+                if (B("sounds") is { } so) s.Notifications.Sounds = so;
+                if (B("voice") is { } vo) s.Notifications.Voice = vo;
+                if (B("afkWarning") is { } afk) s.Notifications.AfkWarning = afk;
+                if (B("recordRoutes") is { } rr) s.Telemetry.RecordRoutes = rr;
+                if (B("autoBackup") is { } ab) s.Data.AutoBackup = ab;
+                borderless = B("borderless") == true;
+            });
+            if (borderless)
+            {
+                RunDetection();
+                Ets2Display.SetBorderless(_detection?.DocumentsPath);
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Setup preferences ignored: {ex.Message}");
+            return false;
         }
     }
 

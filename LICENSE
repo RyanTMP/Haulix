@@ -1,151 +1,223 @@
-HAULIX LICENSE AGREEMENT
-Version 1.0 – valid from HAULIX 0.0.8 BETA
+RYANTMP SOFTWARE LICENSE AGREEMENT
+Version 2.0 – valid from HAULIX 0.0.9 BETA
 
 Copyright © 2026 RyanTMP. All rights reserved.
 
-This agreement is between you (the "User") and RyanTMP, the author of HAULIX (the "Author"). It applies to the
-HAULIX program, its installer, updates, documentation, source code, name, logos and artwork (together "HAULIX"),
-and – once they are available – to the HAULIX online services (Part B). By installing or using HAULIX you accept
-this agreement. If you do not accept it, do not install or use HAULIX.
+This agreement is between you (the "User") and RyanTMP (the "Author"). It applies to every program, app, tool,
+installer, plugin, website feature and online service published by the Author – today HAULIX, and any software
+the Author releases in the future (each a "Product") – together with their updates, documentation, source code,
+names, logos and artwork. Terms that only apply to one Product are listed in that Product's schedule at the end
+of this agreement (for HAULIX: Schedule 1). If a schedule and this agreement differ, the schedule applies to that
+Product.
 
-Versions of HAULIX up to and including 0.0.7 were published under the GNU General Public License v2. Copies of
-those versions remain under that licence. This agreement applies to HAULIX 0.0.8 and all later versions.
+By installing, opening or using a Product you accept this agreement. If you do not accept it, do not install or
+use the Product.
+
+Earlier versions: HAULIX up to and including 0.0.7 was published under the GNU General Public License v2 (copies of
+those versions remain under that licence); HAULIX 0.0.8 was published under the HAULIX License Agreement 1.0.
 
 
-PART A – THE HAULIX PROGRAM
+PART A – USING THE PRODUCTS
 
 1. Licence
-   1.1 The Author grants you a free, non-exclusive, non-transferable, revocable licence to download, install and
-       use HAULIX on computers you own or control, for your own personal, non-commercial use.
-   1.2 Streaming, recording videos, taking screenshots and showing HAULIX in public content (for example on
-       YouTube, Twitch, TikTok or Discord) is allowed and welcome, also on monetised channels.
-   1.3 Using HAULIX inside a virtual trucking company (VTC) or community is allowed as long as HAULIX itself is
-       not sold, rented or offered as part of a paid service.
+   1.1 The Author grants you a non-exclusive, non-transferable, revocable licence to download, install and use a
+       Product on devices you own or control, for your own personal, non-commercial use, within the limits of
+       this agreement and the Product's schedule.
+   1.2 Streaming, videos, screenshots, reviews and tutorials showing a Product are allowed and welcome, also on
+       monetised channels, as long as you do not suggest that you made the Product or that the Author endorses you.
+   1.3 Using a Product inside a community or virtual company (for example a VTC) is allowed as long as the Product
+       itself is not sold, rented or offered as part of a paid service.
+   1.4 Commercial use (for example in a business, at events you charge for, or as part of your own product or
+       service) requires a separate written licence from the Author.
 
 2. Restrictions
-   Unless the Author has given written permission, you may not:
-   a) copy, publish, share, sell, rent, lend or otherwise distribute HAULIX or parts of it – please share the
-      official download link (https://github.com/RyanTMP/Haulix/releases or https://www.haulix-logging.com);
-   b) modify HAULIX, create derivative works, or publish modified versions, patches or "cracks";
-   c) decompile, disassemble or reverse engineer HAULIX, except where the law expressly allows it and only to
-      the extent it allows it (for example § 69e German Copyright Act for interoperability);
+   Unless the Author has given written permission or the law expressly allows it, you may not:
+   a) copy, publish, share, sell, rent, lend, sublicense or otherwise distribute a Product or parts of it – please
+      share the official download link instead;
+   b) modify a Product, create derivative works, or publish modified versions, patches, cracks, key generators or
+      tools that unlock paid features;
+   c) decompile, disassemble or reverse engineer a Product, except to the extent the law allows it (for example
+      § 69e German Copyright Act for interoperability);
    d) remove or change copyright notices, licence texts or brand markings;
-   e) use HAULIX, its code, name or artwork to build or promote another product or service;
-   f) use HAULIX in a way that breaks the law or the rules of games, servers or services you use it with.
+   e) use a Product, its code, name or artwork to build, train or promote another product or service;
+   f) get around technical limits, licence checks, rate limits or protections;
+   g) use a Product in a way that breaks the law or the rules of games, servers or services you use it with.
 
 3. Source code
-   The source code of HAULIX may be publicly visible on GitHub. Being able to see it does not give you any
-   right to use, copy or modify it beyond this agreement. You may read it and report problems or suggest
-   changes through GitHub issues. Contributions you submit may be used, changed and published by the Author
-   as part of HAULIX without payment.
+   The source code of a Product may be publicly visible (for example on GitHub). Being able to see it gives you no
+   right to use, copy or modify it beyond this agreement. You may read it, report problems and suggest changes.
 
-4. Ownership, name and logo
-   HAULIX is protected by copyright. All rights not expressly granted in this agreement remain with the
-   Author. The name "HAULIX", the HAULIX logos, the app icon and all artwork belong to the Author and may not
-   be used for other products or modified versions without written permission. You may show them unchanged
-   to refer to HAULIX.
+4. Ownership, names and logos
+   The Products are protected by copyright and other laws. All rights not expressly granted remain with the Author.
+   The names of the Products (including "HAULIX"), their logos, icons and artwork belong to the Author and may not
+   be used for other products or modified versions without written permission. You may show them unchanged to
+   refer to the original Product.
 
-5. Third-party components and games
-   5.1 HAULIX contains open-source components that remain the property of their authors and are licensed to
-       you under their own licences (see THIRD-PARTY-NOTICES). Nothing in this agreement limits your rights
-       under those licences.
-   5.2 HAULIX is an independent fan project. It is not affiliated with, endorsed by or sponsored by SCS
-       Software, TruckersMP, Discord, Steam, Microsoft or any other company. "Euro Truck Simulator 2" and
-       "American Truck Simulator" are trademarks of SCS Software; all other names belong to their owners.
-       You need your own legal copy of the games. HAULIX only reads data the games provide on your PC.
-   5.3 Optional features that interact with third-party services (for example the TruckersMP anti-AFK
-       message) may break those services' rules. Such features are off by default and you use them at your
-       own risk. The Author is not responsible for warnings, kicks or bans by third parties.
+5. Third-party components, games and services
+   5.1 Products may contain open-source components that remain the property of their authors and are licensed to
+       you under their own licences (see each Product's THIRD-PARTY-NOTICES). Nothing in this agreement limits
+       your rights under those licences.
+   5.2 The Products are independent projects. They are not affiliated with, endorsed by or sponsored by game
+       developers, platforms or services they work with, unless a schedule says otherwise. All other names and
+       trademarks belong to their owners. You need your own legal copy of any game a Product works with.
+   5.3 Features that interact with third-party services may break those services' rules; where a Product says so,
+       such features are off by default and you use them at your own risk. The Author is not responsible for
+       warnings, kicks or bans by third parties.
 
-6. Updates and pre-release versions
-   6.1 HAULIX checks for new versions and can update itself with your confirmation. You can turn the update
-       check off in the settings. Updates may add, change or remove features.
-   6.2 Versions marked "BETA", "DEVKIT" or similar are pre-release software. They may contain errors and
-       features that are unfinished, not yet available or not final.
+6. Updates, pre-release and early access
+   6.1 Products can check for and install updates with your confirmation; you can turn automatic checks off where
+       the Product offers it. Updates may add, change or remove features.
+   6.2 Versions marked "BETA", "DEVKIT", "PREVIEW", "EARLY ACCESS" or similar are pre-release software. They may
+       contain errors and unfinished features, and features may change or be removed before the final version.
+   6.3 Test programs may be offered to selected users. What you see in them is confidential until the Author
+       publishes it, unless the Author says otherwise.
 
-7. Your data
-   HAULIX stores your logbook, settings and backups only on your PC. How HAULIX handles data, including the
-   future online services, is described in the HAULIX Privacy Policy (PRIVACY), which is part of this
-   agreement.
+7. Add-ons, plugins, mods and interfaces
+   7.1 If a Product offers official ways to extend it (for example themes, add-ons, plugins, scripts or an API),
+       you may create extensions through these ways for personal use and share them free of charge, as long as
+       they do not contain the Product's code or artwork and do not break this agreement. The Author may set extra
+       rules for them (for example in developer documentation).
+   7.2 Extensions must not unlock paid features, collect other users' data without consent, or harm users,
+       devices or services. The Author may block extensions that do.
+   7.3 Access to an API or online interface may be limited, changed or ended, and may require a key that must not
+       be shared.
 
+8. Feedback and contributions
+   Ideas, suggestions, bug reports and code you send to the Author (for example through GitHub, Discord or e-mail)
+   may be used, changed and published by the Author as part of any Product, without payment or credit obligation.
+   You confirm that you have the right to give them.
 
-PART B – HAULIX ONLINE SERVICES
-
-The following applies as soon as online features are available (for example accounts, finding and joining
-VTCs, company pages, events and convoys, job board, leaderboards and cloud sync – the "Online Services").
-Online Services are always optional; HAULIX keeps working offline without them.
-
-8. Account
-   8.1 To use Online Services you may need to sign in with a supported account (for example Discord or
-       Steam). You must be at least 16 years old, or have permission from a parent or guardian.
-   8.2 Keep your account secure. You are responsible for what happens with your account. Tell the Author
-       without delay if you believe your account has been misused.
-   8.3 One person, one account. Accounts may not be sold, shared or transferred.
-
-9. Your content
-   9.1 "Your Content" is anything you create or upload through the Online Services: profile and company
-       names, descriptions, logos, messages, events, jobs and uploaded delivery data.
-   9.2 You keep all rights in Your Content. You give the Author a free, worldwide, non-exclusive licence to
-       store, process, display and share Your Content as far as necessary to run, show and improve the Online
-       Services (for example showing your company page to other users or your results on a leaderboard).
-       This licence ends when you delete Your Content or your account, except for copies in backups for a
-       limited time and content that other users already shared with your permission.
-   9.3 You confirm that you have the rights to Your Content and that it does not break the law or the rights
-       of others.
-
-10. Conduct
-    You may not use the Online Services to:
-    a) harass, threaten, insult or discriminate against others, or post hateful, violent, sexual or illegal
-       content;
-    b) impersonate other people, VTCs or companies, or mislead others about your identity;
-    c) send spam or advertising, or recruit for other services in a way that disturbs others;
-    d) manipulate leaderboards, statistics or deliveries (for example with fake telemetry, edited data,
-       cheats or automation);
-    e) attack, overload, scan or reverse engineer the Online Services or access them with unofficial tools,
-       bots or scrapers;
-    f) collect personal data of other users.
-
-11. Moderation, suspension and termination
-    11.1 The Author may remove content, reset manipulated statistics, and warn, suspend or close accounts that
-         break this agreement, the law or the rights of others. Where reasonable, you will be told why and can
-         object.
-    11.2 You can stop using the Online Services and delete your account at any time.
-    11.3 The Author may change, pause or end Online Services or individual features, for example for
-         maintenance, security or because a service is discontinued. Where possible, this will be announced
-         in advance, and you will be able to export your data first.
-
-12. Availability and cost
-    12.1 The Online Services are currently free. Should paid features ever be offered, they will be clearly
-         marked and require your separate agreement; nothing will be charged without it.
-    12.2 There is no guarantee that the Online Services are always available, error-free or secure against
-         all attacks. Your local logbook in HAULIX is not affected by outages.
+9. Data protection
+   How each Product handles data is described in its Privacy Policy (for HAULIX: PRIVACY), which is part of this
+   agreement. Products store data on your device unless a feature clearly says otherwise.
 
 
-PART C – GENERAL
+PART B – ONLINE SERVICES
 
-13. Warranty and liability
-    13.1 HAULIX and the Online Services are provided free of charge and "as is". The Author gives no warranty
-         that they are free of errors or suitable for a particular purpose. Make backups of important data.
-    13.2 The Author is liable without limitation for intent and gross negligence, for injury to life, body or
-         health, under the German Product Liability Act and where a guarantee was given. For free software,
-         liability for simple negligence is excluded as far as the law allows (§§ 521, 599 German Civil Code).
-    13.3 Mandatory rights you have as a consumer under the law of your country remain unaffected.
+This part applies when a Product offers online features (for example accounts, communities or virtual companies,
+events, job boards, leaderboards, cloud sync, sharing or messaging – the "Online Services"). Online Services are
+optional unless a schedule says a Product needs them.
 
-14. Termination
-    This licence ends automatically if you break this agreement. You must then uninstall HAULIX and delete all
-    copies. Sections 2 to 5, 9.2 (for content already shared), 13 and 15 continue to apply.
+10. Account
+    10.1 To use Online Services you may need to sign in with a supported account (for example Discord or Steam)
+         or create a Product account. You must be at least 16 years old, or have permission from a parent or
+         guardian.
+    10.2 Keep your account secure; you are responsible for what happens with it. Tell the Author without delay if
+         you believe it was misused. One person, one account; accounts may not be sold, shared or transferred.
 
-15. Changes to this agreement
-    The Author may update this agreement, for example when new features or Online Services are added. The
-    current version is shown in the installer and in HAULIX (Settings → About). For changes that matter to
-    you, you will be asked to accept the new version when you install an update or use the Online Services.
+11. Your content
+    11.1 "Your Content" is anything you create or upload through the Online Services (for example names,
+         descriptions, logos, messages, events, jobs, images and uploaded data).
+    11.2 You keep all rights in Your Content. You give the Author a free, worldwide, non-exclusive licence to store,
+         process, display and share Your Content as far as needed to run, show and improve the Online Services.
+         The licence ends when you delete Your Content or your account, except for copies in backups for a limited
+         time and content others already shared with your permission.
+    11.3 You confirm that you have the rights to Your Content and that it does not break the law or others' rights.
 
-16. Law and final provisions
-    16.1 German law applies, excluding the UN Convention on Contracts for the International Sale of Goods. If
-         you are a consumer, this choice does not take away the protection of mandatory law of the country
-         where you live.
-    16.2 If a provision of this agreement is invalid, the rest remains valid.
-    16.3 The HAULIX Privacy Policy (PRIVACY) and the third-party notices (THIRD-PARTY-NOTICES) are part of this
-         agreement.
+12. Conduct
+    You may not use the Online Services to: a) harass, threaten, insult or discriminate against others, or post
+    hateful, violent, sexual or illegal content; b) impersonate others or mislead about your identity; c) send spam
+    or advertising; d) manipulate statistics, rankings or results (for example with fake data, cheats or
+    automation); e) attack, overload, scan or reverse engineer the Online Services or use unofficial clients, bots
+    or scrapers; f) collect other users' personal data.
+
+13. Moderation, suspension and changes
+    13.1 The Author may remove content, reset manipulated results, and warn, suspend or close accounts that break
+         this agreement, the law or others' rights. Where reasonable you will be told why and can object.
+    13.2 You can stop using the Online Services and delete your account at any time.
+    13.3 The Author may change, pause or end Online Services or features, for example for maintenance, security or
+         because a service is discontinued. Where possible this is announced in advance and you can export your
+         data first. Paid services are covered by section 16.
+
+14. Availability
+    There is no guarantee that Online Services are always available, error-free or secure against all attacks.
+    Local data in a Product is not affected by outages.
+
+
+PART C – PAID FEATURES
+
+This part applies only if the Author offers paid features for a Product (for example a one-time purchase,
+subscription, supporter package, premium features, cosmetic items or donations with rewards – "Paid Features").
+Nothing is ever charged without your separate, explicit agreement at the time of purchase.
+
+15. Purchase and price
+    15.1 The price, what is included, the term and how to cancel are shown before you buy. Prices include the
+         statutory VAT where it applies.
+    15.2 Payments are handled by the payment provider named at checkout under its own terms. The Author does not
+         store your full payment details.
+    15.3 Paid Features are licensed to you personally under this agreement; they are not sold as property and
+         cannot be transferred or resold.
+
+16. Subscriptions
+    16.1 Subscriptions renew for the same term until you cancel. You can cancel at any time, at the latest before
+         the next renewal, and keep access until the end of the paid term. The way to cancel is shown in the
+         Product or on the Author's website.
+    16.2 If a Paid Feature is discontinued during a paid term, you receive a pro-rata refund for the remaining time
+         or an equivalent replacement.
+
+17. Right of withdrawal (consumers in the EU/EEA/UK)
+    17.1 As a consumer you can withdraw from a purchase within 14 days without giving a reason, as described in the
+         withdrawal information shown at checkout.
+    17.2 For digital content that is provided immediately, the right of withdrawal ends when the provision begins
+         if you expressly agreed to the immediate start and confirmed that you know you lose the right of
+         withdrawal. You will be asked for this at checkout.
+    17.3 Statutory warranty rights for digital products (§§ 327 et seq. German Civil Code or the law of your
+         country) remain unaffected.
+
+18. Refunds and charge-backs
+    Refunds are given as required by law and where the Author promises them. Charge-backs for purchases that were
+    delivered as agreed may lead to the Paid Feature being disabled until the matter is resolved.
+
+
+PART D – GENERAL
+
+19. Warranty and liability
+    19.1 Free Products and free features are provided "as is". For them, the Author gives no warranty that they are
+         error-free or suitable for a particular purpose; make backups of important data.
+    19.2 The Author is liable without limitation for intent and gross negligence, for injury to life, body or
+         health, under the German Product Liability Act and where a guarantee was given. For free Products, liability
+         for simple negligence is excluded as far as the law allows (§§ 521, 599 German Civil Code). For Paid
+         Features, liability for simple negligence is limited to the breach of essential contractual obligations and
+         to the damage typical and foreseeable at the time of purchase.
+    19.3 Mandatory rights you have as a consumer under the law of your country remain unaffected.
+
+20. Termination
+    This licence ends automatically if you seriously break this agreement; you must then uninstall the Product and
+    delete all copies. Sections 2 to 5, 8, 11.2 (for content already shared), 19 and 22 continue to apply. Refunds
+    for Paid Features follow Part C.
+
+21. Changes to this agreement
+    The Author may update this agreement, for example when new Products, features, Online Services or Paid Features
+    are added. The current version is shown in the installer and inside each Product. For changes that matter to
+    you, you will be asked to accept the new version when you install an update, sign in or buy something. Changes
+    never reduce what you already paid for during its paid term.
+
+22. Law and final provisions
+    22.1 German law applies, excluding the UN Convention on Contracts for the International Sale of Goods. If you
+         are a consumer, this choice does not take away the protection of mandatory law of the country where you
+         live.
+    22.2 The EU online dispute resolution platform is available at https://ec.europa.eu/consumers/odr. The Author
+         is not obliged and not willing to take part in dispute resolution proceedings before a consumer
+         arbitration board, unless the law requires it.
+    22.3 If a provision of this agreement is invalid, the rest remains valid.
+    22.4 Each Product's Privacy Policy, THIRD-PARTY-NOTICES and schedule are part of this agreement.
 
 Contact: https://github.com/RyanTMP/Haulix/issues · https://www.haulix-logging.com
+
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+SCHEDULE 1 – HAULIX
+
+Product:          HAULIX – ETS2 Logger (desktop app for Windows, its installer and updates)
+Price:            Free. No Paid Features are offered at the moment; Part C applies only if they are added later.
+Allowed use:      Personal, non-commercial use as in section 1; use in VTCs and communities as in section 1.3.
+Online Services:  Being prepared and not active yet (accounts, VTCs, company pages, events and convoys, job board,
+                  leaderboards, cloud sync). When they start, Part B applies and signing in requires accepting the
+                  current version of this agreement and the HAULIX Privacy Policy. Sharing is off by default.
+Game:             HAULIX works with Euro Truck Simulator 2 by SCS Software and reads data the game provides on your
+                  PC. It is not affiliated with or endorsed by SCS Software or TruckersMP.
+Third-party rules: The optional TruckersMP anti-AFK message breaks the TruckersMP rules; it is off by default and
+                  used at your own risk (section 5.3).
+Privacy:          HAULIX Privacy Policy (PRIVACY).
+Third-party code: THIRD-PARTY-NOTICES.

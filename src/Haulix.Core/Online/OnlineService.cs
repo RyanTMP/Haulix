@@ -14,7 +14,7 @@ public sealed class OnlineService
     /// Version of the HAULIX License Agreement (Part B – online services) and Privacy Policy. Signing in requires the
     /// user to have accepted this version; raise it when the terms change so everyone is asked again.
     /// </summary>
-    public const string TermsVersion = "1.0";
+    public const string TermsVersion = "2.0";
 
     public static bool TermsAccepted(Settings.OnlineSettings s) => s.AcceptedTermsVersion == TermsVersion;
 

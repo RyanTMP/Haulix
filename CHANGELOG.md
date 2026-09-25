@@ -2,6 +2,24 @@
 
 All notable changes to HAULIX. The same list appears in the app under *What's new* (Settings → About).
 
+## 0.0.9 BETA
+
+- **All-new installer** – The setup is redesigned in the new glass look: a clear step list, a welcome page with everything HAULIX does, a progress ring while installing and a finish page with the next steps.
+- **Express or Custom install** – Express installs with the recommended settings. Custom lets you choose the install folder, shortcuts and plugin, start with Windows, tray, updates and backups, the in-game HUD, notifications, sounds and voice, the AFK warning, GPS traces, borderless fullscreen, theme, accent colour, units and currency.
+- **Your setup choices are applied** – Everything you pick in a custom install is applied when HAULIX starts for the first time – no need to set it again.
+- **RyanTMP Software License Agreement 2.0** – One license for HAULIX and future RyanTMP software: free personal use, rules for add-ons, beta versions, online services and – if they ever come – paid features with your consumer rights. Updating asks you to accept it once.
+- **Privacy policy 2.0** – Updated together with the license. Nothing changes for your data: everything stays on your PC.
+
+<details><summary>Deutsch</summary>
+
+- **Ganz neuer Installer** – Das Setup ist im neuen Glas-Look gestaltet: klare Schrittliste, eine Willkommensseite mit allem, was HAULIX kann, ein Fortschrittsring beim Installieren und eine Abschlussseite mit den nächsten Schritten.
+- **Express- oder benutzerdefinierte Installation** – Express installiert mit den empfohlenen Einstellungen. Benutzerdefiniert lässt dich Installationsordner, Verknüpfungen und Plugin, Autostart, Infobereich, Updates und Sicherungen, Ingame-HUD, Benachrichtigungen, Töne und Stimme, AFK-Warnung, GPS-Verlauf, randloses Vollbild, Design, Akzentfarbe, Einheiten und Währung wählen.
+- **Deine Setup-Auswahl wird übernommen** – Alles, was du bei der benutzerdefinierten Installation wählst, übernimmt HAULIX beim ersten Start – du musst nichts erneut einstellen.
+- **RyanTMP-Softwarelizenzvertrag 2.0** – Eine Lizenz für HAULIX und künftige Software von RyanTMP: kostenlos für den privaten Gebrauch, Regeln für Add-ons, Beta-Versionen, Online-Dienste und – falls es sie je gibt – kostenpflichtige Funktionen mit deinen Verbraucherrechten. Beim Update einmal akzeptieren.
+- **Datenschutzerklärung 2.0** – Zusammen mit der Lizenz aktualisiert. Für deine Daten ändert sich nichts: alles bleibt auf deinem PC.
+
+</details>
+
 ## 0.0.8 BETA
 
 - **All-new look: premium dark glass** – HAULIX is redesigned: a deep dark background with soft colour glows, translucent glass panels, a floating sidebar, larger rounded cards, calmer typography with clear numbers, glowing progress bars and a personal greeting on the dashboard.

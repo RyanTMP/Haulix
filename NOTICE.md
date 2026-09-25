@@ -6,12 +6,12 @@ Copyright © 2026 RyanTMP. All rights reserved.
 ## The program
 
 The HAULIX program, its installer and its source code are the work of RyanTMP and are protected by copyright.
-From version 0.0.8 on, use of HAULIX is governed by the **HAULIX License Agreement** ([LICENSE](LICENSE)):
+Use of HAULIX is governed by the **RyanTMP Software License Agreement** ([LICENSE](LICENSE), with HAULIX in Schedule 1):
 free for personal use; copying, redistributing, reselling or modifying HAULIX is not allowed without written
 permission. The source code is publicly visible, but that does not grant any rights beyond the License Agreement.
 
 Versions up to and including 0.0.7 were published under the GNU General Public License v2; copies of those
-versions remain under that licence.
+versions remain under that licence. HAULIX 0.0.8 was published under the HAULIX License Agreement 1.0.
 
 How HAULIX handles data – today offline, later in the optional online services – is described in the
 **HAULIX Privacy Policy** ([PRIVACY.md](PRIVACY.md)).

@@ -1,9 +1,9 @@
 # HAULIX Privacy Policy
 
-Version 1.0 – valid from HAULIX 0.0.8 BETA
+Version 2.0 – valid from HAULIX 0.0.9 BETA
 
 This policy explains which data HAULIX processes – today in the offline program, and later in the optional
-HAULIX online services. It is part of the HAULIX License Agreement.
+HAULIX online services. It is part of the RyanTMP Software License Agreement (Schedule 1 – HAULIX).
 
 **Responsible (controller):** RyanTMP – *[full name and postal address must be added here before the online
 services start, as required by Art. 13 GDPR]* · Contact: https://github.com/RyanTMP/Haulix/issues ·

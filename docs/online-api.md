@@ -35,7 +35,7 @@ contract and the app only needs a real `IOnlineApi` implementation plus `OnlineS
 
 ## Terms, consent and privacy
 
-The online services are covered by **Part B of the HAULIX License Agreement** ([LICENSE](../LICENSE)) and the
+The online services are covered by **Part B of the RyanTMP Software License Agreement** ([LICENSE](../LICENSE)) and the
 **HAULIX Privacy Policy** ([PRIVACY.md](../PRIVACY.md)).
 
 - **Consent before sign-in.** The sign-in screen shows both documents; signing in is only possible after the user

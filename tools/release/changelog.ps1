@@ -38,7 +38,8 @@ foreach ($v in $json) {
 Write-Host "CHANGELOG.md updated"
 
 if ($Version -and $NotesFile) {
-  $plain = ($Version -split '-')[0]
+  # changelog.json lists hotfixes the way HAULIX shows them: "0.0.9.1-beta" -> "0.0.9-1".
+  $plain = [regex]::Replace(($Version -split '-')[0], '^(\d+\.\d+\.\d+)\.(\d+)$', '$1-$2')
   $v = $json | Where-Object { $_.version -eq $plain } | Select-Object -First 1
   if (-not $v) { throw "Version $plain is not in changelog.json" }
   $n = New-Object Text.StringBuilder

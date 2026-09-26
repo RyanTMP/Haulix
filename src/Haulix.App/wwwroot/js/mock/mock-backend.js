@@ -407,7 +407,7 @@ function handle(method, p) {
       return mockRoute;
     }
     case "app.init":
-      return { version: "1.0.0", settings, detection, status: statusPayload(), profile, telemetry: live ? { snapshot: snapshot(), job: null, routeId: 999 } : null,
+      return { version: "0.0.9.1-beta", settings, detection, status: statusPayload(), profile, telemetry: live ? { snapshot: snapshot(), job: null, routeId: 999 } : null,
         counts: { deliveries: deliveries.length, recorded: 48, imported: 16, routes: 46, routePoints: 18_220, sessions: 88, events: 214, learnedCities: 8, snapshots: 31 },
         dataFolder: "C:\\Users\\you\\AppData\\Local\\Haulix", backupFolder: "C:\\Users\\you\\AppData\\Local\\Haulix\\backups", mapStatus, route: mockRoute, systemLanguage: navigator.language.slice(0, 2) };
     case "settings.get": return settings;
@@ -436,7 +436,7 @@ function handle(method, p) {
         unlocked: value >= target, unlockedUtc: value >= target ? new Date(Date.now() - 86400e3 * (3 + i * 4)).toISOString() : null,
         family, category, level: i + 1, levels: levels.length, points: pts[tier] })));
     }
-    case "update.check": return { enabled: !!settings.general.updateFeedUrl, available: false, current: "0.0.4-beta" };
+    case "update.check": return { enabled: true, available: false, current: "0.0.9.1-beta", latest: "0.0.9.1-beta" };
     case "image.save": return "C:\\Users\\you\\Pictures\\haulix-card.png";
     case "image.copy": return true;
     case "shell.openUrl": return true;

@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Haulix.Core</RootNamespace>
-    <Version>0.0.9-beta</Version>
+    <Version>0.0.9.1-beta</Version>
     <Copyright>Copyright © 2026 RyanTMP</Copyright>
     <Authors>RyanTMP</Authors>
     <!-- HAULIX only runs on Windows (ETS2 shared memory, Steam registry). -->

@@ -29,6 +29,7 @@ public sealed class MainForm : Form
     private DiscordPresence? _discord;
     private static readonly bool DiscordPresenceEnabled = false;
     private HudOverlay? _hud;
+    private Control? _nativeSplash;
 
     public MainForm(string dataFolder, bool startMinimized)
     {
@@ -44,6 +45,8 @@ public sealed class MainForm : Form
 
         _web = new WebView2 { Dock = DockStyle.Fill, DefaultBackgroundColor = Background };
         Controls.Add(_web);
+        _nativeSplash = CreateNativeSplash();
+        if (_nativeSplash is not null) { Controls.Add(_nativeSplash); _nativeSplash.BringToFront(); }
 
         _tray = new NotifyIcon { Icon = Icon, Text = "HAULIX ETS2 Logger", Visible = false };
         _tray.DoubleClick += (_, _) => BringToFrontFromOtherInstance();
@@ -135,6 +138,7 @@ public sealed class MainForm : Form
         // Discord Rich Presence is "coming soon": the code exists but is locked in this version.
         if (DiscordPresenceEnabled) _discord = new DiscordPresence(_engine);
         _hud = new HudOverlay(_engine, () => Visible && WindowState != FormWindowState.Minimized && ActiveForm == this);
+        _hud.PlacementEnded += saved => Post(new { @event = "hudPlacement", data = new { active = false, saved } });
         // Job notifications over the game while HAULIX itself is not the active window.
         _engine.Notifier.Raised += n => BeginInvoke(() =>
         {
@@ -161,6 +165,8 @@ public sealed class MainForm : Form
         _engine.Start();
         // Setup choices like "Start with Windows" also need the host side (Run key).
         if (_engine.InstallerPreferencesApplied) ApplyHostSettings(_engine.Settings.Load());
+        // The web start-up screen takes over as soon as the page has loaded.
+        core.NavigationCompleted += (_, _) => { _nativeSplash?.Dispose(); _nativeSplash = null; };
         core.Navigate($"https://{HostName}/index.html");
     }
 
@@ -334,6 +340,14 @@ public sealed class MainForm : Form
                     BeginInvoke(() => _hud?.BeginPlacement());
                     result = true;
                     return true;
+                case "hud.placeEnd":
+                {
+                    // Done / Cancel in Settings → HUD while the card is being placed.
+                    var save = args.ValueKind == JsonValueKind.Object && args.TryGetProperty("save", out var sv) && sv.ValueKind == JsonValueKind.True;
+                    BeginInvoke(() => _hud?.EndPlacement(save));
+                    result = true;
+                    return true;
+                }
                 case "shell.openUrl":
                 {
                     // Only web links, opened in the user's browser.
@@ -553,6 +567,22 @@ public sealed class MainForm : Form
     }
 
     private sealed record SavedBounds(int X, int Y, int W, int H, bool Maximized);
+
+    /// <summary>The H logo on the dark background while WebView2 starts, so the window is never blank.</summary>
+    private static Control? CreateNativeSplash()
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "wwwroot", "assets", "brand", "h-logo.png");
+        if (!File.Exists(path)) return null;
+        try
+        {
+            using var file = Image.FromFile(path);
+            var logo = new Bitmap(file, new Size(62, (int)Math.Round(62.0 * file.Height / file.Width)));
+            var box = new PictureBox { Dock = DockStyle.Fill, BackColor = Background, Image = logo, SizeMode = PictureBoxSizeMode.CenterImage };
+            box.Disposed += (_, _) => logo.Dispose();
+            return box;
+        }
+        catch (Exception) { return null; }
+    }
 
     private static Icon LoadIcon()
     {

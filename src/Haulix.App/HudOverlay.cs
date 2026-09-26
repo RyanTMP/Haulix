@@ -30,6 +30,7 @@ internal sealed class HudOverlay : IDisposable
         _engine = engine;
         _appInFront = appInFront;
         _card = new JobCard(SavePlacement);
+        _card.MoveEnded += saved => PlacementEnded?.Invoke(saved);
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
     }
@@ -37,12 +38,23 @@ internal sealed class HudOverlay : IDisposable
     /// <summary>Shows the card for a few seconds (sample values when not driving) to check its position.</summary>
     public void Preview(int seconds = 10) => _previewUntil = DateTime.UtcNow.AddSeconds(seconds);
 
-    /// <summary>Makes the card draggable on the game monitor: drag it, then double-click (or wait) to save.</summary>
+    /// <summary>Makes the card draggable on the game monitor: drag it and let go to save. Right-click or the buttons in
+    /// HAULIX end it too, and it ends by itself after a minute, so the card never stays movable.</summary>
     public void BeginPlacement()
     {
         _card.BeginMove();
         Tick();
     }
+
+    /// <summary>Ends "Place on screen" from HAULIX (Done / Cancel).</summary>
+    public void EndPlacement(bool save)
+    {
+        _card.EndMove(save);
+        Tick();
+    }
+
+    /// <summary>Raised when placement ends; the argument says whether the position was saved.</summary>
+    public event Action<bool>? PlacementEnded;
 
     public bool Placing => _card.Moving;
 
@@ -154,11 +166,14 @@ internal sealed class HudOverlay : IDisposable
         private float _fontFactor;
         private Screen? _screen;
 
-        // Placement ("Place on screen"): the card becomes draggable until the player double-clicks it.
+        // Placement ("Place on screen"): the card is draggable until the player lets go of it, right-clicks it,
+        // ends it in HAULIX or a minute passes.
         private bool _moving;
         private Point _dragFrom;
         private bool _dragging;
+        private bool _moved;
         private DateTime _moveUntil;
+        public event Action<bool>? MoveEnded;
 
         public JobCard(Action<Point, Screen> savePlacement)
         {
@@ -190,12 +205,13 @@ internal sealed class HudOverlay : IDisposable
         public void BeginMove()
         {
             _moving = true;
-            _moveUntil = DateTime.UtcNow.AddMinutes(2);
+            _moveUntil = DateTime.UtcNow.AddMinutes(1);
+            _moved = false;
             SetClickThrough(false);
             Cursor = Cursors.SizeAll;
         }
 
-        private void EndMove(bool save)
+        public void EndMove(bool save)
         {
             if (!_moving) return;
             _moving = false;
@@ -203,8 +219,10 @@ internal sealed class HudOverlay : IDisposable
             Capture = false;
             Cursor = Cursors.Default;
             SetClickThrough(true);
-            if (save && _screen is not null) _savePlacement(new Point(Left + Width / 2, Top + Height / 2), _screen);
+            save &= _screen is not null;
+            if (save) _savePlacement(new Point(Left + Width / 2, Top + Height / 2), _screen!);
             Invalidate();
+            MoveEnded?.Invoke(save);
         }
 
         private void SetClickThrough(bool on)
@@ -239,24 +257,23 @@ internal sealed class HudOverlay : IDisposable
             Location = new Point(
                 Math.Clamp(p.X - _dragFrom.X, area.Left, Math.Max(area.Left, area.Right - Width)),
                 Math.Clamp(p.Y - _dragFrom.Y, area.Top, Math.Max(area.Top, area.Bottom - Height)));
+            _moved = true;
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
+            var wasDragging = _dragging;
             _dragging = false;
             Capture = false;
-        }
-
-        protected override void OnMouseDoubleClick(MouseEventArgs e)
-        {
-            base.OnMouseDoubleClick(e);
-            if (_moving && e.Button == MouseButtons.Left) EndMove(save: true);
+            // Letting go of the card finishes placement. It used to wait for a double-click, which often never reaches
+            // this overlay window, so the card stayed movable. A click without dragging keeps the old position.
+            if (_moving && wasDragging && e.Button == MouseButtons.Left) EndMove(save: _moved);
         }
 
         public void Update(TelemetrySnapshot s, HudSettings hud, string appAccent, Screen screen, double opacity, bool de, bool imperial)
         {
-            if (_moving && DateTime.UtcNow > _moveUntil) EndMove(save: true);
+            if (_moving && DateTime.UtcNow > _moveUntil) EndMove(save: false);
             _screen = screen;
             var scale = hud.Scale is >= 50 and <= 200 ? hud.Scale / 100f : hud.Size switch { "small" => 0.82f, "large" => 1.25f, _ => 1f };
             _ui = screen.Scale() * scale;
@@ -287,8 +304,9 @@ internal sealed class HudOverlay : IDisposable
             if (_moving)
             {
                 rows.Add(new(L("Drag", "Ziehen"), L("move the card", "Karte verschieben"), _pal.Ink));
-                rows.Add(new(L("Double-click", "Doppelklick"), L("save position", "Position speichern"), _accent));
+                rows.Add(new(L("Let go", "Loslassen"), L("save position", "Position speichern"), _accent));
                 rows.Add(new(L("Right-click", "Rechtsklick"), L("cancel", "abbrechen"), _pal.Muted));
+                rows.Add(new(L("Ends in", "Endet in"), $"{Math.Max(0, (int)(_moveUntil - DateTime.UtcNow).TotalSeconds)} s", _pal.Muted));
             }
             else foreach (var key in hud.Fields.Distinct())
             {

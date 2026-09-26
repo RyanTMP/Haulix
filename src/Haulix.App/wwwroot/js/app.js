@@ -6,6 +6,7 @@ import { store, pushHistory, isLive } from "./core/store.js";
 import * as fmt from "./core/format.js";
 import { initTooltips, toast, closeDrawer, modal } from "./components/ui.js";
 import { loadCities } from "./core/cities.js";
+import { versionBadge, channelPill } from "./components/version.js";
 import { setLanguage, resolveLanguage, startAutoTranslate, locale } from "./core/i18n.js";
 
 const PAGES = {
@@ -62,9 +63,33 @@ let current = { id: null, cleanup: null, token: 0 };
 
 /* ------------------------------------------------------------------ boot */
 
+/** Start-up screen progress: fills the ring and bar and shows the current step. */
+const bootStarted = performance.now();
+function splashStep(pct, text) {
+  document.getElementById("splashFill")?.style.setProperty("width", `${pct}%`);
+  document.getElementById("splashRing")?.style.setProperty("stroke-dashoffset", String(100 - pct));
+  const t = document.getElementById("splashStep");
+  if (t && text) t.textContent = text;
+}
+
+async function hideSplash() {
+  splashStep(100, "Ready");
+  // Keep the start-up screen up briefly so it doesn't just flash on fast machines.
+  const rest = 1200 - (performance.now() - bootStarted);
+  if (rest > 0) await new Promise((r) => setTimeout(r, rest));
+  const splash = document.getElementById("splash");
+  if (!splash) return;
+  splash.classList.add("is-done");
+  setTimeout(() => splash.remove(), 500);
+}
+
 async function boot() {
   initTooltips();
-  await Promise.all([loadIcons(), connect(), loadCities(), loadLogos()]);
+  splashStep(15, "Loading interface");
+  let done = 0;
+  const steps = [loadIcons(), connect(), loadCities(), loadLogos()].map((p) => Promise.resolve(p).finally(() => splashStep(15 + ++done * 10, "Loading interface")));
+  await Promise.all(steps);
+  splashStep(60, "Reading your logbook");
 
   on("status", (s) => store.set("status", s));
   let onJob = null;
@@ -102,6 +127,10 @@ async function boot() {
   startAutoTranslate();
   // "0.0.3-devkit" → "0.0.3 DEVKIT" for display (the pre-release label marks developer builds).
   store.set("version", fmt.versionLabel(init.version));
+  store.set("versionRaw", init.version);
+  const sv = document.getElementById("splashVersion");
+  if (sv) sv.innerHTML = html`Version <strong>${fmt.versionParts(init.version).number}</strong> ${channelPill(fmt.versionParts(init.version).channel)}`.toString();
+  splashStep(80, "Connecting to ETS2");
   store.set("detection", init.detection);
   store.set("status", init.status);
   store.set("profile", init.profile);
@@ -111,10 +140,19 @@ async function boot() {
   if (init.telemetry) store.set("telemetry", init.telemetry);
   applySettings(init.settings);
 
+  splashStep(90, "Preparing dashboard");
   renderShell();
   store.on("status", updateStatus);
   store.on("profile", () => { updateNavBadges(); updateProfileChip(); });
   store.on("counts", updateNavBadges);
+  store.on("updateInfo", () => updateStatus(store.get("status")));
+  // The version badge (sidebar, About): open the update when one is waiting, otherwise "What's new".
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("[data-version-badge]")) return;
+    const u = store.get("updateInfo");
+    if (u?.available) showUpdate(u);
+    else import("./core/changelog.js").then((m) => m.showChangelog());
+  });
   setInterval(updateFreshness, 1000);
 
   window.addEventListener("hashchange", route);
@@ -133,9 +171,7 @@ async function boot() {
     saveSettings((s) => (s.general.lastSeenVersion = init.version)).catch(() => {});
   }
 
-  const splash = document.getElementById("splash");
-  splash.classList.add("is-done");
-  setTimeout(() => splash.remove(), 400);
+  hideSplash();
   if (!isNative) toast({ kind: "info", title: "Preview mode", message: "Running in a browser with sample data. Launch Haulix.exe to read your ETS2 data.", timeout: 7000 });
 }
 
@@ -145,6 +181,7 @@ async function checkForUpdate(settings) {
   if (!isNative || settings.general.updateCheck === false) return;
   const run = async () => {
     const u = await call("update.check").catch(() => null);
+    if (u) store.set("updateInfo", u);
     if (u?.available && updateShownFor !== u.latest) { updateShownFor = u.latest; showUpdate(u); }
   };
   await run();
@@ -328,7 +365,7 @@ function updateStatus(s) {
     <dl class="status-grid">
       ${statusRows(s).map(([k, [tone, label], tip]) => html`<dt>${k}</dt><dd data-tip="${tip}"><span class="${cx("dot", tone && `dot--${tone}`, k === "Telemetry" && (s.telemetry === "live" || s.telemetry === "demo") && "dot--live")}"></span><span>${label}</span></dd>`)}
     </dl>
-    <div class="sidebar__meta"><span>v${store.get("version")}</span><span id="lastUpdate"></span></div>`);
+    <div class="sidebar__meta">${versionBadge("sm")}<span id="lastUpdate"></span></div>`);
   updateFreshness();
 }
 

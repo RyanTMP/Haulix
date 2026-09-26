@@ -144,7 +144,17 @@ export const cardinal = (deg) => ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Ma
 
 export const plural = (n, one, many = one + "s") => `${num(n)} ${n === 1 ? one : many}`;
 
-/** "0.0.5-beta" → "0.0.5 BETA" (pre-release label shown in capitals). */
+// A fourth version part is a hotfix of the same release: "0.0.9.1-beta" is shown as "0.0.9-1" (and still sorts after 0.0.9).
+const hotfix = (n) => n.replace(/^(\d+\.\d+\.\d+)\.(\d+)$/, "$1-$2");
+
+/** "0.0.5-beta" → "0.0.5 BETA", "0.0.9.1-beta" → "0.0.9-1 BETA" (pre-release label shown in capitals). */
 export function versionLabel(v) {
-  return String(v || "").replace(/^v/i, "").replace(/-([a-z]+)$/i, (_, l) => ` ${l.toUpperCase()}`);
+  const { number, channel } = versionParts(v);
+  return channel ? `${number} ${channel}` : number;
+}
+
+/** "0.0.9-beta" → { number: "0.0.9", channel: "BETA" }; a release without a label is { channel: "" }. */
+export function versionParts(v) {
+  const m = String(v || "").trim().replace(/^v/i, "").match(/^([\d.]+(?:-\d+)?)(?:[-\s]+(.+))?$/);
+  return m ? { number: hotfix(m[1]), channel: (m[2] || "").toUpperCase() } : { number: String(v || "—"), channel: "" };
 }

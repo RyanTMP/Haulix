@@ -7,6 +7,7 @@ import { saveSettings, changeLanguage, showUpdate } from "../app.js";
 import { t } from "../core/i18n.js";
 import { currencyList } from "../core/format.js";
 import * as f from "../core/format.js";
+import { versionBadge } from "../components/version.js";
 
 // Three categories: HAULIX itself, ETS2 and (later) ATS. Each lists its own sections in the side navigation.
 const CATEGORIES = [
@@ -127,7 +128,9 @@ export default {
           ${row("Show the HUD", "A job card over ETS2 while you drive, like VTC trackers. Needs borderless fullscreen or window mode (see Notifications → ETS2 display mode).", toggle("general.hud", !!s.general.hud))}
           ${row("Only during a job", "Hide the HUD in free roam.", toggle("hud.onlyOnJob", !!s.hud?.onlyOnJob))}
           <div class="setting-group"><div class="setting-group__title">${icon("move")}Place</div>
-            ${row("Place on screen", "Makes the card draggable over the game: drag it anywhere, double-click to save, right-click to cancel.", html`<div class="row" style="gap:8px"><button class="btn btn--sm btn--primary" id="hudPlace">${icon("move")}Place on screen</button><button class="btn btn--sm" id="hudTest">${icon("monitor")}Show for 10 s</button></div>`)}
+            ${row("Place on screen", "Makes the card draggable over the game: drag it anywhere and let go to save, right-click to cancel. Ends by itself after one minute.", html`<div class="row" style="gap:8px" id="hudPlaceRow">
+              <button class="btn btn--sm btn--primary" id="hudPlace">${icon("move")}Place on screen</button><button class="btn btn--sm" id="hudTest">${icon("monitor")}Show for 10 s</button>
+              <button class="btn btn--sm btn--primary hidden" id="hudPlaceDone">${icon("check")}Done</button><button class="btn btn--sm hidden" id="hudPlaceCancel">${icon("x")}Cancel</button></div>`)}
             ${row("Position", "Or pick a fixed spot. Dragging switches to “Custom”.", select("hud.position", HUD_POSITIONS, HUD_POS_OK(s.hud?.position) || "topRight"))}
             ${row("Distance from the edge", "", slider("hud.margin", 0, 120, 2, s.hud?.margin ?? 16, " px"))}
           </div>
@@ -198,9 +201,10 @@ export default {
           <div class="about-hero">
             <img class="brand-img" src="assets/brand/wordmark-outline.png" alt="HAULIX" style="height:40px">
             <div class="grow"><div class="about-hero__lead">Your free logbook and co-driver for Euro Truck Simulator 2.</div>
-              <div class="faint" style="font-size:12px">Version <span class="num">${f.versionLabel(store.get("version"))}</span> · made by RyanTMP</div></div>
+              <div class="faint" style="font-size:12px">Made by RyanTMP</div></div>
             <button class="btn btn--sm" id="showChangelog">${icon("sparkles")}What's new</button>
           </div>
+          <div class="about-version" id="aboutVersion">${versionBadge("lg")}</div>
           <div class="about-points">
             <div>${icon("book-open")}<span><strong>Logs every delivery</strong> with route, income, fuel and a driving score – automatically.</span></div>
             <div>${icon("gauge")}<span><strong>Live dashboard</strong>, current job page, real-time ETA and your driving score.</span></div>
@@ -329,6 +333,9 @@ export default {
     $("#checkUpdate", root)?.addEventListener("click", async () => {
       const el = $("#updateResult", root);
       const u = await call("update.check", { force: true }).catch((err) => ({ enabled: true, error: err.message }));
+      if (!u.error) store.set("updateInfo", u);
+      const av = $("#aboutVersion", root);
+      if (av) av.innerHTML = versionBadge("lg").toString();
       el.innerHTML = (!u.enabled ? html`<div class="callout" style="margin:8px 0">${icon("info")}<div>No update source is configured in this build.</div></div>`
         : u.error ? html`<div class="callout callout--warn" style="margin:8px 0">${icon("triangle-alert")}<div>Update check failed: ${u.error}</div></div>`
         : u.available ? html`<div class="callout callout--ok" style="margin:8px 0">${icon("download")}<div><strong>Version ${f.versionLabel(u.latest)} is available.</strong> <a class="link" href="#" data-show-update>Show update</a></div></div>`
@@ -457,9 +464,20 @@ export default {
       await saveSettings((s) => { s.hud = { cardEnabled: true, onlyOnJob: s.hud?.onlyOnJob ?? false }; });
       location.reload();
     });
+    // "Place on screen": while the card is movable, Done / Cancel replace the buttons; the host reports when it ends.
+    const placing = (on) => {
+      for (const id of ["#hudPlace", "#hudTest"]) $(id, root)?.classList.toggle("hidden", on);
+      for (const id of ["#hudPlaceDone", "#hudPlaceCancel"]) $(id, root)?.classList.toggle("hidden", !on);
+    };
     $("#hudPlace", root)?.addEventListener("click", () => call("hud.place")
-      .then(() => toast({ kind: "info", title: "Place the HUD", message: "Switch to your game monitor: drag the card, double-click it to save, right-click to cancel.", timeout: 7000 }))
+      .then(() => { placing(true); toast({ kind: "info", title: "Place the HUD", message: "Drag the card on your game monitor and let go to save. Right-click it to cancel.", timeout: 7000 }); })
       .catch((err) => toast({ kind: "error", title: "Not available", message: err.message })));
+    $("#hudPlaceDone", root)?.addEventListener("click", () => { placing(false); call("hud.placeEnd", { save: true }).catch(() => {}); });
+    $("#hudPlaceCancel", root)?.addEventListener("click", () => { placing(false); call("hud.placeEnd", { save: false }).catch(() => {}); });
+    const offPlacement = on("hudPlacement", (p) => {
+      placing(false);
+      toast(p.saved ? { kind: "success", title: "HUD position saved", timeout: 3500 } : { kind: "info", title: "HUD placement ended", message: "The position was not changed.", timeout: 3500 });
+    });
     $("#showChangelog", root)?.addEventListener("click", () => import("../core/changelog.js").then((m) => m.showChangelog()));
     $("#hudTest", root)?.addEventListener("click", () => call("hud.preview").then(() => toast({ kind: "info", title: "HUD shown for 10 seconds", message: "Check the position on your game monitor.", timeout: 4000 })).catch(() => {}));
 
@@ -580,6 +598,6 @@ export default {
     root.querySelectorAll("[data-sec]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); $(`#sec-${a.dataset.sec}`, root).scrollIntoView({ behavior: "smooth" }); history.replaceState(null, "", `#/settings/${a.dataset.sec}`); }));
     page.addEventListener("scroll", mark);
     showCat(cat, params[0] && CAT_OF[params[0]] ? params[0] : null);
-    return () => { page.removeEventListener("scroll", mark); offHud(); offVoice.forEach((o) => o?.()); };
+    return () => { page.removeEventListener("scroll", mark); offHud(); offPlacement?.(); offVoice.forEach((o) => o?.()); };
   },
 };

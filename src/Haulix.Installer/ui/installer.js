@@ -414,7 +414,8 @@
   });
 
   on("init", (info) => {
-    const label = (v) => (v ? String(v).replace(/-([a-z]+)$/i, (_, l) => ` ${l.toUpperCase()}`) : v);
+    // "0.0.9.1-beta" (a hotfix) is shown as "0.0.9-1 BETA", like in the app.
+    const label = (v) => (v ? String(v).replace(/^(\d+\.\d+\.\d+)\.(\d+)(?=-|$)/, "$1-$2").replace(/-([a-z]+)$/i, (_, l) => ` ${l.toUpperCase()}`) : v);
     state.info = { ...info, version: label(info.version), existingVersion: label(info.existingVersion) };
     state.dir = info.installDir;
     state.page = info.mode === "uninstall" ? "confirm" : "welcome";
@@ -446,7 +447,7 @@
   function mock(msg) {
     const q = new URLSearchParams(location.search);
     setTimeout(() => {
-      if (msg.cmd === "init") emit("init", { mode: q.get("mode") || "install", version: "0.0.9-beta", existingVersion: "0.0.8-beta", installDir: "C:\\Users\\you\\AppData\\Local\\Programs\\HAULIX", dataDir: "C:\\Users\\you\\AppData\\Local\\Haulix", hasPayload: true, sizeMb: 48, appRunning: false, ets2: true, plugin: false, pluginBundled: true, ets2Running: false, systemLanguage: q.get("lang") || navigator.language });
+      if (msg.cmd === "init") emit("init", { mode: q.get("mode") || "install", version: "0.0.9.1-beta", existingVersion: "0.0.9-beta", installDir: "C:\\Users\\you\\AppData\\Local\\Programs\\HAULIX", dataDir: "C:\\Users\\you\\AppData\\Local\\Haulix", hasPayload: true, sizeMb: 48, appRunning: false, ets2: true, plugin: false, pluginBundled: true, ets2Running: false, systemLanguage: q.get("lang") || navigator.language });
       if (msg.cmd === "install" || msg.cmd === "uninstall") {
         let v = 0;
         const t = setInterval(() => {

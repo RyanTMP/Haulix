@@ -223,3 +223,32 @@ body {
   .card, .sidebar { background: var(--surface-1); }
   .modal, .drawer, .menu, .toast { background: var(--surface-2); }
 }
+
+/* ---------- Version badge: which HAULIX version is running (sidebar, About, start-up screen) ---------- */
+.ver { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 7px 10px; border-radius: 10px; text-align: left;
+  background: rgb(255 255 255 / 0.035); border: 1px solid var(--border); color: var(--text); cursor: pointer; font: inherit; transition: border-color 150ms var(--ease), background 150ms var(--ease); }
+.ver:hover { border-color: var(--border-strong); background: rgb(255 255 255 / 0.06); }
+.ver__label { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); }
+.ver__main { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; }
+.ver__num { font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+.ver__state { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2); }
+.ver__state i { width: 6px; height: 6px; border-radius: 50%; background: var(--success, #3dd68c); box-shadow: 0 0 6px var(--success, #3dd68c); }
+.ver--update { border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.ver--update .ver__state { color: var(--accent); font-weight: 600; }
+.ver--update .ver__state i { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.ver--lg { flex-direction: row; align-items: center; gap: 16px; width: 100%; padding: 14px 18px; border-radius: 14px; }
+.ver--lg .ver__main { font-size: 20px; gap: 10px; }
+.ver--lg .ver__main strong { font-weight: 800; letter-spacing: 0.06em; }
+.ver--lg .ver__state { margin-left: auto; font-size: 12px; }
+.about-version { margin: 4px 0 16px; }
+
+.ver-pill { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border-radius: 99px; font-size: 10px; font-weight: 800; letter-spacing: 0.12em; line-height: 1; }
+.ver-pill--beta { color: #ffc24d; background: rgb(255 176 32 / 0.14); border: 1px solid rgb(255 176 32 / 0.35); }
+.ver-pill--alpha, .ver-pill--dev { color: #ff8f8f; background: rgb(240 71 79 / 0.14); border: 1px solid rgb(240 71 79 / 0.35); }
+.ver-pill--rc { color: #8fb8ff; background: rgb(108 168 255 / 0.14); border: 1px solid rgb(108 168 255 / 0.35); }
+.ver-pill--stable { color: #6fe3a8; background: rgb(61 214 140 / 0.12); border: 1px solid rgb(61 214 140 / 0.3); }
+.ver--lg .ver-pill { height: 22px; font-size: 11px; padding: 0 9px; }
+
+.sidebar__meta { align-items: center; gap: 8px; }
+.splash__foot strong { color: var(--text-2); font-weight: 700; }
+.splash__foot span { display: inline-flex; align-items: center; gap: 6px; }

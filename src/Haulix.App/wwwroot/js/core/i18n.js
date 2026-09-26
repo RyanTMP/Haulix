@@ -487,6 +487,9 @@ const de = {
     // ---- 0.0.7: HUD
     "A job card over ETS2 while you drive, like VTC trackers. Needs borderless fullscreen or window mode (see Notifications → ETS2 display mode).": "Eine Auftragskarte über ETS2 während der Fahrt, wie bei VTC-Trackern. Benötigt randloses Vollbild oder Fenstermodus (siehe Benachrichtigungen → ETS2-Anzeigemodus).",
     "Place": "Platzieren", "Place on screen": "Auf dem Bildschirm platzieren", "Show for 10 s": "10 s anzeigen",
+    "Done": "Fertig", "HUD placement ended": "HUD-Platzierung beendet", "The position was not changed.": "Die Position wurde nicht geändert.",
+    "Drag the card on your game monitor and let go to save. Right-click it to cancel.": "Ziehe die Karte auf deinem Spielmonitor und lass los, um zu speichern. Rechtsklick bricht ab.",
+    "Makes the card draggable over the game: drag it anywhere and let go to save, right-click to cancel. Ends by itself after one minute.": "Macht die Karte über dem Spiel verschiebbar: ziehen und loslassen speichert, Rechtsklick bricht ab. Endet nach einer Minute von selbst.",
     "Makes the card draggable over the game: drag it anywhere, double-click to save, right-click to cancel.": "Macht die Karte über dem Spiel verschiebbar: irgendwohin ziehen, Doppelklick speichert, Rechtsklick bricht ab.",
     "Or pick a fixed spot. Dragging switches to “Custom”.": "Oder wähle eine feste Stelle. Ziehen stellt auf „Eigene“ um.",
     "Distance from the edge": "Abstand zum Rand", "Look": "Aussehen", "Style": "Stil", "Dark": "Dunkel", "Glass": "Glas", "Light": "Hell", "High contrast": "Hoher Kontrast",

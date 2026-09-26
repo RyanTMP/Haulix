@@ -15,7 +15,9 @@ Set-Location $root
 [xml]$proj = Get-Content "src\Haulix.App\Haulix.App.csproj"
 $version = ($proj.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
 $tag = "v$version"
-$label = [regex]::Replace($version, '-([a-z]+)$', { param($m) " " + $m.Groups[1].Value.ToUpper() })
+# "0.0.9-beta" -> "0.0.9 BETA"; a fourth part is a hotfix: "0.0.9.1-beta" -> "0.0.9-1 BETA".
+$label = [regex]::Replace($version, '^(\d+\.\d+\.\d+)\.(\d+)(?=-|$)', '$1-$2')
+$label = [regex]::Replace($label, '-([a-z]+)$', { param($m) " " + $m.Groups[1].Value.ToUpper() })
 Write-Host "Publishing HAULIX $label ($tag)" -ForegroundColor Yellow
 
 gh auth status *> $null

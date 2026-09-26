@@ -2,6 +2,20 @@
 
 All notable changes to HAULIX. The same list appears in the app under *What's new* (Settings → About).
 
+## 0.0.9-1 BETA
+
+- **HUD placement fixed** – "Place on screen" no longer leaves the in-game HUD movable forever: drag the card and let go to save, right-click to cancel, or use Done / Cancel in Settings. Placement also ends by itself after one minute.
+- **New start-up screen** – HAULIX now starts with a start-up screen: the logo with a progress ring, the loading steps and your version. The window shows the logo right away instead of staying black while it loads.
+- **Clear version display** – Your HAULIX version is shown clearly in the sidebar, in Settings → About and on the start-up screen – with a coloured BETA label and whether you are up to date. Click it for what's new or to install an update.
+
+<details><summary>Deutsch</summary>
+
+- **HUD-Platzierung behoben** – „Auf dem Bildschirm platzieren“ lässt das Ingame-HUD nicht mehr dauerhaft verschiebbar: Karte ziehen und loslassen speichert, Rechtsklick bricht ab, oder Fertig / Abbrechen in den Einstellungen. Nach einer Minute endet die Platzierung von selbst.
+- **Neuer Startbildschirm** – HAULIX startet jetzt mit einem Startbildschirm: Logo mit Fortschrittsring, die Ladeschritte und deine Version. Das Fenster zeigt sofort das Logo, statt beim Laden schwarz zu bleiben.
+- **Klare Versionsanzeige** – Deine HAULIX-Version steht deutlich in der Seitenleiste, unter Einstellungen → Über und auf dem Startbildschirm – mit farbigem BETA-Label und ob du aktuell bist. Ein Klick zeigt die Neuerungen oder installiert ein Update.
+
+</details>
+
 ## 0.0.9 BETA
 
 - **Brand, company and cargo logos** – Trucks and trailers show their brand logo (DAF, Iveco, MAN, Mercedes-Benz, Renault, Scania, Volvo, Krone, Kögel, Schmitz Cargobull, Feldbinder, Wielton, Tirsan, Schwarzmüller). Jobs show the logos of the 200+ ETS2 companies, and every cargo gets a category icon – on the dashboard, the Current job page, the logbook and the fleet pages.
